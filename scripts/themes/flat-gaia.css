@@ -1,0 +1,434 @@
+/* @theme flat-gaia */
+
+@import 'default';
+
+:root {
+  --bespoke-marp-note-font-scale: 1.456;
+
+  /* DrKaur typography */
+  --heading-font: 'Leelawadee UI', 'Leelawadee', sans-serif;
+  --heading-size: 36px;
+  --heading-color: #c00000;
+  --body-font-family: 'Nirmala UI', 'Nirmala UI Semilight', sans-serif;
+  --body-size: 22px;
+  --body-color: #000000;
+
+  /* Slide chrome (Innovation In Software deck style) */
+  --accent-width: 12px;
+  --divider-color: #c00000;
+  --footer-size: 13px;
+  --footer-color: #555555;
+  --slide-pad-x: 48px;
+  --slide-pad-top: 36px;
+  --slide-pad-bottom: 52px;
+}
+
+/* Base slide: Nirmala UI body, red/black accent bar on right edge. */
+section {
+  --body-font: var(--body-size);
+  --table-font: 20px;
+  --pre-font: 20px;
+  --pre-small-font: 18px;
+  --header-footer-font: 28px;
+  --image-max-height: 440px;
+
+  background-color: #ffffff;
+  background-image: linear-gradient(to bottom, var(--heading-color) 50%, #000000 50%);
+  background-size: var(--accent-width) 100%;
+  background-position: right top;
+  background-repeat: no-repeat;
+  color: var(--body-color);
+  font-family: var(--body-font-family);
+  font-size: var(--body-size);
+  line-height: 1.4;
+  color-scheme: light;
+  padding: var(--slide-pad-top) calc(var(--slide-pad-x) + var(--accent-width) + 8px)
+    var(--slide-pad-bottom) var(--slide-pad-x);
+  justify-content: flex-start;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+section.fit-md {
+  --body-size: 19px;
+  --body-font: 19px;
+  --heading-size: 30px;
+  --table-font: 16px;
+  --pre-font: 15px;
+  --pre-small-font: 13px;
+  --header-footer-font: 22px;
+  --image-max-height: 380px;
+  line-height: 1.32;
+}
+
+section.fit-sm {
+  --body-size: 17px;
+  --body-font: 17px;
+  --heading-size: 26px;
+  --table-font: 14px;
+  --pre-font: 13px;
+  --pre-small-font: 12px;
+  --header-footer-font: 20px;
+  --image-max-height: 340px;
+  line-height: 1.28;
+}
+
+section.fit-xs {
+  --body-size: 15px;
+  --body-font: 15px;
+  --heading-size: 22px;
+  --table-font: 12px;
+  --pre-font: 11px;
+  --pre-small-font: 10px;
+  --header-footer-font: 18px;
+  --image-max-height: 300px;
+  line-height: 1.25;
+}
+
+/* Two-column slides default to fit-md density to prevent overflow. */
+section.split:not(.fit-md):not(.fit-sm):not(.fit-xs) {
+  --body-size: 19px;
+  --body-font: 19px;
+  --heading-size: 30px;
+  --table-font: 16px;
+  --pre-font: 15px;
+  --pre-small-font: 13px;
+  line-height: 1.32;
+}
+
+/* Title / section opener — same chrome as content slides, centered text. */
+section.lead {
+  color: var(--body-color);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+section.center {
+  background: #ffffff;
+  color: var(--body-color);
+  text-align: center;
+}
+
+/* Hide running header — slide title is the h1, matching corporate PPT layout. */
+header {
+  display: none;
+}
+
+/* Copyright footer (left) and page number (right, dark red). */
+footer {
+  font-family: var(--body-font-family);
+  color: var(--footer-color);
+  font-size: var(--footer-size);
+  left: var(--slide-pad-x);
+  bottom: 18px;
+  width: calc(100% - var(--slide-pad-x) * 2 - var(--accent-width));
+}
+
+section::after {
+  color: var(--heading-color) !important;
+  font-family: var(--heading-font);
+  font-size: 18px;
+  font-weight: 700;
+  right: calc(var(--accent-width) + 18px);
+  bottom: 16px;
+}
+
+section.lead::after,
+section.lead footer {
+  color: var(--heading-color);
+}
+
+section.lead footer {
+  color: var(--footer-color);
+}
+
+/* ── Layout 1: content — single column (title + body) ── */
+section.content {
+  overflow: hidden;
+}
+
+section.content > h1 {
+  margin: 0 0 0.25em;
+  text-align: left;
+}
+
+section.content > h2,
+section.content > h3 {
+  text-align: left;
+  margin-top: 0.15em;
+}
+
+/* ── Layout 2: split — two columns (text left | visual right) ── */
+section.split > h1 {
+  margin: 0 0 0.3em;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+section.split {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+section.split .cols {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 0;
+  align-items: stretch;
+  min-height: 0;
+  margin-top: 0.05em;
+  overflow: hidden;
+}
+
+section.split .col-text,
+section.split .col-visual {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+section.split .col-text {
+  padding-right: 0.9em;
+}
+
+section.split .col-visual {
+  border-left: 2px solid var(--divider-color);
+  padding-left: 0.9em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+section.split .col-text ul,
+section.split .col-text ol,
+section.split .col-visual ul,
+section.split .col-visual ol {
+  margin: 0.1em 0 0;
+  padding-left: 1.1em;
+}
+
+section.split .col-text li,
+section.split .col-visual li {
+  margin-bottom: 0.15em;
+}
+
+section.split p {
+  margin: 0.12em 0;
+}
+
+section.split .col-visual img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: var(--image-max-height);
+  object-fit: contain;
+}
+
+section.lead h1,
+section.lead h2,
+section.lead h3,
+section.center h1,
+section.center h2,
+section.center h3 {
+  text-align: center;
+  width: 100%;
+}
+
+section.lead h1 {
+  color: var(--heading-color);
+  margin-top: 0.35em;
+}
+
+section.lead h2 {
+  font-weight: 400;
+  color: var(--heading-color);
+}
+
+section.lead p,
+section.lead em,
+section.lead strong,
+section.center p,
+section.center em,
+section.center strong {
+  text-align: center;
+  color: var(--body-color);
+}
+
+section.lead blockquote,
+section.center blockquote {
+  text-align: center;
+  border-left: none;
+  border-top: 4px solid var(--heading-color);
+  padding: 0.75em 1em 0;
+  margin: 0.5em auto 0;
+  max-width: 88%;
+  color: var(--body-color);
+}
+
+section.lead ul,
+section.lead ol,
+section.center ul,
+section.center ol {
+  text-align: center;
+  list-style: none;
+  padding: 0;
+  margin: 0.5em auto 0;
+  display: table;
+}
+
+section.lead li,
+section.center li {
+  text-align: center;
+  color: var(--body-color);
+}
+
+section.lead img,
+section.center img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--heading-font);
+  font-size: var(--heading-size);
+  color: var(--heading-color);
+  line-height: 1.15;
+  margin: 0 0 0.2em;
+}
+
+strong {
+  color: var(--heading-color);
+}
+
+p,
+li,
+em {
+  font-family: var(--body-font-family);
+  font-size: var(--body-font);
+  line-height: 1.45;
+  color: var(--body-color);
+}
+
+blockquote {
+  font-family: var(--body-font-family);
+  font-size: var(--body-font);
+  line-height: 1.45;
+  border-left: 4px solid var(--heading-color);
+  color: var(--body-color);
+}
+
+table {
+  font-family: var(--body-font-family);
+  font-size: var(--table-font);
+  line-height: 1.15;
+  margin: 0.1em 0 0;
+  color: var(--body-color);
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+th,
+table thead th {
+  font-family: var(--heading-font);
+  background: #ffebeb;
+  color: var(--heading-color);
+  padding: 0.2em 0.35em;
+  word-wrap: break-word;
+}
+
+td {
+  background: #f7f7f7;
+  color: var(--body-color);
+  padding: 0.2em 0.35em;
+  word-wrap: break-word;
+  vertical-align: top;
+}
+
+tr:nth-child(even) td {
+  background: #ffffff;
+}
+
+pre {
+  font-size: var(--pre-font);
+  line-height: 1.15;
+  color: #1a1a1a;
+  background: #f4f4f4;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 0.3em 0.55em;
+  font-family: Consolas, 'Courier New', monospace;
+  margin-top: 0.2em;
+  max-height: 42vh;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+section.split pre,
+section.fit-md pre,
+section.fit-sm pre {
+  max-height: 36vh;
+}
+
+section.fit-sm pre {
+  max-height: 32vh;
+}
+
+pre code {
+  color: #1a1a1a;
+  background: transparent;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 1em;
+  line-height: 1.2;
+  letter-spacing: 0;
+  margin: 0;
+  padding: 0;
+  display: block;
+  white-space: pre;
+  tab-size: 2;
+}
+
+pre code.language-text,
+pre code.language-ascii,
+pre code.language-diagram {
+  font-size: var(--pre-small-font);
+  line-height: 1.2;
+}
+
+section.content img,
+section.fit-md img,
+section.fit-sm img,
+section.fit-xs img {
+  display: block;
+  margin: 0.4em auto 0;
+  max-width: 100%;
+  max-height: var(--image-max-height);
+  object-fit: contain;
+}
+
+section.fit-md .col-visual img {
+  max-height: calc(var(--image-max-height) - 10px);
+}
+
+section.fit-sm .col-visual img {
+  max-height: calc(var(--image-max-height) - 20px);
+}
+
+code {
+  color: #1a1a1a;
+  background: #f4f4f4;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.25em;
+}

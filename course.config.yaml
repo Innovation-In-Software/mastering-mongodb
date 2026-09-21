@@ -1,0 +1,47 @@
+course:
+  name: "Mastering MongoDB"
+  subtitle: "Document modeling, queries, aggregation, and production operations"
+  org: "Innovation In Software"
+  header: "Mastering MongoDB — Complete Course"
+  days: 3
+
+paths:
+  deck_md: slides/course-complete-marp-with-notes.md
+  deck_html: slides/course-complete-marp-with-notes.html
+  speaker_notes: slides/course-complete-speaker-notes.md
+  lab_guides: slide-exercises
+  assets: slides/assets
+
+modules:
+  - id: 1
+    title: "Introduction to NoSQL Databases"
+    day: 1
+    duration_minutes: 90
+  - id: 2
+    title: "Installation and Setup"
+    day: 1
+    duration_minutes: 90
+  - id: 3
+    title: "Data Modeling with MongoDB"
+    day: 1
+    duration_minutes: 210
+  - id: 4
+    title: "The MongoDB Query Language"
+    day: 2
+    duration_minutes: 390
+  - id: 5
+    title: "The Aggregation Framework"
+    day: 2
+    duration_minutes: 210
+  - id: 6
+    title: "Indexing and Query Performance"
+    day: 3
+    duration_minutes: 210
+  - id: 7
+    title: "Introduction to Replication and Sharding"
+    day: 3
+    duration_minutes: 210
+  - id: 8
+    title: "MongoDB Best Practices, Security, and Troubleshooting"
+    day: 3
+    duration_minutes: 210

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 340" width="920" height="340">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="340" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="26" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Shoe S200</text>
+<rect x="20" y="48" width="433" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="236.5" y="77.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">sku / name / category</text>
+<text x="236.5" y="104.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">S200 · Running Shoe · SHOE</text>
+<rect x="467" y="48" width="433" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="683.5" y="77.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">price</text>
+<text x="683.5" y="104.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">Decimal128 129.99</text>
+<rect x="20" y="140" width="433" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="236.5" y="169.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">attributes.sizes</text>
+<text x="236.5" y="196.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">[7, 8, 9, 10]</text>
+<rect x="467" y="140" width="433" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="683.5" y="169.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">attributes.color</text>
+<text x="683.5" y="196.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">Blue</text>
+<rect x="20" y="232" width="433" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="236.5" y="261.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">attributes.material</text>
+<text x="236.5" y="288.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">Mesh</text>
+<rect x="467" y="232" width="433" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="683.5" y="261.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">tags</text>
+<text x="683.5" y="288.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">running · sports</text>
+</svg>

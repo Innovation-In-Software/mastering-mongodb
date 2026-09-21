@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 220" width="920" height="220">
+<defs>
+  <marker id="ae37" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="220" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">MongoDB Shell command flow</text>
+<rect x="20.0" y="64" width="163.2" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="101.6" y="106.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">User command</text>
+<line x1="183.2" y1="103.0" x2="196.2" y2="103.0" stroke="#cc0000" stroke-width="2" marker-end="url(#ae37)"/>
+<rect x="199.2" y="64" width="163.2" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="280.79999999999995" y="106.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Shell</text>
+<line x1="362.4" y1="103.0" x2="375.4" y2="103.0" stroke="#cc0000" stroke-width="2" marker-end="url(#ae37)"/>
+<rect x="378.4" y="64" width="163.2" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="106.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">MongoDB server</text>
+<line x1="541.5999999999999" y1="103.0" x2="554.5999999999999" y2="103.0" stroke="#cc0000" stroke-width="2" marker-end="url(#ae37)"/>
+<rect x="557.5999999999999" y="64" width="163.2" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="639.1999999999999" y="106.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Operation result</text>
+<line x1="720.8" y1="103.0" x2="733.8" y2="103.0" stroke="#cc0000" stroke-width="2" marker-end="url(#ae37)"/>
+<rect x="736.8" y="64" width="163.2" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="818.4" y="106.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Terminal output</text>
+<text x="460" y="204" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">The shell is a client. The server executes the operation.</text>
+</svg>

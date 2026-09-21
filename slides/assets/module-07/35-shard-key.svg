@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 205" width="920" height="205">
+<defs>
+  <marker id="ae35" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="205" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="36" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="20" fill="#1a1a1a">{ customerId: 1 }</text>
+<text x="460" y="68" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="16" fill="#1a1a1a">{ tenantId: 1, createdAt: 1 }</text>
+<text x="460" y="100" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="16" fill="#1a1a1a">{ customerId: &quot;hashed&quot; }</text>
+<text x="460" y="150" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">The most important sharding decision</text>
+<text x="460" y="178" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">No universally ideal key — workload decides</text>
+</svg>

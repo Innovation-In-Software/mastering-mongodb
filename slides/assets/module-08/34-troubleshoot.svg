@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" width="920" height="240">
+<defs>
+  <marker id="ae34" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="240" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="180" y="10" width="560" height="42" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="37.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Symptom + when + blast radius</text>
+<line x1="460.0" y1="52" x2="460.0" y2="62" stroke="#cc0000" stroke-width="2" marker-end="url(#ae34)"/>
+<rect x="180" y="66" width="560" height="42" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="93.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Recent change + metrics/logs</text>
+<line x1="460.0" y1="108" x2="460.0" y2="118" stroke="#cc0000" stroke-width="2" marker-end="url(#ae34)"/>
+<rect x="180" y="122" width="560" height="42" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="149.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">One hypothesis, one test</text>
+<line x1="460.0" y1="164" x2="460.0" y2="174" stroke="#cc0000" stroke-width="2" marker-end="url(#ae34)"/>
+<rect x="180" y="178" width="560" height="42" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="205.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Verify + write the prevention</text>
+</svg>

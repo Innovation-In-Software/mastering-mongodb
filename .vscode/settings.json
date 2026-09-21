@@ -1,0 +1,10 @@
+{
+  // Marp slide decks: export with the Marp extension or tasks below — NOT "Markdown PDF" extensions.
+  // Generic markdown-pdf tools ignore marp: true and render one long document instead of slides.
+  "markdown.marp.themes": [
+    "./scripts/themes/flat-gaia.css"
+  ],
+  "markdown.marp.exportType": "html",
+  "markdown.marp.exportAutoOpen": true,
+  "markdown.marp.openExportedHtmlInIntegratedBrowser": true
+}

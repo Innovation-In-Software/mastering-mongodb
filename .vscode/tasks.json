@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Marp: Present (arrow keys)",
+      "type": "shell",
+      "command": "npx @marp-team/marp-cli \"${file}\" --theme scripts/themes/flat-gaia.css --preview --watch --no-stdin",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Marp: Export HTML (slides)",
+      "type": "shell",
+      "command": "npx @marp-team/marp-cli \"${file}\" --theme scripts/themes/flat-gaia.css --html --allow-local-files --no-stdin -o \"${fileDirname}/${fileBasenameNoExtension}.html\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Marp: Export PDF (slides)",
+      "type": "shell",
+      "command": "npx @marp-team/marp-cli \"${file}\" --theme scripts/themes/flat-gaia.css --pdf --allow-local-files --no-stdin -o \"${fileDirname}/${fileBasenameNoExtension}.pdf\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}

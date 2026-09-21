@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 220" width="920" height="220">
+<defs>
+  <marker id="m038" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="220" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="40" y="20" width="200" height="180" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="140.0" y="88.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">total</text>
+<text x="140.0" y="149.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">input</text>
+<rect x="300" y="20" width="280" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="440.0" y="39.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">&gt;= 1000</text>
+<text x="440.0" y="56.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">HIGH</text>
+<rect x="300" y="85" width="280" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="440.0" y="104.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">&gt;= 500</text>
+<text x="440.0" y="121.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">MEDIUM</text>
+<rect x="300" y="150" width="280" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="440.0" y="169.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">default</text>
+<text x="440.0" y="186.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">LOW</text>
+<rect x="640" y="70" width="240" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="760.0" y="100.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">orderSize</text>
+<text x="760.0" y="127.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">one label</text>
+<line x1="240" y1="110" x2="300" y2="45" stroke="#cc0000" stroke-width="2" marker-end="url(#m038)"/>
+<line x1="240" y1="110" x2="300" y2="110" stroke="#cc0000" stroke-width="2" marker-end="url(#m038)"/>
+<line x1="240" y1="110" x2="300" y2="175" stroke="#cc0000" stroke-width="2" marker-end="url(#m038)"/>
+</svg>

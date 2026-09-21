@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 350" width="920" height="350">
+<defs>
+  <marker id="ae30" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="350" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="20" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Module 1 path</text>
+<rect x="40" y="60" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="140.0" y="101.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">NoSQL</text>
+<rect x="250" y="60" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="350.0" y="101.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Four models</text>
+<rect x="460" y="60" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="560.0" y="101.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Document DB</text>
+<rect x="670" y="60" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="770.0" y="101.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">MongoDB</text>
+<rect x="140" y="220" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="261.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">BSON</text>
+<rect x="400" y="220" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="500.0" y="261.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Collections</text>
+<rect x="660" y="220" width="200" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="760.0" y="261.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Documents</text>
+<line x1="240" y1="95" x2="250" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="450" y1="95" x2="460" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="660" y1="95" x2="670" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="740" y1="130" x2="740" y2="220" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="500" y1="130" x2="500" y2="220" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="770" y1="240" x2="660" y2="255" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="460" y1="255" x2="340" y2="255" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<text x="460" y="320" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">NoSQL → models → document databases → MongoDB → BSON documents in collections</text>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" width="920" height="360">
+<defs>
+  <marker id="ae02" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="360" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="48" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">Three data categories applications must store</text>
+<rect x="24" y="80" width="284" height="70" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="166.0" y="122.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#cc0000">Structured</text>
+<rect x="24" y="160" width="284" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="166.0" y="193.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Rows and columns</text>
+<text x="166.0" y="217.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">SKU, price, quantity</text>
+<rect x="24" y="250" width="284" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="166.0" y="279.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Example</text>
+<text x="166.0" y="300.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">SKU, price, quantity</text>
+<rect x="318" y="80" width="284" height="70" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="122.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#cc0000">Semi-structured</text>
+<rect x="318" y="160" width="284" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="193.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Nested JSON-like</text>
+<text x="460.0" y="217.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Product + specs + tags</text>
+<rect x="318" y="250" width="284" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="279.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Example</text>
+<text x="460.0" y="300.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Product + specs + tags</text>
+<rect x="612" y="80" width="284" height="70" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="754.0" y="122.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#cc0000">Unstructured</text>
+<rect x="612" y="160" width="284" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="754.0" y="193.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">No fixed fields</text>
+<text x="754.0" y="217.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Images, logs, video</text>
+<rect x="612" y="250" width="284" height="70" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="754.0" y="279.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Example</text>
+<text x="754.0" y="300.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Images, logs, video</text>
+</svg>

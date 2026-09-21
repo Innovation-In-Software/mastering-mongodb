@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 343" width="920" height="343">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="343" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="24" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#1a1a1a">Exercise 4.1 — assemble a query</text>
+<rect x="20" y="40" width="440" height="42" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="65.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">Task</text>
+<rect x="460" y="40" width="440" height="42" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="65.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">Starting point</text>
+<rect x="20" y="87" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="113.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">All products</text>
+<rect x="460" y="87" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="113.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">find({})</text>
+<rect x="20" y="135" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="161.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">One SKU</text>
+<rect x="460" y="135" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="161.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">findOne({ sku: &quot;L100&quot; })</text>
+<rect x="20" y="183" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="209.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Active products</text>
+<rect x="460" y="183" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="209.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">{ active: true }</text>
+<rect x="20" y="231" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="257.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">ACTIVE customers</text>
+<rect x="460" y="231" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="257.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">{ status: &quot;ACTIVE&quot; }</text>
+<rect x="20" y="279" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="305.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">One order</text>
+<rect x="460" y="279" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="305.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">{ orderNumber: &quot;O5001&quot; }</text>
+</svg>

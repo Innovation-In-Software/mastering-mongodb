@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 170" width="920" height="170">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="170" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Lab 4.6 — preview → update → counts → verify</text>
+<rect x="33.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="133.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Preview</text>
+<line x1="233.0" y1="95" x2="247.0" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="251.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="351.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">$set $inc $min</text>
+<line x1="451.0" y1="95" x2="465.0" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="469.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="569.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Counts</text>
+<line x1="669.0" y1="95" x2="683.0" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="687.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="787.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">findOne</text>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 370" width="920" height="370">
+<defs>
+  <marker id="ae06" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="370" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="24" y="16" width="220" height="48" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="134.0" y="46.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#cc0000">Topic</text>
+<rect x="244" y="16" width="328" height="48" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="408.0" y="46.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#cc0000">SQL / relational</text>
+<rect x="572" y="16" width="324" height="48" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="734.0" y="46.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#cc0000">NoSQL family</text>
+<rect x="24" y="72" width="220" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="134.0" y="102.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Schema</text>
+<rect x="244" y="72" width="328" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="408.0" y="102.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Declared up front</text>
+<rect x="572" y="72" width="324" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="734.0" y="102.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Flexible / evolving</text>
+<rect x="24" y="130" width="220" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="134.0" y="160.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Storage</text>
+<rect x="244" y="130" width="328" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="408.0" y="160.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Rows in tables</text>
+<rect x="572" y="130" width="324" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="734.0" y="160.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Documents, keys, columns, graphs</text>
+<rect x="24" y="188" width="220" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="134.0" y="218.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Relationships</text>
+<rect x="244" y="188" width="328" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="408.0" y="218.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Joins on keys</text>
+<rect x="572" y="188" width="324" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="734.0" y="218.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Embed, reference, or traverse</text>
+<rect x="24" y="246" width="220" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="134.0" y="276.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Scaling</text>
+<rect x="244" y="246" width="328" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="408.0" y="276.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Typically vertical</text>
+<rect x="572" y="246" width="324" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="734.0" y="276.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Often horizontal</text>
+<rect x="24" y="304" width="220" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="134.0" y="334.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Workloads</text>
+<rect x="244" y="304" width="328" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="408.0" y="334.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Reporting, ledgers</text>
+<rect x="572" y="304" width="324" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="734.0" y="334.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Apps, catalogs, events, graphs</text>
+</svg>

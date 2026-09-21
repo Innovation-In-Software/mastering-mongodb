@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" width="920" height="360">
+<defs>
+  <marker id="ae28" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="360" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="160" y="16" width="600" height="50" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="47.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#cc0000">MongoDB may not be the first choice when…</text>
+<rect x="160" y="84" width="600" height="54" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="117.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Complex relational reporting</text>
+<rect x="160" y="148" width="600" height="54" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="181.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Specialized graph traversal</text>
+<rect x="160" y="212" width="600" height="54" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="245.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Simple key-value cache only</text>
+<rect x="160" y="276" width="600" height="54" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="309.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">SQL-only tooling is mandatory</text>
+</svg>

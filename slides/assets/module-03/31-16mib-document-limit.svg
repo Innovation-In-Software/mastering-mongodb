@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" width="920" height="240">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="240" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Maximum BSON document size = 16 MiB</text>
+<rect x="80" y="90" width="760" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<rect x="80" y="90" width="620" height="48" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="460" y="122" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Typical order  →  approaching 16 MiB</text>
+<text x="80" y="170" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">0</text>
+<text x="840" y="170" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">16 MiB max</text>
+<text x="460" y="210" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">The limit is a ceiling, not a target — stay comfortably smaller</text>
+</svg>

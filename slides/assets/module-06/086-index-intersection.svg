@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 164" width="920" height="164">
+<defs>
+  <marker id="m086" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="164" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="20" y="28" width="274" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="157.0" y="88.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">{ category: 1 }</text>
+<line x1="294" y1="83.0" x2="318" y2="83.0" stroke="#cc0000" stroke-width="2" marker-end="url(#m086)"/>
+<rect x="322" y="28" width="274" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="459.0" y="88.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">{ active: 1 }</text>
+<line x1="596" y1="83.0" x2="620" y2="83.0" stroke="#cc0000" stroke-width="2" marker-end="url(#m086)"/>
+<rect x="624" y="28" width="274" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="761.0" y="67.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">AND query</text>
+<text x="761.0" y="109.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">May combine</text>
+</svg>

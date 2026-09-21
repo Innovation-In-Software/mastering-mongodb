@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 430" width="920" height="430">
+<defs>
+  <marker id="ae07" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="430" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Local vs. managed cloud</text>
+<rect x="24" y="50" width="200" height="44" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="75.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#cc0000">Topic</text>
+<rect x="224" y="50" width="336" height="44" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="75.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#cc0000">Local</text>
+<rect x="560" y="50" width="336" height="44" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="75.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#cc0000">Managed cloud</text>
+<rect x="24" y="102" width="200" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="127.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Setup</text>
+<rect x="224" y="102" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="127.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Install on workstation</text>
+<rect x="560" y="102" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="127.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Provision in a portal</text>
+<rect x="24" y="152" width="200" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="177.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Infrastructure</text>
+<rect x="224" y="152" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="177.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">User manages</text>
+<rect x="560" y="152" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="177.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Provider manages</text>
+<rect x="24" y="202" width="200" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="227.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Internet</text>
+<rect x="224" y="202" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="227.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Usually not required</text>
+<rect x="560" y="202" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="227.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Required</text>
+<rect x="24" y="252" width="200" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="277.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Scaling</text>
+<rect x="224" y="252" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="277.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Manual</text>
+<rect x="560" y="252" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="277.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Platform-supported</text>
+<rect x="24" y="302" width="200" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="327.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Backups</text>
+<rect x="224" y="302" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="327.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">User responsibility</text>
+<rect x="560" y="302" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="327.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Managed options</text>
+<rect x="24" y="352" width="200" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="124.0" y="377.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Maintenance</text>
+<rect x="224" y="352" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="392.0" y="377.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Patches and disks</text>
+<rect x="560" y="352" width="336" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="728.0" y="377.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Provider operations</text>
+<text x="460" y="418" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">Database commands are similar; operations ownership differs</text>
+</svg>

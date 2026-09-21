@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 200" width="920" height="200">
+<defs>
+  <marker id="ae31" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="200" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Connection string anatomy</text>
+<rect x="24" y="56" width="133.52" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="90.76" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">mongodb://</text>
+<text x="90.76" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">protocol</text>
+<rect x="163.52" y="56" width="98.64" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="212.84" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">user</text>
+<text x="212.84" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">username</text>
+<rect x="268.16" y="56" width="98.64" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="317.48" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">****</text>
+<text x="317.48" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">password</text>
+<rect x="372.8" y="56" width="133.52" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="439.56" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">host</text>
+<text x="439.56" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">host</text>
+<rect x="512.32" y="56" width="98.64" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="561.6400000000001" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">27017</text>
+<text x="561.6400000000001" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">port</text>
+<rect x="616.96" y="56" width="116.08000000000001" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="675.0" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">db</text>
+<text x="675.0" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">database</text>
+<rect x="739.0400000000001" y="56" width="116.08000000000001" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="797.08" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">?…</text>
+<text x="797.08" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">options</text>
+<text x="460" y="188" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#cc0000">Never put a real password in slides, screenshots, or source code</text>
+</svg>

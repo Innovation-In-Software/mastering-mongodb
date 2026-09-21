@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 320" width="920" height="320">
+<defs>
+  <marker id="ae25" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="320" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="30" y="80" width="270" height="160" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="165.0" y="147.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">Local</text>
+<text x="165.0" y="195.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Developer laptop</text>
+<rect x="325" y="80" width="270" height="160" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="147.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">Self-managed</text>
+<text x="460.0" y="195.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Your servers</text>
+<rect x="620" y="80" width="270" height="160" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="755.0" y="147.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">Managed cloud</text>
+<text x="755.0" y="195.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Atlas</text>
+<text x="460" y="40" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">Same document model — three ways to run it</text>
+<text x="460" y="280" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">This course uses local or cloud; commands stay the same in mongosh</text>
+</svg>

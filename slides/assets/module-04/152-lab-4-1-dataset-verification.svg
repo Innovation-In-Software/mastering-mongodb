@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 190" width="920" height="190">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="190" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Lab 4.1 — dataset verification</text>
+<rect x="33.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="133.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">use db</text>
+<line x1="233.0" y1="95" x2="247.0" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="251.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="351.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">show collections</text>
+<line x1="451.0" y1="95" x2="465.0" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="469.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="569.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">count</text>
+<line x1="669.0" y1="95" x2="683.0" y2="95" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="687.0" y="50" width="200" height="90" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="787.0" y="100.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">findOne</text>
+<text x="460" y="160" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">Fresh load: products 13 · customers 6 · orders 17 · reviews 6</text>
+</svg>

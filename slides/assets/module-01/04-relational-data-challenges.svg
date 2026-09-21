@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" width="920" height="360">
+<defs>
+  <marker id="ae04" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="360" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="40" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">One business object split across many tables</text>
+<rect x="30" y="70" width="168" height="64" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="114.0" y="107.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">customers</text>
+<line x1="114" y1="134" x2="460" y2="200" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="208" y="70" width="168" height="64" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="292.0" y="107.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">addresses</text>
+<line x1="292" y1="134" x2="460" y2="200" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="386" y="70" width="168" height="64" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="470.0" y="107.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">orders</text>
+<line x1="470" y1="134" x2="460" y2="200" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="564" y="70" width="168" height="64" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="648.0" y="107.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">order_items</text>
+<line x1="648" y1="134" x2="460" y2="200" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="742" y="70" width="168" height="64" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="826.0" y="107.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">payments</text>
+<line x1="826" y1="134" x2="460" y2="200" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="260" y="210" width="400" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="243.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1a1a1a">JOIN … JOIN … JOIN</text>
+<text x="460.0" y="267.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Reconstruct one complete order</text>
+<text x="460" y="330" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">The application object and the stored shape diverge</text>
+</svg>

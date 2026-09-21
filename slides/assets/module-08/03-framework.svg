@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" width="920" height="380">
+<defs>
+  <marker id="ae03" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="380" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="20" y="16" width="300" height="44" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="43.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#cc0000">Review area</text>
+<rect x="320" y="16" width="580" height="44" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="43.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#cc0000">Must show</text>
+<rect x="20" y="66" width="300" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="95.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">1. Data model</text>
+<rect x="320" y="66" width="580" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="95.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Access patterns, bounds, types</text>
+<rect x="20" y="118" width="300" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="147.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">2. Queries and indexes</text>
+<rect x="320" y="118" width="580" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="147.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Explain evidence</text>
+<rect x="20" y="170" width="300" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="199.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">3. Security</text>
+<rect x="320" y="170" width="580" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="199.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Identity, network, secrets</text>
+<rect x="20" y="222" width="300" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="251.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">4. Availability</text>
+<rect x="320" y="222" width="580" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="251.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Replica set, shard plan</text>
+<rect x="20" y="274" width="300" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="303.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">5. Backup and recovery</text>
+<rect x="320" y="274" width="580" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="303.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">RPO, RTO, restore test</text>
+<rect x="20" y="326" width="300" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="355.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">6. Monitoring and ops</text>
+<rect x="320" y="326" width="580" height="48" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="610.0" y="355.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Alerts, runbooks, owners</text>
+</svg>

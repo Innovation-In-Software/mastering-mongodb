@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" width="920" height="380">
+<defs>
+  <marker id="ae16" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="380" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="40" y="16" width="400" height="50" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="48.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#cc0000">Relational</text>
+<rect x="480" y="16" width="400" height="50" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="48.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#cc0000">MongoDB</text>
+<rect x="40" y="78" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="109.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Table</text>
+<line x1="440" y1="103" x2="480" y2="103" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="480" y="78" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="109.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Collection</text>
+<rect x="40" y="136" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="167.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Row</text>
+<line x1="440" y1="161" x2="480" y2="161" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="480" y="136" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="167.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Document</text>
+<rect x="40" y="194" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="225.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Column</text>
+<line x1="440" y1="219" x2="480" y2="219" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="480" y="194" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="225.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Field</text>
+<rect x="40" y="252" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="283.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Primary key</text>
+<line x1="440" y1="277" x2="480" y2="277" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="480" y="252" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="283.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">_id</text>
+<rect x="40" y="310" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="341.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Join</text>
+<line x1="440" y1="335" x2="480" y2="335" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<rect x="480" y="310" width="400" height="50" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="341.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Embed, reference, or $lookup</text>
+</svg>

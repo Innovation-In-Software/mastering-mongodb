@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 258" width="920" height="258">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="258" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="26" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Accidental broad filter</text>
+<rect x="30" y="46" width="420" height="180" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="114.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#cc0000">Intended</text>
+<text x="240.0" y="175.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">Two TEMP- lab products</text>
+<rect x="470" y="46" width="420" height="180" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="114.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#cc0000">If filter is {}</text>
+<text x="680.0" y="175.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">The entire catalog</text>
+</svg>

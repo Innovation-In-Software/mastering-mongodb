@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 480" width="920" height="480">
+<defs>
+  <marker id="ae63" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="480" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Troubleshooting by system layer</text>
+<rect x="210" y="40" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="64.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Client</text>
+<line x1="460.0" y1="80" x2="460.0" y2="88" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="92" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="116.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">URI</text>
+<line x1="460.0" y1="132" x2="460.0" y2="140" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="144" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="168.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">DNS</text>
+<line x1="460.0" y1="184" x2="460.0" y2="192" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="196" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="220.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Network</text>
+<line x1="460.0" y1="236" x2="460.0" y2="244" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="248" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="272.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Server</text>
+<line x1="460.0" y1="288" x2="460.0" y2="296" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="300" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="324.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Authentication</text>
+<line x1="460.0" y1="340" x2="460.0" y2="348" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="352" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="376.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Authorization</text>
+<line x1="460.0" y1="392" x2="460.0" y2="400" stroke="#cc0000" stroke-width="2" marker-end="url(#ae63)"/>
+<rect x="210" y="404" width="500" height="40" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="428.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Database operation</text>
+<text x="460" y="466" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">Name the layer before changing a second setting</text>
+</svg>

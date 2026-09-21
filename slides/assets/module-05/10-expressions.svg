@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 268" width="920" height="268">
+<defs>
+  <marker id="m029" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="268" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="20" y="16" width="440" height="42" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="41.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">Category</text>
+<rect x="460" y="16" width="440" height="42" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="41.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">Examples</text>
+<rect x="20" y="64" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="90.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Arithmetic</text>
+<rect x="460" y="64" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="90.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">$add $multiply $round</text>
+<rect x="20" y="112" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="138.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">String</text>
+<rect x="460" y="112" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="138.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">$concat $toUpper</text>
+<rect x="20" y="160" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="186.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Date</text>
+<rect x="460" y="160" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="186.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">$year $dateToString</text>
+<rect x="20" y="208" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="234.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Conditional</text>
+<rect x="460" y="208" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="234.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">$cond $switch $ifNull</text>
+</svg>

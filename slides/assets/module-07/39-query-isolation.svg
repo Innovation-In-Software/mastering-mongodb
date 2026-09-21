@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 210" width="920" height="210">
+<defs>
+  <marker id="ae39" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="210" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="36" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="16" fill="#1a1a1a">db.orders.find({ customerId: &quot;C101&quot; })</text>
+<rect x="40" y="70" width="400" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="111.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Shard-key predicate</text>
+<text x="240.0" y="149.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">Router can target</text>
+<rect x="480" y="70" width="400" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="111.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">No shard-key field</text>
+<text x="680.0" y="149.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">Often scatter-gather</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 185" width="920" height="185">
+<defs>
+  <marker id="ae45" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="185" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="20" y="36" width="260" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="150.0" y="77.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Indexed shapes</text>
+<text x="150.0" y="115.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">Module 6</text>
+<line x1="280" y1="91.0" x2="306" y2="91.0" stroke="#cc0000" stroke-width="2" marker-end="url(#ae45)"/>
+<rect x="310" y="36" width="260" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="440.0" y="77.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Replica / shard</text>
+<text x="440.0" y="115.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">Module 7</text>
+<line x1="570" y1="91.0" x2="596" y2="91.0" stroke="#cc0000" stroke-width="2" marker-end="url(#ae45)"/>
+<rect x="600" y="36" width="260" height="110" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="730.0" y="77.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">Ready to operate</text>
+<text x="730.0" y="115.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">Module 8</text>
+</svg>

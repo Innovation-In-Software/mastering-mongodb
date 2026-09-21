@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 262" width="920" height="262">
+<defs>
+  <marker id="m008" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="262" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="20" y="14" width="440" height="42" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="39.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">Cost</text>
+<rect x="460" y="14" width="440" height="42" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="39.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#cc0000">Effect</text>
+<rect x="20" y="62" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="88.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Storage + memory</text>
+<rect x="460" y="62" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="88.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Extra data to keep hot</text>
+<rect x="20" y="110" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="136.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Insert / update / delete</text>
+<rect x="460" y="110" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="136.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Each write may touch many indexes</text>
+<rect x="20" y="158" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="184.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Backup / replication</text>
+<rect x="460" y="158" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="184.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">More bytes to copy</text>
+<rect x="20" y="206" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="240.0" y="232.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Operations</text>
+<rect x="460" y="206" width="440" height="44" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="680.0" y="232.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">More objects to hide or drop</text>
+</svg>

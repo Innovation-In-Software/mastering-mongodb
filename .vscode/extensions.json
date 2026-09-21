@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "marp-team.marp-vscode"
+  ],
+  "unwantedRecommendations": [
+    "yzane.markdown-pdf",
+    "yzannick.markdown-pdf"
+  ]
+}

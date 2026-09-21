@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 190" width="920" height="190">
+<defs>
+  <marker id="m033" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="190" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="20" y="40" width="428" height="100" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="234.0" y="76.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">paymentStatus</text>
+<text x="234.0" y="114.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">1</text>
+<line x1="448" y1="90.0" x2="468" y2="90.0" stroke="#cc0000" stroke-width="2" marker-end="url(#m033)"/>
+<rect x="472" y="40" width="428" height="100" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="686.0" y="76.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#1a1a1a">createdAt</text>
+<text x="686.0" y="114.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">-1</text>
+<text x="460" y="162" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">Paid reporting by date</text>
+</svg>

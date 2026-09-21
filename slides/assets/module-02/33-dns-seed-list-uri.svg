@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 200" width="920" height="200">
+<defs>
+  <marker id="ae33" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="200" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">DNS seed-list URI</text>
+<rect x="24" y="56" width="203.28" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="125.64" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">mongodb+srv://</text>
+<text x="125.64" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">protocol</text>
+<rect x="233.28" y="56" width="150.96" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="308.76" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">username</text>
+<text x="308.76" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">username</text>
+<rect x="390.24" y="56" width="150.96" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="465.72" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">password</text>
+<text x="465.72" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">password</text>
+<rect x="547.2" y="56" width="185.84" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="640.12" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">cluster-host</text>
+<text x="640.12" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">cluster host</text>
+<rect x="739.0400000000001" y="56" width="133.52" height="58" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="805.8000000000001" y="87.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">database</text>
+<text x="805.8000000000001" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#666666">database</text>
+<text x="460" y="188" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#cc0000">mongodb+srv://username:password@cluster-host/database</text>
+</svg>

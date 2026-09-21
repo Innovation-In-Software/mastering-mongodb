@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 156" width="920" height="156">
+<defs>
+  <marker id="ae" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="156" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="26" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Exercise 4.13 — three unsafe writes</text>
+<rect x="20" y="48" width="284" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="162.0" y="77.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">updateMany({})</text>
+<text x="162.0" y="104.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">All products inactive</text>
+<rect x="318" y="48" width="284" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="77.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">deleteMany({})</text>
+<text x="460.0" y="104.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">All orders gone</text>
+<rect x="616" y="48" width="284" height="78" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="758.0" y="77.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Replace contact {}</text>
+<text x="758.0" y="104.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">Wipes phone</text>
+</svg>

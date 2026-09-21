@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 250" width="920" height="250">
+<defs>
+  <marker id="ae19" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="250" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="40" y="20" width="840" height="50" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="50.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#cc0000">Arbiter votes but stores no application data</text>
+<rect x="40" y="90" width="260" height="100" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="170.0" y="145.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">Cannot be primary</text>
+<rect x="330" y="90" width="260" height="100" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="145.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">No extra copy</text>
+<rect x="620" y="90" width="260" height="100" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="750.0" y="145.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">No extra reads</text>
+<text x="460" y="220" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">Prefer a data-bearing voting member when resources allow</text>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 255" width="920" height="255">
+<defs>
+  <marker id="ae64" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="255" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<text x="460" y="28" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">Read the error, then branch</text>
+<rect x="310" y="46" width="300" height="48" rx="10" fill="#ffebeb" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="73.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#cc0000">What did the client say?</text>
+<rect x="16" y="120" width="170" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="101.0" y="155.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Refused</text>
+<text x="101.0" y="170.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">Start server / fix port</text>
+<rect x="196" y="120" width="170" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="281.0" y="155.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Timeout</text>
+<text x="281.0" y="170.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">Firewall / allowlist</text>
+<rect x="376" y="120" width="170" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="461.0" y="155.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1a1a1a">Auth failed</text>
+<text x="461.0" y="170.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#666666">User / password / auth DB</text>
+<rect x="556" y="120" width="170" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="641.0" y="155.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Unauthorized</text>
+<text x="641.0" y="170.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">Grant role</text>
+<rect x="736" y="120" width="168" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="820.0" y="155.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#1a1a1a">Bad URI</text>
+<text x="820.0" y="170.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#666666">Syntax / encoding</text>
+<line x1="400" y1="94" x2="101" y2="120" stroke="#cc0000" stroke-width="2" marker-end="url(#ae64)"/>
+<line x1="430" y1="94" x2="281" y2="120" stroke="#cc0000" stroke-width="2" marker-end="url(#ae64)"/>
+<line x1="460" y1="94" x2="461" y2="120" stroke="#cc0000" stroke-width="2" marker-end="url(#ae64)"/>
+<line x1="490" y1="94" x2="641" y2="120" stroke="#cc0000" stroke-width="2" marker-end="url(#ae64)"/>
+<line x1="520" y1="94" x2="820" y2="120" stroke="#cc0000" stroke-width="2" marker-end="url(#ae64)"/>
+<text x="460" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666666">Then retest with the simplest client: mongosh ping</text>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 370" width="920" height="370">
+<defs>
+  <marker id="ae32" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,1 L9,5 L0,9 Z" fill="#cc0000"/>
+  </marker>
+</defs>
+<rect width="920" height="370" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="2"/>
+<rect x="40" y="40" width="250" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="165.0" y="73.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">customers</text>
+<text x="165.0" y="97.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">PK customer_id</text>
+<rect x="335" y="40" width="250" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="73.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">orders</text>
+<text x="460.0" y="97.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">PK order_id</text>
+<rect x="630" y="40" width="250" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="755.0" y="73.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1a1a1a">order_items</text>
+<text x="755.0" y="97.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#666666">PK (order_id, product_id)</text>
+<rect x="335" y="220" width="250" height="80" rx="10" fill="#ffffff" stroke="#cc0000" stroke-width="2"/>
+<text x="460.0" y="253.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#1a1a1a">products</text>
+<text x="460.0" y="277.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">PK product_id</text>
+<line x1="290" y1="80" x2="335" y2="80" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="585" y1="80" x2="630" y2="80" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="460" y1="120" x2="460" y2="220" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<line x1="700" y1="120" x2="520" y2="220" stroke="#cc0000" stroke-width="2" marker-end="url(#ae)"/>
+<text x="460" y="340" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#666666">Exercise 1.2 start: reconstruct order O5001 from these tables</text>
+</svg>
