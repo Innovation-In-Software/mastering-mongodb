@@ -1,0 +1,1305 @@
+[
+  {
+    "global_index": 1,
+    "marp_class": "lead",
+    "heading": "MongoDB Best Practices, Security, and Troubleshooting",
+    "body_markdown": "A database is not production-ready merely because it accepts queries",
+    "notes": "The slide title is: MongoDB Best Practices, Security, and Troubleshooting.\n\nThe slide says: A database is not production-ready merely because it accepts queries."
+  },
+  {
+    "global_index": 2,
+    "marp_class": "content fit-md",
+    "heading": "Module Learning Objectives",
+    "body_markdown": "Participants will learn to:\n\n- Review MongoDB solutions systematically\n- Recognize design and operational risks\n- Protect databases and credentials\n- Monitor health and performance\n- Troubleshoot common problems\n- Verify recovery capabilities\n- Make controlled production changes\n- Establish an improvement plan",
+    "notes": "This slide lists key points under Module Learning Objectives.\n\nThe slide title is: Module Learning Objectives.\n\nThe slide says: Participants will learn to:.\n\nBullet 1 on the slide: Review MongoDB solutions systematically.\n\nBullet 2 on the slide: Recognize design and operational risks.\n\nBullet 3 on the slide: Protect databases and credentials.\n\nBullet 4 on the slide: Monitor health and performance.\n\nBullet 5 on the slide: Troubleshoot common problems.\n\nBullet 6 on the slide: Verify recovery capabilities.\n\nBullet 7 on the slide: Make controlled production changes.\n\nBullet 8 on the slide: Establish an improvement plan."
+  },
+  {
+    "global_index": 3,
+    "marp_class": "content",
+    "heading": "Introduction",
+    "body_markdown": "This module brings together data modeling, querying, aggregation, indexing, security and operations.\n\nA production-ready MongoDB solution should be:\n\n- Correct for the application’s access patterns\n- Efficient at expected data volumes\n- Secure by default\n- Observable and recoverable\n- Resilient to application and infrastructure failures\n- Maintainable as requirements evolve",
+    "notes": "This module brings together data modeling, querying, aggregation, indexing, security and operations."
+  },
+  {
+    "global_index": 4,
+    "marp_class": "split",
+    "heading": "Model around access patterns",
+    "body_markdown": "MongoDB’s flexible schema allows documents to evolve, but flexibility should be governed by explicit design rules.\n\nStart with the application’s most important operations:\n\n- What data is read together?\n- What data is updated together?\n- Which queries run most often?\n- Which operations are latency-sensitive?\n- How large can each relationship become?\n- Which information must remain historically accurate?\n\nFor `training_store`, an order can embed its purchased items:",
+    "notes": "Start with the application’s most important operations:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/006 - Design Around Access Patterns.png"
+  },
+  {
+    "global_index": 5,
+    "marp_class": "content",
+    "heading": "Model around access patterns (cont.)",
+    "body_markdown": "```javascript\n{\n  orderNumber: \"ORD-2026-1001\",\n  customerId: ObjectId(\"...\"),\n\n  items: [\n    {\n      productId: ObjectId(\"...\"),\n      sku: \"ELEC-1001\",\n      productName: \"Wireless Mouse\",\n      unitPrice: NumberDecimal(\"39.99\"),\n      quantity: 2,\n      lineTotal: NumberDecimal(\"79.98\")\n    }\n  ],\n\n  total: NumberDecimal(\"90.38\"),\n  status: \"Delivered\"\n}\n```\n\nThis is appropriate because order items:\n\n- Belong to one order\n- Are normally retrieved with the order\n- Form a bounded group\n- Must preserve historical product and price information",
+    "notes": "This is appropriate because order items:"
+  },
+  {
+    "global_index": 6,
+    "marp_class": "content",
+    "heading": "Embed bounded, owned information",
+    "body_markdown": "Embedding works well when related data:\n\n- Belongs to one parent\n- Is normally accessed with the parent\n- Has a practical size limit\n- Is updated with the parent\n- Benefits from single-document atomicity\n\nExamples:\n\n- Order items inside an order\n- Shipping address snapshot inside an order\n- A small number of addresses inside a customer\n- Product specifications inside a product",
+    "notes": "Embedding works well when related data:"
+  },
+  {
+    "global_index": 7,
+    "marp_class": "content",
+    "heading": "Reference independent or unbounded information",
+    "body_markdown": "Referencing is generally better when related data:\n\n- Grows without a practical limit\n- Is shared among many documents\n- Changes independently\n- Must be queried separately\n- Would make the parent document excessively large\n\nProduct reviews should normally be independent documents:\n\n```javascript\n{\n  productId: ObjectId(\"...\"),\n  customerId: ObjectId(\"...\"),\n  rating: 5,\n  comment: \"Excellent product.\",\n  createdAt: new Date()\n}\n```\n\nAvoid placing every review in the product:",
+    "notes": "Referencing is generally better when related data:"
+  },
+  {
+    "global_index": 8,
+    "marp_class": "content",
+    "heading": "Reference independent or unbounded information (cont.)",
+    "body_markdown": "```javascript\n{\n  name: \"Wireless Mouse\",\n  reviews: [\n    // Potentially millions of reviews\n  ]\n}\n```\n\nMongoDB identifies unbounded arrays as a schema anti-pattern because they can produce oversized documents and reduce performance.",
+    "notes": "MongoDB identifies unbounded arrays as a schema anti-pattern because they can produce oversized documents and reduce performance."
+  },
+  {
+    "global_index": 9,
+    "marp_class": "content",
+    "heading": "Keep documents focused",
+    "body_markdown": "A document should contain information commonly used together.\n\nAvoid bloated documents containing:\n\n- Large fields rarely returned\n- Unbounded event histories\n- Repeated copies of unrelated records\n- Large binary objects that most queries do not need\n\nLarge documents can reduce working-set efficiency and increase disk access. Separating information that is not commonly retrieved together can improve performance.",
+    "notes": "A document should contain information commonly used together."
+  },
+  {
+    "global_index": 10,
+    "marp_class": "split",
+    "heading": "Use consistent field names",
+    "body_markdown": "Avoid several names for the same concept:\n\n```javascript\n{ customerId: ObjectId(\"...\") }\n{ customer_id: ObjectId(\"...\") }\n{ custId: ObjectId(\"...\") }\n```\n\nChoose and enforce one:\n\n```javascript\n{\n  customerId: ObjectId(\"...\")\n}\n```\n\nA common convention is:",
+    "notes": "Avoid several names for the same concept:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/010 - Use Consistent Field Names and Types.png"
+  },
+  {
+    "global_index": 11,
+    "marp_class": "content",
+    "heading": "Use consistent field names (cont.)",
+    "body_markdown": "```text\nCollections: plural nouns\nFields: camelCase\nBooleans: active, verifiedPurchase, emailConfirmed\nDates: createdAt, updatedAt, orderedAt\nReferences: customerId, productId\n```",
+    "notes": "Covers Use consistent field names."
+  },
+  {
+    "global_index": 12,
+    "marp_class": "content",
+    "heading": "Use consistent BSON types",
+    "body_markdown": "Poor consistency:\n\n```javascript\n{ price: \"39.99\" }\n{ price: 39.99 }\n{ price: NumberDecimal(\"39.99\") }\n```\n\nPreferred:\n\n```javascript\n{\n  price: NumberDecimal(\"39.99\")\n}\n```\n\nRecommended examples:",
+    "notes": "Poor consistency:"
+  },
+  {
+    "global_index": 13,
+    "marp_class": "content",
+    "heading": "Use consistent BSON types (cont.)",
+    "body_markdown": "| Business value        | Suitable type                          |\n| ----------------------- | ----------------------------------------- |\n| Monetary amount       | `Decimal128`                           |\n| Timestamp             | BSON Date                              |\n| Count or quantity     | Integer                                |\n| Identifier            | `ObjectId` or consistently defined key |\n| Status flag           | Boolean                                |\n| Multiple values       | Array                                  |\n| Structured sub-object | Embedded document                      |",
+    "notes": "Covers Use consistent BSON types."
+  },
+  {
+    "global_index": 14,
+    "marp_class": "split",
+    "heading": "Preserve historical snapshots",
+    "body_markdown": "An order should preserve the information applicable when it was placed.\n\n```javascript\n{\n  items: [\n    {\n      productId: ObjectId(\"...\"),\n      productName: \"Wireless Mouse\",\n      unitPrice: NumberDecimal(\"39.99\")\n    }\n  ]\n}\n```\n\nIf the current product is renamed or repriced, the historical order remains accurate.\n\nThis is intentional duplication, not accidental inconsistency.",
+    "notes": "An order should preserve the information applicable when it was placed.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/013 - Preserve Historical Snapshots.png"
+  },
+  {
+    "global_index": 15,
+    "marp_class": "split",
+    "heading": "Use Schema Validation",
+    "body_markdown": "MongoDB’s flexible model can still enforce essential business rules.\n\nExample validator for `products`:",
+    "notes": "MongoDB’s flexible model can still enforce essential business rules.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/011 - Apply Schema Validation.png"
+  },
+  {
+    "global_index": 16,
+    "marp_class": "content",
+    "heading": "Use Schema Validation (cont.)",
+    "body_markdown": "```javascript\ndb.createCollection(\"validated_products\", {\n  validator: {\n    $jsonSchema: {\n      bsonType: \"object\",\n\n      required: [\n        \"sku\",\n        \"name\",\n        \"category\",\n        \"price\",\n        \"stock\",\n        \"active\"\n      ],\n\n      properties: {\n        sku: {\n          bsonType: \"string\",\n          description: \"SKU must be a string\"\n        },\n\n        name: {\n          bsonType: \"string\",\n          minLength: 1\n        },\n\n        category: {\n          bsonType: \"string\"\n        },\n\n        price: {\n          bsonType: \"decimal\",\n          minimum: NumberDecimal(\"0\")\n        },\n```\n\n```javascript\n        stock: {\n          bsonType: [\n            \"int\",\n            \"long\"\n          ],\n          minimum: 0\n        },\n\n        active: {\n          bsonType: \"bool\"\n        },\n\n        tags: {\n          bsonType: \"array\",\n          items: {\n            bsonType: \"string\"\n          }\n        }\n      }\n    }\n  },\n\n  validationLevel: \"strict\",\n  validationAction: \"error\"\n})\n```",
+    "notes": "Covers Use Schema Validation."
+  },
+  {
+    "global_index": 17,
+    "marp_class": "content",
+    "heading": "Use Schema Validation (cont.)",
+    "body_markdown": "Schema-validation rules can cover only the fields the application needs to control; they do not necessarily need to define every possible field.\n\nUse validation for:\n\n- Required fields\n- Data types\n- Allowed enumerations\n- Numeric ranges\n- Nested structures\n- Application invariants\n\nValidation should complement—not replace—application validation.",
+    "notes": "Schema-validation rules can cover only the fields the application needs to control; they do not necessarily need to define every possible field."
+  },
+  {
+    "global_index": 18,
+    "marp_class": "split",
+    "heading": "Plan for Schema Evolution",
+    "body_markdown": "Production schemas change over time.\n\nSuppose version 1 uses:\n\n```javascript\n{\n  name: \"Wireless Mouse\",\n  price: NumberDecimal(\"39.99\")\n}\n```\n\nVersion 2 adds:\n\n```javascript\n{\n  schemaVersion: 2,\n  active: true,\n  pricing: {\n    amount: NumberDecimal(\"39.99\"),\n    currency: \"CAD\"\n  }\n}\n```\n\nUseful migration approaches include:",
+    "notes": "Production schemas change over time.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/012 - Plan for Schema Evolution.png"
+  },
+  {
+    "global_index": 19,
+    "marp_class": "content",
+    "heading": "Plan for Schema Evolution (cont.)",
+    "body_markdown": "- Background batch migration\n- Migration during deployment\n- Read-old/write-new application logic\n- Lazy migration when a document is accessed\n- Explicit schema-version fields\n- Temporary compatibility with both formats\n\nMigration process:\n\n1. Add application support for both formats.\n2. Begin writing the new format.\n3. Migrate existing documents in controlled batches.\n4. Measure progress and failures.\n5. Add or update validation rules.\n6. Remove obsolete compatibility code after verification.\n\nAvoid applying a massive untested update to a production collection.",
+    "notes": "Migration process:"
+  },
+  {
+    "global_index": 20,
+    "marp_class": "content",
+    "heading": "Performance Optimization Techniques",
+    "body_markdown": "Performance tuning should follow evidence:\n\n```text\nObserve → Measure → Diagnose → Change → Measure again\n```\n\nDo not begin by creating many speculative indexes.",
+    "notes": "Performance tuning should follow evidence:"
+  },
+  {
+    "global_index": 21,
+    "marp_class": "split",
+    "heading": "Understand query shapes",
+    "body_markdown": "A query shape includes:\n\n- Filter fields\n- Operators\n- Sort fields\n- Projection\n- Collation\n- Limit\n- Aggregation stages\n\nExample:\n\n```javascript\ndb.orders.find(\n  {\n    customerId: customerId,\n    status: \"Completed\"\n  },\n  {\n    orderNumber: 1,\n    total: 1,\n    orderedAt: 1\n  }\n).sort({\n  orderedAt: -1\n}).limit(20)\n```\n\nPotential index:\n\n```javascript\ndb.orders.createIndex({\n  customerId: 1,\n  status: 1,\n  orderedAt: -1\n})\n```",
+    "notes": "A query shape includes:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/026 - Design Indexes Around Query Shapes.png"
+  },
+  {
+    "global_index": 22,
+    "marp_class": "content",
+    "heading": "Filter early",
+    "body_markdown": "In aggregation pipelines, place selective `$match` stages early when logically possible:\n\n```javascript\ndb.orders.aggregate([\n  {\n    $match: {\n      status: \"Delivered\",\n      orderedAt: {\n        $gte: ISODate(\"2026-09-01T00:00:00Z\")\n      }\n    }\n  },\n  {\n    $unwind: \"$items\"\n  },\n  {\n    $group: {\n      _id: \"$items.productId\",\n      unitsSold: {\n        $sum: \"$items.quantity\"\n      }\n    }\n  }\n])\n```\n\nFiltering before `$unwind` reduces the number of documents and array elements processed downstream.",
+    "notes": "In aggregation pipelines, place selective `$match` stages early when logically possible:"
+  },
+  {
+    "global_index": 23,
+    "marp_class": "split",
+    "heading": "Project only needed fields",
+    "body_markdown": "For application queries:\n\n```javascript\ndb.products.find(\n  {\n    category: \"Electronics\"\n  },\n  {\n    _id: 0,\n    sku: 1,\n    name: 1,\n    price: 1\n  }\n)\n```\n\nThis reduces unnecessary network transfer and application processing.\n\nWithin aggregation, early projection may help when it removes very large fields, although MongoDB can optimize straightforward field dependencies automatically.",
+    "notes": "For application queries:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/017 - Return Only Required Fields.png"
+  },
+  {
+    "global_index": 24,
+    "marp_class": "content",
+    "heading": "Limit results",
+    "body_markdown": "Avoid returning an unbounded result set:\n\n```javascript\ndb.orders.find({\n  customerId: customerId\n}).sort({\n  orderedAt: -1\n}).limit(25)\n```\n\nUse pagination for user-facing lists.\n\nFor large datasets, range-based pagination is often more scalable than large `$skip` values.\n\n```javascript\ndb.orders.find({\n  customerId: customerId,\n  orderedAt: {\n    $lt: lastSeenDate\n  }\n}).sort({\n  orderedAt: -1,\n  _id: -1\n}).limit(25)\n```",
+    "notes": "Avoid returning an unbounded result set:"
+  },
+  {
+    "global_index": 25,
+    "marp_class": "content",
+    "heading": "Use bulk operations",
+    "body_markdown": "Instead of sending many individual writes:\n\n```javascript\ndb.products.bulkWrite([\n  {\n    updateOne: {\n      filter: {\n        sku: \"ELEC-1001\"\n      },\n      update: {\n        $inc: {\n          stock: 10\n        }\n      }\n    }\n  },\n  {\n    updateOne: {\n      filter: {\n        sku: \"ELEC-1002\"\n      },\n      update: {\n        $inc: {\n          stock: 20\n        }\n      }\n    }\n  }\n])\n```\n\nBulk operations can reduce client-server round trips.",
+    "notes": "Instead of sending many individual writes:"
+  },
+  {
+    "global_index": 26,
+    "marp_class": "content",
+    "heading": "Use atomic operators",
+    "body_markdown": "Prefer:\n\n```javascript\ndb.products.updateOne(\n  {\n    sku: \"ELEC-1001\",\n    stock: {\n      $gte: 2\n    }\n  },\n  {\n    $inc: {\n      stock: -2\n    }\n  }\n)\n```\n\nThis is safer than:\n\n1. Reading the stock into the application\n2. Calculating a new value\n3. Writing it back separately\n\nThe guarded filter prevents stock from falling below zero in this operation.",
+    "notes": "Prefer:"
+  },
+  {
+    "global_index": 27,
+    "marp_class": "split",
+    "heading": "Index important queries",
+    "body_markdown": "Create indexes for frequent, important query patterns:\n\n```javascript\ndb.products.createIndex(\n  {\n    sku: 1\n  },\n  {\n    unique: true\n  }\n)\n\ndb.products.createIndex({\n  category: 1,\n  price: 1\n})\n\ndb.orders.createIndex({\n  customerId: 1,\n  orderedAt: -1\n})\n\ndb.reviews.createIndex({\n  productId: 1,\n  createdAt: -1\n})\n```",
+    "notes": "Create indexes for frequent, important query patterns:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/025 - Indexing Best Practices.png"
+  },
+  {
+    "global_index": 28,
+    "marp_class": "content",
+    "heading": "Follow compound-index field order carefully",
+    "body_markdown": "For many workloads, begin with:\n\n1. Equality fields\n2. Sort fields\n3. Range fields\n\nExample query:\n\n```javascript\ndb.orders.find({\n  status: \"Completed\",\n  orderedAt: {\n    $gte: ISODate(\"2026-09-01T00:00:00Z\")\n  }\n}).sort({\n  total: -1\n})\n```\n\nA candidate index might be:\n\n```javascript\ndb.orders.createIndex({\n  status: 1,\n  total: -1,\n  orderedAt: 1\n})\n```",
+    "notes": "For many workloads, begin with:"
+  },
+  {
+    "global_index": 29,
+    "marp_class": "content",
+    "heading": "Follow compound-index field order carefully (cont.)",
+    "body_markdown": "Whether this is best depends on:\n\n- Date selectivity\n- Importance of avoiding an in-memory sort\n- Distribution of statuses\n- Result size\n- Frequency of the query\n\nValidate it with realistic data and `explain()`.",
+    "notes": "Whether this is best depends on:"
+  },
+  {
+    "global_index": 30,
+    "marp_class": "content",
+    "heading": "Avoid excessive indexing",
+    "body_markdown": "Each index:\n\n- Uses storage\n- Consumes cache\n- Adds insert cost\n- Adds update cost\n- Adds delete cost\n- Increases operational complexity\n\nBefore creating an index, identify the query it serves.\n\nBefore dropping one, hide and test it where appropriate.",
+    "notes": "Each index:"
+  },
+  {
+    "global_index": 31,
+    "marp_class": "content",
+    "heading": "Measure with `explain()`",
+    "body_markdown": "Use:\n\n```javascript\ndb.orders.find({\n  status: \"Completed\"\n}).explain(\"executionStats\")\n```\n\nFor aggregation:\n\n```javascript\ndb.orders.explain(\n  \"executionStats\"\n).aggregate([\n  {\n    $match: {\n      status: \"Completed\"\n    }\n  }\n])\n```\n\nReview:\n\n- `winningPlan`\n- `nReturned`\n- `totalDocsExamined`\n- `totalKeysExamined`\n- `executionTimeMillis`\n- Collection scan versus index scan\n- Blocking sorts\n- Index bounds",
+    "notes": "Use:"
+  },
+  {
+    "global_index": 32,
+    "marp_class": "content",
+    "heading": "Measure with `explain()` (cont.)",
+    "body_markdown": "A high documents-examined-to-documents-returned ratio can indicate an inefficient query or missing index.",
+    "notes": "A high documents-examined-to-documents-returned ratio can indicate an inefficient query or missing index."
+  },
+  {
+    "global_index": 33,
+    "marp_class": "content",
+    "heading": "Typical stages",
+    "body_markdown": "| Stage        | Meaning                 |\n| -------------- | ------------------------- |\n| `COLLSCAN`   | Collection scan         |\n| `IXSCAN`     | Index scan              |\n| `FETCH`      | Retrieve full documents |\n| `SORT`       | Sort results            |\n| `GROUP`      | Group documents         |\n| `PROJECTION` | Reshape output          |\n\nA collection scan is not automatically wrong. It may be appropriate when:\n\n- The collection is small\n- Most documents must be returned\n- The operation is an occasional administrative task\n- An index would not be selective",
+    "notes": "A collection scan is not automatically wrong. It may be appropriate when:"
+  },
+  {
+    "global_index": 34,
+    "marp_class": "content",
+    "heading": "Monitor Slow Operations",
+    "body_markdown": "Potential tools include:\n\n- MongoDB diagnostic logs\n- Database profiler\n- Atlas Query Profiler\n- Atlas Performance Advisor\n- MongoDB Compass explain plans\n- Application performance monitoring\n- Driver command monitoring\n\nMongoDB’s diagnostic logs record slow operations, while its profiler and Atlas tools help identify inefficient query patterns.",
+    "notes": "Potential tools include:"
+  },
+  {
+    "global_index": 35,
+    "marp_class": "content",
+    "heading": "Database profiler caution",
+    "body_markdown": "Profiling can add overhead, especially at aggressive settings. MongoDB warns that the database profiler can degrade performance.\n\nEnable it deliberately and with an appropriate threshold or filter:\n\n```javascript\ndb.setProfilingLevel(\n  1,\n  {\n    slowms: 200,\n    sampleRate: 0.2\n  }\n)\n```\n\nCheck the current configuration:\n\n```javascript\ndb.getProfilingStatus()\n```\n\nReturn to disabled profiling:",
+    "notes": "Profiling can add overhead, especially at aggressive settings. MongoDB warns that the database profiler can degrade performance."
+  },
+  {
+    "global_index": 36,
+    "marp_class": "content",
+    "heading": "Database profiler caution (cont.)",
+    "body_markdown": "```javascript\ndb.setProfilingLevel(0)\n```\n\nProfiler behavior and performance impact should be evaluated before use on a busy production system.",
+    "notes": "Profiler behavior and performance impact should be evaluated before use on a busy production system."
+  },
+  {
+    "global_index": 37,
+    "marp_class": "content",
+    "heading": "Resource and Capacity Optimization",
+    "body_markdown": "Monitor at least:\n\n- CPU utilization\n- Memory utilization\n- Disk latency and throughput\n- Available disk space\n- Network throughput\n- Connection count\n- Query latency\n- Replication lag\n- Oplog window\n- Cache pressure\n- Page faults\n- Active operations\n- Shard balance\n- Chunk migrations",
+    "notes": "Monitor at least:"
+  },
+  {
+    "global_index": 38,
+    "marp_class": "content",
+    "heading": "Working set",
+    "body_markdown": "The working set is the data and index information actively used by the workload.\n\nIf the active working set does not fit efficiently in memory, MongoDB must perform more disk I/O, increasing latency.\n\nPossible responses include:\n\n- Improve indexes\n- Reduce unnecessary data retrieval\n- Archive cold data\n- Remodel large documents\n- Increase memory\n- Separate workloads\n- Scale horizontally when justified",
+    "notes": "The working set is the data and index information actively used by the workload."
+  },
+  {
+    "global_index": 39,
+    "marp_class": "split",
+    "heading": "Security Considerations",
+    "body_markdown": "MongoDB should not be exposed to an untrusted network without appropriate controls.\n\nA secure deployment uses multiple layers:\n\n```text\nNetwork controls\n      +\nTLS encryption\n      +\nAuthentication\n      +\nAuthorization\n      +\nEncryption at rest\n      +\nAuditing and monitoring\n      +\nBackups and recovery\n```\n\nMongoDB’s self-managed security checklist emphasizes authentication, TLS and restricted network exposure.",
+    "notes": "MongoDB should not be exposed to an untrusted network without appropriate controls.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/039 - Secure Configuration Practices.png"
+  },
+  {
+    "global_index": 40,
+    "marp_class": "split",
+    "heading": "Enable authentication",
+    "body_markdown": "Authentication answers:\n\n> Who is connecting?\n\nNever rely only on network location as proof of identity.\n\nFor a self-managed deployment, authorization must be enabled through the MongoDB security configuration.\n\nConceptual configuration:\n\n```yaml\nsecurity:\n  authorization: enabled\n```",
+    "notes": "Authentication answers:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/031 - Authentication.png"
+  },
+  {
+    "global_index": 41,
+    "marp_class": "content",
+    "heading": "Enable authentication (cont.)",
+    "body_markdown": "MongoDB documents `security.authorization` as the setting that enables authorization.\n\nCreate administrative users before enforcing authentication according to the supported deployment procedure.",
+    "notes": "MongoDB documents `security.authorization` as the setting that enables authorization."
+  },
+  {
+    "global_index": 42,
+    "marp_class": "split",
+    "heading": "Apply least privilege",
+    "body_markdown": "Authorization answers:\n\n> What may this identity do?\n\nCreate role-appropriate accounts:\n\n- Application read/write user\n- Reporting read-only user\n- Backup operator\n- Monitoring user\n- Database administrator\n\nExample application user:\n\n```javascript\nuse training_store\n\ndb.createUser({\n  user: \"trainingStoreApp\",\n  pwd: passwordPrompt(),\n  roles: [\n    {\n      role: \"readWrite\",\n      db: \"training_store\"\n    }\n  ]\n})\n```",
+    "notes": "Authorization answers:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/033 - Principle of Least Privilege.png"
+  },
+  {
+    "global_index": 43,
+    "marp_class": "content",
+    "heading": "Apply least privilege (cont.)",
+    "body_markdown": "Avoid giving an application broad administrative privileges.\n\nUse separate identities for:\n\n- Applications\n- Developers\n- Administrators\n- Automated jobs\n- Monitoring systems",
+    "notes": "Avoid giving an application broad administrative privileges."
+  },
+  {
+    "global_index": 44,
+    "marp_class": "content",
+    "heading": "Protect credentials",
+    "body_markdown": "Do not place credentials directly in:\n\n- Source code\n- Git repositories\n- Container images\n- Shared screenshots\n- Course materials\n- Shell-history commands\n- Unprotected configuration files\n\nUse:\n\n- Environment-specific secret stores\n- Cloud secret-management services\n- Kubernetes Secrets with appropriate protection\n- Rotated credentials\n- Short-lived authentication when supported\n- Restricted service accounts\n\nA connection string should be treated as sensitive:",
+    "notes": "Do not place credentials directly in:"
+  },
+  {
+    "global_index": 45,
+    "marp_class": "content",
+    "heading": "Protect credentials (cont.)",
+    "body_markdown": "```text\nmongodb+srv://username:<password>@cluster.example.net/\n```",
+    "notes": "Covers Protect credentials."
+  },
+  {
+    "global_index": 46,
+    "marp_class": "content",
+    "heading": "Encrypt traffic with TLS",
+    "body_markdown": "TLS protects data in transit between:\n\n- Applications and MongoDB\n- Administrative tools and MongoDB\n- Replica-set members\n- Sharded-cluster components\n\nMongoDB supports TLS for encrypting network traffic.\n\nProduction clients should:\n\n- Validate the server certificate\n- Use trusted certificate authorities\n- Avoid disabling certificate validation\n- Protect private keys\n- Rotate expiring certificates",
+    "notes": "TLS protects data in transit between:"
+  },
+  {
+    "global_index": 47,
+    "marp_class": "content",
+    "heading": "Restrict network exposure",
+    "body_markdown": "Use:\n\n- Private networks\n- Firewalls\n- Security groups\n- Atlas IP access lists\n- Private endpoints where appropriate\n- Restricted `bindIp` settings\n- Segmented administrative access\n- VPN or controlled bastion access\n\nDo not expose port `27017` broadly to the public internet.\n\n`bindIp` controls the interfaces on which a self-managed MongoDB process listens.",
+    "notes": "Use:"
+  },
+  {
+    "global_index": 48,
+    "marp_class": "content",
+    "heading": "Protect data at rest",
+    "body_markdown": "Depending on the deployment, use:\n\n- Encrypted storage volumes\n- Cloud-provider encryption\n- MongoDB-supported encryption features\n- Key-management systems\n- Client-side field-level protection for sensitive fields where appropriate\n\nHighly sensitive data might include:\n\n- Government identifiers\n- Payment-related information\n- Medical information\n- Authentication secrets\n- Private customer information\n\nPasswords should not be stored as plain text. Application passwords require an appropriate password-hashing design; encryption is not a substitute for secure password hashing.",
+    "notes": "Depending on the deployment, use:"
+  },
+  {
+    "global_index": 49,
+    "marp_class": "content",
+    "heading": "Audit important activity",
+    "body_markdown": "Security monitoring should detect:\n\n- Failed authentication attempts\n- Privilege changes\n- User creation\n- Unusual exports\n- Unexpected schema or index changes\n- Large deletions\n- Configuration changes\n- Access from unusual locations\n\nAudit capabilities vary by MongoDB edition and deployment model. Application-level audit events may also be necessary.",
+    "notes": "Security monitoring should detect:"
+  },
+  {
+    "global_index": 50,
+    "marp_class": "split",
+    "heading": "Backups and Recovery",
+    "body_markdown": "Replication is not a backup.\n\nAn accidental deletion is replicated:\n\n```javascript\ndb.orders.deleteMany({})\n```\n\nA recovery plan should define:\n\n- Backup frequency\n- Retention period\n- Encryption\n- Offsite or separate-account storage\n- Point-in-time recovery requirements\n- Restore procedures\n- Restore testing\n- Recovery time objective\n- Recovery point objective",
+    "notes": "Replication is not a backup.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/041 - Backup and Recovery Fundamentals.png"
+  },
+  {
+    "global_index": 51,
+    "marp_class": "split",
+    "heading": "Recovery objectives",
+    "body_markdown": "**Recovery Point Objective (RPO)** asks:\n\n> How much data loss is acceptable?\n\n**Recovery Time Objective (RTO)** asks:\n\n> How long may recovery take?\n\nBackups are useful only if restoration works. Schedule restoration exercises rather than assuming backups are valid.",
+    "notes": "Backups are useful only if restoration works. Schedule restoration exercises rather than assuming backups are valid.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/045 - Recovery Point and Recovery Time Objectives.png"
+  },
+  {
+    "global_index": 52,
+    "marp_class": "content",
+    "heading": "Step 1: Define the symptom",
+    "body_markdown": "Use a systematic process:\n\n```text\nSymptom → Scope → Evidence → Layer → Cause → Fix → Verify\n```\n\nAvoid vague descriptions such as:\n\n```text\nMongoDB is slow.\n```\n\nPrefer:\n\n```text\nThe customer order-history endpoint increased from\n100 ms to 2.5 seconds after the September release.\n```",
+    "notes": "Avoid vague descriptions such as:"
+  },
+  {
+    "global_index": 53,
+    "marp_class": "content",
+    "heading": "Step 2: Determine the scope",
+    "body_markdown": "Ask:\n\n- One query or all queries?\n- One application instance or every instance?\n- One collection or the complete database?\n- One replica-set member or the entire cluster?\n- Reads, writes or both?\n- Continuous or intermittent?\n- Started after a deployment?\n- Related to data growth or traffic?",
+    "notes": "Ask:"
+  },
+  {
+    "global_index": 54,
+    "marp_class": "content",
+    "heading": "Step 3: Gather evidence",
+    "body_markdown": "Collect:\n\n- Application error and trace\n- Timestamp and timezone\n- Query shape\n- `explain()` result\n- MongoDB logs\n- Driver logs\n- Server metrics\n- Replica-set status\n- Current operations\n- Recent schema and index changes\n- Deployment changes",
+    "notes": "Collect:"
+  },
+  {
+    "global_index": 55,
+    "marp_class": "content",
+    "heading": "Step 4: Identify the layer",
+    "body_markdown": "| Layer       | Example issue                           |\n| ------------- | ------------------------------------------ |\n| Application | Incorrect filter or unbounded result    |\n| Driver      | Pool exhaustion or timeout              |\n| Network     | DNS, firewall or TLS failure            |\n| Query       | Collection scan or expensive sort       |\n| Schema      | Unbounded array                         |\n| Index       | Missing or unsuitable compound index    |\n| Server      | CPU, memory or disk pressure            |\n| Replication | Lag or election                         |\n| Sharding    | Scatter-gather or imbalance             |\n| Security    | Authentication or authorization failure |",
+    "notes": "Covers Step 4: Identify the layer."
+  },
+  {
+    "global_index": 56,
+    "marp_class": "content",
+    "heading": "Step 5: Apply the smallest safe correction",
+    "body_markdown": "Examples:\n\n- Add a targeted index.\n- Bound a query with a date range.\n- Correct a connection-string option.\n- Increase an undersized pool after measuring.\n- Rewrite an unbounded array model.\n- Fix a role rather than granting administrator access.",
+    "notes": "Examples:"
+  },
+  {
+    "global_index": 57,
+    "marp_class": "split",
+    "heading": "Step 6: Verify",
+    "body_markdown": "Repeat the same test and compare:\n\n- Latency\n- Documents examined\n- Keys examined\n- Error rate\n- Resource usage\n- Application behavior",
+    "notes": "Repeat the same test and compare:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/054 - Troubleshooting Methodology.png"
+  },
+  {
+    "global_index": 58,
+    "marp_class": "split",
+    "heading": "Connection refused",
+    "body_markdown": "Possible causes:\n\n- `mongod` is stopped.\n- Incorrect host or port\n- Firewall restriction\n- `bindIp` restriction\n- Container port not exposed\n- DNS failure\n\nChecks:\n\n```javascript\ndb.hello()\n```\n\nOperating-system checks may include service state and port connectivity.",
+    "notes": "Possible causes:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/055 - Connection Troubleshooting.png"
+  },
+  {
+    "global_index": 59,
+    "marp_class": "content",
+    "heading": "Authentication failed",
+    "body_markdown": "Check:\n\n- Username\n- Password\n- Authentication database\n- Authentication mechanism\n- Credential encoding\n- Atlas database-user configuration\n\nThe database user may have been created in `admin` even though the application accesses `training_store`.\n\nExample:\n\n```text\nmongodb://user@host/training_store?authSource=admin\n```",
+    "notes": "Check:"
+  },
+  {
+    "global_index": 60,
+    "marp_class": "split",
+    "heading": "Authorization failure",
+    "body_markdown": "Authentication succeeded, but the user lacks permission.\n\nInspect the current connection’s authenticated roles through appropriate administrative methods and grant only the required privilege.\n\nDo not solve every authorization error by assigning `root`.",
+    "notes": "Authentication succeeded, but the user lacks permission.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/032 - Authorization and Role-Based Access.png"
+  },
+  {
+    "global_index": 61,
+    "marp_class": "content",
+    "heading": "Slow query",
+    "body_markdown": "Run:\n\n```javascript\ndb.orders.find({\n  customerId: customerId\n}).sort({\n  orderedAt: -1\n}).explain(\"executionStats\")\n```\n\nCheck for:\n\n- `COLLSCAN`\n- Large `totalDocsExamined`\n- Large `totalKeysExamined`\n- Blocking sort\n- Low selectivity\n- Excessive result count",
+    "notes": "Run:"
+  },
+  {
+    "global_index": 62,
+    "marp_class": "content",
+    "heading": "Duplicate-key error",
+    "body_markdown": "Typical code:\n\n```text\nE11000\n```\n\nLikely causes:\n\n- Duplicate `_id`\n- Duplicate SKU\n- Duplicate email\n- Compound unique-index violation\n\nTreat expected uniqueness conflicts as business outcomes where appropriate:\n\n```text\n“This email is already registered.”\n```",
+    "notes": "Typical code:"
+  },
+  {
+    "global_index": 63,
+    "marp_class": "content",
+    "heading": "Duplicate-key error (cont.)",
+    "body_markdown": "Do not expose the raw database error to the user.",
+    "notes": "Do not expose the raw database error to the user."
+  },
+  {
+    "global_index": 64,
+    "marp_class": "content",
+    "heading": "Document-validation failure",
+    "body_markdown": "A failed schema rule may generate error code `121`.\n\nPossible causes:\n\n- Missing required field\n- Incorrect BSON type\n- Value outside allowed range\n- Invalid nested structure\n\nLog the validation details securely and return a safe application-level message.",
+    "notes": "A failed schema rule may generate error code `121`."
+  },
+  {
+    "global_index": 65,
+    "marp_class": "content",
+    "heading": "Write conflict or transient transaction error",
+    "body_markdown": "Applications using transactions should follow the driver’s supported retry pattern.\n\nAvoid blindly retrying every operation. A retry should be:\n\n- Supported for that error type\n- Bounded\n- Observable\n- Safe from duplicate side effects\n- Designed for idempotency where possible",
+    "notes": "Applications using transactions should follow the driver’s supported retry pattern."
+  },
+  {
+    "global_index": 66,
+    "marp_class": "split",
+    "heading": "Replication lag",
+    "body_markdown": "Check:\n\n```javascript\nrs.status()\n```\n\nPossible causes:\n\n- Slow secondary storage\n- Network delay\n- Heavy write volume\n- Long-running operations\n- Undersized oplog\n- Resource saturation",
+    "notes": "Check:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/042 - Replication vs. Backup.png"
+  },
+  {
+    "global_index": 67,
+    "marp_class": "content",
+    "heading": "No primary available",
+    "body_markdown": "Possible causes:\n\n- Election in progress\n- Loss of voting majority\n- Network partition\n- Misconfigured replica set\n- Multiple members unavailable\n\nCheck:\n\n```javascript\nrs.status()\ndb.hello()\n```",
+    "notes": "Possible causes:"
+  },
+  {
+    "global_index": 68,
+    "marp_class": "content",
+    "heading": "Sharded query contacts every shard",
+    "body_markdown": "Likely cause:\n\n- Query does not include an appropriate shard-key predicate.\n\nInvestigate:\n\n- Shard key\n- Query shape\n- Targeting information\n- Data distribution\n- Whether the workload has changed since shard-key selection",
+    "notes": "Likely cause:"
+  },
+  {
+    "global_index": 69,
+    "marp_class": "split",
+    "heading": "Return appropriate messages",
+    "body_markdown": "Internal log:\n\n```text\nMongoServerError: E11000 duplicate key error\ncollection: training_store.customers\nindex: uq_customers_email\n```\n\nUser-facing response:\n\n```text\nAn account already exists for that email address.\n```\n\nDo not expose:\n\n- Stack traces\n- Server hostnames\n- Database names unnecessarily\n- Connection strings\n- Credentials\n- Internal topology\n- Complete raw documents",
+    "notes": "Internal log:",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/018 - Use Appropriate BSON Types.png"
+  },
+  {
+    "global_index": 70,
+    "marp_class": "content",
+    "heading": "Use structured logging",
+    "body_markdown": "A useful log record may contain:\n\n```javascript\n{\n  event: \"order_query_failed\",\n  requestId: \"REQ-2026-1025\",\n  operation: \"findCustomerOrders\",\n  customerId: \"masked-or-authorized-value\",\n  durationMs: 2200,\n  errorCategory: \"database_timeout\",\n  occurredAt: \"2026-09-22T18:20:00Z\"\n}\n```\n\nAvoid logging credentials or unrestricted personal data.",
+    "notes": "A useful log record may contain:"
+  },
+  {
+    "global_index": 71,
+    "marp_class": "content",
+    "heading": "Use timeouts",
+    "body_markdown": "Database operations should not wait indefinitely.\n\nConfigure appropriate:\n\n- Server-selection timeout\n- Connection timeout\n- Socket timeout\n- Operation time limit\n- Transaction timeout\n- Application request timeout\n\nFor selected operations:\n\n```javascript\ndb.orders.find({\n  status: \"Processing\"\n}).maxTimeMS(3000)\n```\n\nTimeouts must be chosen according to the workload. Extremely low limits can create avoidable failures.",
+    "notes": "Database operations should not wait indefinitely."
+  },
+  {
+    "global_index": 72,
+    "marp_class": "content",
+    "heading": "Design idempotent operations",
+    "body_markdown": "A retried request should not unintentionally create duplicate business effects.\n\nUse:\n\n- Unique request keys\n- Unique order numbers\n- Upserts where semantically appropriate\n- Guarded state transitions\n- Idempotency records\n\nExample:\n\n```javascript\ndb.orders.updateOne(\n  {\n    orderNumber: \"ORD-2026-1002\",\n    status: \"Processing\"\n  },\n  {\n    $set: {\n      status: \"Shipped\"\n    },\n    $currentDate: {\n      shippedAt: true\n    }\n  }\n)\n```\n\nRunning it again does not rematch an already shipped order.",
+    "notes": "A retried request should not unintentionally create duplicate business effects."
+  },
+  {
+    "global_index": 73,
+    "marp_class": "content",
+    "heading": "Business requirement",
+    "body_markdown": "Create a sales report showing the top products for a selected date range.\n\nThe report must:\n\n- Include only `Shipped`, `Delivered` or `Completed` orders.\n- Include orders from September 2026.\n- Expand individual order items.\n- Group by product.\n- Calculate units sold.\n- Calculate sales revenue.\n- Count the number of contributing orders.\n- Sort by revenue.\n- Return the top ten products.",
+    "notes": "Create a sales report showing the top products for a selected date range."
+  },
+  {
+    "global_index": 74,
+    "marp_class": "content",
+    "heading": "Step 1: Verify the data range",
+    "body_markdown": "```javascript\ndb.orders.find(\n  {},\n  {\n    orderNumber: 1,\n    status: 1,\n    orderedAt: 1,\n    total: 1\n  }\n).sort({\n  orderedAt: 1\n})\n```\n\nConfirm that `orderedAt` is a BSON Date rather than a string.",
+    "notes": "Confirm that `orderedAt` is a BSON Date rather than a string."
+  },
+  {
+    "global_index": 75,
+    "marp_class": "content",
+    "heading": "Step 2: Construct the pipeline",
+    "body_markdown": "```javascript\nconst salesPipeline = [\n  {\n    $match: {\n      status: {\n        $in: [\n          \"Shipped\",\n          \"Delivered\",\n          \"Completed\"\n        ]\n      },\n\n      orderedAt: {\n        $gte: ISODate(\"2026-09-01T00:00:00Z\"),\n        $lt: ISODate(\"2026-10-01T00:00:00Z\")\n      }\n    }\n  },\n\n  {\n    $unwind: \"$items\"\n  },\n\n  {\n    $group: {\n      _id: {\n        productId: \"$items.productId\",\n        sku: \"$items.sku\",\n        productName: \"$items.productName\"\n      },\n```\n\n```javascript\n      unitsSold: {\n        $sum: \"$items.quantity\"\n      },\n\n      revenue: {\n        $sum: \"$items.lineTotal\"\n      },\n\n      orderIds: {\n        $addToSet: \"$_id\"\n      }\n    }\n  },\n\n  {\n    $project: {\n      _id: 0,\n      productId: \"$_id.productId\",\n      sku: \"$_id.sku\",\n      productName: \"$_id.productName\",\n      unitsSold: 1,\n      revenue: 1,\n\n      orderCount: {\n        $size: \"$orderIds\"\n      }\n    }\n  },\n```",
+    "notes": "Covers Step 2: Construct the pipeline."
+  },
+  {
+    "global_index": 76,
+    "marp_class": "content",
+    "heading": "Step 2: Construct the pipeline (cont.)",
+    "body_markdown": "```javascript\n  {\n    $sort: {\n      revenue: -1\n    }\n  },\n\n  {\n    $limit: 10\n  }\n];\n```\n\nRun it:\n\n```javascript\ndb.orders.aggregate(salesPipeline)\n```",
+    "notes": "Run it:"
+  },
+  {
+    "global_index": 77,
+    "marp_class": "content",
+    "heading": "Step 3: Explain the baseline",
+    "body_markdown": "```javascript\ndb.orders.explain(\n  \"executionStats\"\n).aggregate(salesPipeline)\n```\n\nRecord:\n\n```text\nWinning input stage:\nDocuments examined:\nKeys examined:\nDocuments returned by the initial match:\nExecution time:\nBlocking sort present:\n```\n\nOn a small classroom dataset, differences may be tiny. The important lesson is how the execution plan changes.",
+    "notes": "Record:"
+  },
+  {
+    "global_index": 78,
+    "marp_class": "content",
+    "heading": "Step 4: Identify the indexable pipeline stage",
+    "body_markdown": "The first stage is:\n\n```javascript\n{\n  $match: {\n    status: {\n      $in: [\n        \"Shipped\",\n        \"Delivered\",\n        \"Completed\"\n      ]\n    },\n    orderedAt: {\n      $gte: ISODate(\"2026-09-01T00:00:00Z\"),\n      $lt: ISODate(\"2026-10-01T00:00:00Z\")\n    }\n  }\n}\n```\n\nThe relevant fields are:\n\n```text\nstatus     → equality-style membership condition\norderedAt  → date range\n```\n\nCandidate compound index:",
+    "notes": "The first stage is:"
+  },
+  {
+    "global_index": 79,
+    "marp_class": "content",
+    "heading": "Step 4: Identify the indexable pipeline stage (cont.)",
+    "body_markdown": "```javascript\n{\n  status: 1,\n  orderedAt: 1\n}\n```",
+    "notes": "Covers Step 4: Identify the indexable pipeline stage."
+  },
+  {
+    "global_index": 80,
+    "marp_class": "content",
+    "heading": "Step 5: Create the index",
+    "body_markdown": "```javascript\ndb.orders.createIndex(\n  {\n    status: 1,\n    orderedAt: 1\n  },\n  {\n    name: \"idx_orders_status_orderedAt\"\n  }\n)\n```\n\nVerify:\n\n```javascript\ndb.orders.getIndexes()\n```",
+    "notes": "Verify:"
+  },
+  {
+    "global_index": 81,
+    "marp_class": "content",
+    "heading": "Step 6: Explain the tuned pipeline",
+    "body_markdown": "```javascript\ndb.orders.explain(\n  \"executionStats\"\n).aggregate(salesPipeline)\n```\n\nCompare with the baseline:\n\n| Metric             |  Before index |   After index |\n| -------------------- | --------------: | --------------: |\n| Collection scan    | Record result | Record result |\n| Index scan         | Record result | Record result |\n| Documents examined |  Record value |  Record value |\n| Keys examined      |  Record value |  Record value |\n| Documents matched  |  Record value |  Record value |\n| Execution time     |  Record value |  Record value |",
+    "notes": "Compare with the baseline:"
+  },
+  {
+    "global_index": 82,
+    "marp_class": "content",
+    "heading": "Step 6: Explain the tuned pipeline (cont.)",
+    "body_markdown": "Expected behavior on a sufficiently large and selective dataset:\n\n- `$match` can use the compound index.\n- Fewer unrelated order documents are examined.\n- Less data reaches `$unwind`.\n- Less data reaches `$group`.\n- Downstream processing becomes less expensive.\n\nThe index does not directly perform the `$group`; it reduces the input that the aggregation must group.",
+    "notes": "Expected behavior on a sufficiently large and selective dataset:"
+  },
+  {
+    "global_index": 83,
+    "marp_class": "content",
+    "heading": "Step 7: Test the field order",
+    "body_markdown": "Create an alternative index for controlled comparison:\n\n```javascript\ndb.orders.createIndex(\n  {\n    orderedAt: 1,\n    status: 1\n  },\n  {\n    name: \"idx_orders_orderedAt_status_test\"\n  }\n)\n```\n\nTest each index using `hint()`:\n\n```javascript\ndb.orders.explain(\n  \"executionStats\"\n).aggregate(\n  salesPipeline,\n  {\n    hint: \"idx_orders_status_orderedAt\"\n  }\n)\n```",
+    "notes": "Create an alternative index for controlled comparison:"
+  },
+  {
+    "global_index": 84,
+    "marp_class": "content",
+    "heading": "Step 7: Test the field order (cont.)",
+    "body_markdown": "```javascript\ndb.orders.explain(\n  \"executionStats\"\n).aggregate(\n  salesPipeline,\n  {\n    hint: \"idx_orders_orderedAt_status_test\"\n  }\n)\n```\n\nCompare:\n\n- Keys examined\n- Documents examined\n- Execution time\n- Index bounds\n- Behavior across different months and status distributions\n\nDo not keep both automatically. Retain the index that best supports the broader workload, not merely one isolated test.",
+    "notes": "Compare:"
+  },
+  {
+    "global_index": 85,
+    "marp_class": "content",
+    "heading": "Step 8: Add product-category analysis",
+    "body_markdown": "Join the current product record:\n\n```javascript\nconst categorySalesPipeline = [\n  {\n    $match: {\n      status: {\n        $in: [\n          \"Shipped\",\n          \"Delivered\",\n          \"Completed\"\n        ]\n      },\n\n      orderedAt: {\n        $gte: ISODate(\"2026-09-01T00:00:00Z\"),\n        $lt: ISODate(\"2026-10-01T00:00:00Z\")\n      }\n    }\n  },\n\n  {\n    $unwind: \"$items\"\n  },\n\n  {\n    $lookup: {\n      from: \"products\",\n      localField: \"items.productId\",\n      foreignField: \"_id\",\n      as: \"product\"\n    }\n  },\n```",
+    "notes": "Join the current product record:"
+  },
+  {
+    "global_index": 86,
+    "marp_class": "content",
+    "heading": "Step 8: Add product-category analysis (cont.)",
+    "body_markdown": "```javascript\n  {\n    $unwind: \"$product\"\n  },\n\n  {\n    $group: {\n      _id: \"$product.category\",\n\n      unitsSold: {\n        $sum: \"$items.quantity\"\n      },\n\n      revenue: {\n        $sum: \"$items.lineTotal\"\n      },\n\n      uniqueCustomers: {\n        $addToSet: \"$customerId\"\n      }\n    }\n  },\n\n  {\n    $project: {\n      _id: 0,\n      category: \"$_id\",\n      unitsSold: 1,\n      revenue: 1,\n```\n\n```javascript\n      customerCount: {\n        $size: \"$uniqueCustomers\"\n      }\n    }\n  },\n\n  {\n    $sort: {\n      revenue: -1\n    }\n  }\n];\n```",
+    "notes": "Covers Step 8: Add product-category analysis."
+  },
+  {
+    "global_index": 87,
+    "marp_class": "content",
+    "heading": "Step 8: Add product-category analysis (cont.)",
+    "body_markdown": "Run:\n\n```javascript\ndb.orders.aggregate(categorySalesPipeline)\n```\n\nThe foreign field used by `$lookup` is `products._id`, which already has an index by default.",
+    "notes": "Run:"
+  },
+  {
+    "global_index": 88,
+    "marp_class": "content",
+    "heading": "Step 9: Validate correctness",
+    "body_markdown": "Performance tuning must not change the report’s meaning.\n\nCheck:\n\n```javascript\ndb.orders.countDocuments({\n  status: {\n    $in: [\n      \"Shipped\",\n      \"Delivered\",\n      \"Completed\"\n    ]\n  },\n\n  orderedAt: {\n    $gte: ISODate(\"2026-09-01T00:00:00Z\"),\n    $lt: ISODate(\"2026-10-01T00:00:00Z\")\n  }\n})\n```\n\nValidate sample totals manually:\n\n```javascript\ndb.orders.find({\n  orderNumber: \"ORD-2026-1001\"\n})\n```\n\nConfirm:",
+    "notes": "Performance tuning must not change the report’s meaning."
+  },
+  {
+    "global_index": 89,
+    "marp_class": "content",
+    "heading": "Step 9: Validate correctness (cont.)",
+    "body_markdown": "- Included statuses are correct.\n- Date boundaries are correct.\n- Cancelled orders are excluded.\n- Quantities are not double-counted.\n- `lineTotal` uses a consistent numeric type.\n- Missing product matches are handled intentionally.\n- The report timezone matches the business requirement.",
+    "notes": "Covers Step 9: Validate correctness."
+  },
+  {
+    "global_index": 90,
+    "marp_class": "content",
+    "heading": "Step 10: Clean up the test-only index",
+    "body_markdown": "If testing shows the reverse-order index is unnecessary:\n\n```javascript\ndb.orders.dropIndex(\n  \"idx_orders_orderedAt_status_test\"\n)\n```\n\nKeep:\n\n```text\nidx_orders_status_orderedAt\n```\n\nonly if it supports an important workload and provides measurable value.",
+    "notes": "If testing shows the reverse-order index is unnecessary:"
+  },
+  {
+    "global_index": 91,
+    "marp_class": "split",
+    "heading": "Data model",
+    "body_markdown": "- Documents reflect access patterns.\n- Embedded arrays are bounded.\n- Historical snapshots are intentional.\n- Field names and BSON types are consistent.\n- Large documents have been evaluated.\n- Validation rules protect essential invariants.\n- Schema evolution has a migration strategy.",
+    "notes": "Covers Data model.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/064 - E-Commerce Production Readiness Review.png"
+  },
+  {
+    "global_index": 92,
+    "marp_class": "content",
+    "heading": "Queries",
+    "body_markdown": "- Results are filtered and bounded.\n- Pagination is implemented where required.\n- Queries use appropriate projection.\n- Array queries use `$elemMatch` where necessary.\n- Dates and timezones are handled consistently.\n- Expensive query shapes have been tested at realistic scale.",
+    "notes": "Covers Queries."
+  },
+  {
+    "global_index": 93,
+    "marp_class": "content",
+    "heading": "Indexes",
+    "body_markdown": "- Important query shapes have supporting indexes.\n- Compound field order has been validated.\n- Unique indexes enforce business rules.\n- Redundant and unused indexes are reviewed.\n- Write overhead has been measured.\n- Explain plans have been captured before and after tuning.",
+    "notes": "Covers Indexes."
+  },
+  {
+    "global_index": 94,
+    "marp_class": "content",
+    "heading": "Aggregation",
+    "body_markdown": "- Selective `$match` stages appear early.\n- `$unwind` expansion is controlled.\n- `$lookup` fields are indexed appropriately.\n- Grouping cardinality is understood.\n- Large sorts are monitored.\n- Output is verified for correctness.",
+    "notes": "Covers Aggregation."
+  },
+  {
+    "global_index": 95,
+    "marp_class": "split",
+    "heading": "Security",
+    "body_markdown": "- Authentication is enabled.\n- Least-privilege roles are used.\n- TLS protects network traffic.\n- Credentials are stored securely.\n- Network exposure is restricted.\n- Sensitive fields are protected appropriately.\n- Security activity is monitored.\n- Dependencies and MongoDB versions are patched according to policy.",
+    "notes": "Covers Security.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/034 - Network Security.png"
+  },
+  {
+    "global_index": 96,
+    "marp_class": "content",
+    "heading": "Availability and recovery",
+    "body_markdown": "- Production deployments use appropriate replication.\n- Clients use topology-aware connection strings.\n- Read and write concerns match business requirements.\n- Backups are independent from replication.\n- Restore procedures are tested.\n- RPO and RTO are documented.\n- Failover behavior is tested.",
+    "notes": "Covers Availability and recovery."
+  },
+  {
+    "global_index": 97,
+    "marp_class": "split",
+    "heading": "Operations",
+    "body_markdown": "- Metrics and alerts are configured.\n- Slow queries are monitored.\n- Logs are centralized and protected.\n- Capacity trends are reviewed.\n- Replication lag is monitored.\n- Disk space alerts are configured.\n- Deployment changes are documented.\n- Operational runbooks exist.",
+    "notes": "Covers Operations.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/061 - Operational Runbooks.png"
+  },
+  {
+    "global_index": 98,
+    "marp_class": "content",
+    "heading": "Course Wrap-Up",
+    "body_markdown": "The course progression can be summarized as follows:\n\n| Module                      | Core capability                          |\n| ------------------------------ | ------------------------------------------- |\n| 1. Introduction to NoSQL    | Select an appropriate database model     |\n| 2. Installation and Setup   | Establish and verify MongoDB             |\n| 3. Data Modeling            | Design documents around access patterns  |\n| 4. Query Language           | Retrieve and manipulate documents        |\n| 5. Aggregation              | Transform data into analytical results   |\n| 6. Indexing                 | Improve query performance using evidence |\n| 7. Replication and Sharding | Design for availability and scale        |\n| 8. Best Practices           | Operate MongoDB securely and reliably    |",
+    "notes": "The course progression can be summarized as follows:"
+  },
+  {
+    "global_index": 99,
+    "marp_class": "content",
+    "heading": "Course Wrap-Up (cont.)",
+    "body_markdown": "The most important principles are:\n\n1. Model around how the application uses data.\n2. Embed bounded data that belongs together.\n3. Reference shared, independent or unbounded data.\n4. Keep field names and data types consistent.\n5. Design indexes around real query shapes.\n6. Measure performance before and after optimization.\n7. Filter early in aggregation pipelines.\n8. Apply authentication, authorization, TLS and network restrictions.\n9. Treat replication, sharding and backups as different capabilities.\n10. Troubleshoot from evidence instead of assumptions.",
+    "notes": "The most important principles are:"
+  },
+  {
+    "global_index": 100,
+    "marp_class": "content",
+    "heading": "Question-and-Answer Discussion Prompts",
+    "body_markdown": "Use these prompts to close the course:\n\n1. When would you choose MongoDB instead of a relational database?\n2. When should related data be embedded?\n3. When should related data be referenced?\n4. Why is an unbounded array dangerous?\n5. What is the difference between `find()` and aggregation?\n6. How does a compound-index prefix affect query support?\n7. Why can too many indexes harm performance?\n8. What does `COLLSCAN` mean?\n9. How are replication and sharding different?\n10. Why is replication not a backup?\n11. What makes a strong shard key?\n12. How would you diagnose a suddenly slow API endpoint?\n13. Which security controls are essential before production?\n14. How would you prevent duplicate order processing?\n15. Which metrics would you monitor after deployment?",
+    "notes": "Use these prompts to close the course:"
+  },
+  {
+    "global_index": 101,
+    "marp_class": "content",
+    "heading": "Question-and-Answer Discussion Prompts (cont.)",
+    "body_markdown": "After completing the module, learners should be able to review a MongoDB application from schema, query, performance, security and operational perspectives—and justify each recommendation with observable evidence.",
+    "notes": "After completing the module, learners should be able to review a MongoDB application from schema, query, performance, security and operational perspectives—and justify each recommendation with..."
+  },
+  {
+    "global_index": 102,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.1 — Review and Improve a Data Model",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Start from mixed prices, unbounded reviews, string dates, and a password hash on the document\n- Correct types, split reviews, standardize names, add validation, protect secrets\n- Keep the catalog and order access patterns fast\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/41-demo-model.svg\" alt=\"Review and Improve a Data Model\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.1 — Review and Improve a Data Model.\n\nThe slide title is: Demo 8.1 — Review and Improve a Data Model.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Start from mixed prices, unbounded reviews, string dates, and a password hash on the document.\n\nBullet 3 on the slide: Correct types, split reviews, standardize names, add validation, protect secrets.\n\nBullet 4 on the slide: Keep the catalog and order access patterns fast.\n\nThe figure on this slide is titled: Review and Improve a Data Model."
+  },
+  {
+    "global_index": 103,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.1 — Review a Document Model",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Score an order-shaped document and rewrite the boundary, snapshots, and first validator.\n- **Lab guide:** [`Exercise 8.1`](../slide-exercises/module-08/exercise-8.1-review-a-document-model.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/05-document-boundary.svg\" alt=\"Order versus customer boundary\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.1 — Review a Document Model.\n\nThe slide title is: Exercise 8.1 — Review a Document Model.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Score an order-shaped document and rewrite the boundary, snapshots, and first validator.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.1](../slide-exercises/module-08/exercise-8.1-review-a-document-model.md).\n\nThe figure on this slide is titled: Order versus customer boundary."
+  },
+  {
+    "global_index": 104,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.1 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.1`](../slide-exercises/module-08/exercise-8.1-review-a-document-model.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Score the document**\n- **Do:** Review this order-shaped document and mark each area as strong, risky, or missing: access patterns, ownership, duplication, BSON types, array growth, historical snapshots, sensitive fields, and validation. { _id: ObjectI\n- **Expected:** Risky/missing: price as string, date as string, unbounded `notes`, live customer fields (email, loyalty, password hash) instead of a snapshot plus a reference, \n\n**Step 2 — Rewrite the boundary**\n- **Do:** Write the corrected document boundary: what stays on the order, what is referenced, and one validation rule you would add first.\n- **Expected:** Order keeps orderNumber, customerId, purchase-time name/address/price snapshots, items, statuses, Decimal128 total, Date createdAt. Customer master stays in cus",
+    "notes": "We are starting Exercise 8.1 — Review a Document Model. We have about 15 min for this lab.\n\nEvaluate an order-shaped document for access patterns, snapshots, types, growth, sensitive data, and validation.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.1-review-a-document-model.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Score the document.\n\nStep 2 — Rewrite the boundary.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.1 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.1](../slide-exercises/module-08/exercise-8.1-review-a-document-model.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Review this order-shaped document and mark each area as strong, risky, or missing: access patterns, ownership, duplication, BSON types, array growth, historical snapshots, sensitive fields, and validation. { _id: ObjectI.\n\nBullet 2 on the slide: Expected: Risky/missing: price as string, date as string, unbounded notes, live customer fields (email, loyalty, password hash) instead of a snapshot plus a reference,.\n\nBullet 3 on the slide: Do: Write the corrected document boundary: what stays on the order, what is referenced, and one validation rule you would add first.\n\nBullet 4 on the slide: Expected: Order keeps orderNumber, customerId, purchase-time name/address/price snapshots, items, statuses, Decimal128 total, Date createdAt. Customer master stays in cus."
+  },
+  {
+    "global_index": 105,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.2 — Find the Schema Anti-Patterns",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Name seven anti-patterns on a messy product document and sketch the repair.\n- **Lab guide:** [`Exercise 8.2`](../slide-exercises/module-08/exercise-8.2-find-the-schema-anti-patterns.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/10-anti-patterns.svg\" alt=\"Schema anti-patterns\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.2 — Find the Schema Anti-Patterns.\n\nThe slide title is: Exercise 8.2 — Find the Schema Anti-Patterns.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Name seven anti-patterns on a messy product document and sketch the repair.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.2](../slide-exercises/module-08/exercise-8.2-find-the-schema-anti-patterns.md).\n\nThe figure on this slide is titled: Schema anti-patterns."
+  },
+  {
+    "global_index": 106,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.2 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.2`](../slide-exercises/module-08/exercise-8.2-find-the-schema-anti-patterns.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Name the anti-patterns**\n- **Do:** On the product document below, list every anti-pattern from the module list. { Product_Name: \"Trail shoe\", productPrice: \"89.99\", details: { catalog: { store: { web: { active: \"yes\" } } } }, customer: { email: \"aisha@exa\n- **Expected:** Unbounded reviews; price as text; mixed names (`Product_Name` vs `productPrice`); unnecessary nesting; live customer data on a product; missing sku/category/Dec\n\n**Step 2 — Corrected sketch**\n- **Do:** Sketch the replacement: product core fields, where reviews live, and how customer data is removed.\n- **Expected:** products: sku, name, category, Decimal128 price, Boolean active, Date updatedAt, bounded attributes. reviews collection keyed by productId. No customer object o",
+    "notes": "We are starting Exercise 8.2 — Find the Schema Anti-Patterns. We have about 15 min for this lab.\n\nIdentify unbounded arrays, textual prices, inconsistent names, and related anti-patterns, then sketch a repair.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.2-find-the-schema-anti-patterns.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Name the anti-patterns.\n\nStep 2 — Corrected sketch.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.2 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.2](../slide-exercises/module-08/exercise-8.2-find-the-schema-anti-patterns.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: On the product document below, list every anti-pattern from the module list. { Product_Name: \"Trail shoe\", productPrice: \"89.99\", details: { catalog: { store: { web: { active: \"yes\" } } } }, customer: { email: \"aisha@exa.\n\nBullet 2 on the slide: Expected: Unbounded reviews; price as text; mixed names (Product_Name vs productPrice); unnecessary nesting; live customer data on a product; missing sku/category/Dec.\n\nBullet 3 on the slide: Do: Sketch the replacement: product core fields, where reviews live, and how customer data is removed.\n\nBullet 4 on the slide: Expected: products: sku, name, category, Decimal128 price, Boolean active, Date updatedAt, bounded attributes. reviews collection keyed by productId. No customer object o."
+  },
+  {
+    "global_index": 107,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.2 — Diagnose a Slow Query",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Capture the query → `explain(\"executionStats\")`\n- Spot COLLSCAN or weak scanning\n- Fix filter, sort, projection; add an index; compare examined vs returned\n- Discuss write and storage cost\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/22-explain.svg\" alt=\"Diagnose a Slow Query\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.2 — Diagnose a Slow Query.\n\nThe slide title is: Demo 8.2 — Diagnose a Slow Query.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Capture the query → explain(\"executionStats\").\n\nBullet 3 on the slide: Spot COLLSCAN or weak scanning.\n\nBullet 4 on the slide: Fix filter, sort, projection; add an index; compare examined vs returned.\n\nBullet 5 on the slide: Discuss write and storage cost.\n\nThe figure on this slide is titled: Diagnose a Slow Query."
+  },
+  {
+    "global_index": 108,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.3 — Review a Query and Projection",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Rewrite find({}) into a selective, projected, sorted, limited query and name an ESR index.\n- **Lab guide:** [`Exercise 8.3`](../slide-exercises/module-08/exercise-8.3-review-a-query-and-projection.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/11-selective-filter.svg\" alt=\"Selective query rewrite\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.3 — Review a Query and Projection.\n\nThe slide title is: Exercise 8.3 — Review a Query and Projection.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Rewrite find({}) into a selective, projected, sorted, limited query and name an ESR index.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.3](../slide-exercises/module-08/exercise-8.3-review-a-query-and-projection.md).\n\nThe figure on this slide is titled: Selective query rewrite."
+  },
+  {
+    "global_index": 109,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.3 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.3`](../slide-exercises/module-08/exercise-8.3-review-a-query-and-projection.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Rewrite the query**\n- **Do:** The application only needs C101’s paid orders, newest first, ten at a time, showing orderNumber, fulfillmentStatus, total, and createdAt. Rewrite: db.orders.find({})\n- **Expected:** Filter on customerId + paymentStatus PAID; projection of the four fields (and usually `_id: 0`); `.sort({ createdAt: -1 })`; `.limit(10)`.\n\n**Step 2 — Name a candidate index**\n- **Do:** Write one compound index that supports the filter and sort. Label equality vs sort fields.\n- **Expected:** `{ customerId: 1, paymentStatus: 1, createdAt: -1 }` — equality, equality, sort. Do not lead with createdAt.",
+    "notes": "We are starting Exercise 8.3 — Review a Query and Projection. We have about 15 min for this lab.\n\nRewrite a broad find into a selective, projected, sorted, limited query with an ESR index.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.3-review-a-query-and-projection.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Rewrite the query.\n\nStep 2 — Name a candidate index.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.3 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.3](../slide-exercises/module-08/exercise-8.3-review-a-query-and-projection.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: The application only needs C101’s paid orders, newest first, ten at a time, showing orderNumber, fulfillmentStatus, total, and createdAt. Rewrite: db.orders.find({}).\n\nBullet 2 on the slide: Expected: Filter on customerId + paymentStatus PAID; projection of the four fields (and usually _id: 0); .sort({ createdAt: -1 }); .limit(10).\n\nBullet 3 on the slide: Do: Write one compound index that supports the filter and sort. Label equality vs sort fields.\n\nBullet 4 on the slide: Expected: { customerId: 1, paymentStatus: 1, createdAt: -1 } — equality, equality, sort. Do not lead with createdAt."
+  },
+  {
+    "global_index": 110,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.3 — Tune an Aggregation Pipeline",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Start with `$lookup` → `$unwind` → `$match` → `$group` → `$sort`\n- Aim for `$match` → `$project` → (maybe lookup) → controlled unwind → `$group` → `$sort`\n- Business logic decides the exact order\n- Measure before and after\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/15-early-match.svg\" alt=\"Tune an Aggregation Pipeline\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.3 — Tune an Aggregation Pipeline.\n\nThe slide title is: Demo 8.3 — Tune an Aggregation Pipeline.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Start with $lookup → $unwind → $match → $group → $sort.\n\nBullet 3 on the slide: Aim for $match → $project → (maybe lookup) → controlled unwind → $group → $sort.\n\nBullet 4 on the slide: Business logic decides the exact order.\n\nBullet 5 on the slide: Measure before and after.\n\nThe figure on this slide is titled: Tune an Aggregation Pipeline."
+  },
+  {
+    "global_index": 111,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.4 — Optimize an Aggregation Pipeline",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Name defects in a lookup-first pipeline and propose a safer stage order that does not double-count.\n- **Lab guide:** [`Exercise 8.4`](../slide-exercises/module-08/exercise-8.4-optimize-an-aggregation-pipeline.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/16-unwind.svg\" alt=\"Unwind expansion\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.4 — Optimize an Aggregation Pipeline.\n\nThe slide title is: Exercise 8.4 — Optimize an Aggregation Pipeline.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Name defects in a lookup-first pipeline and propose a safer stage order that does not double-count.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.4](../slide-exercises/module-08/exercise-8.4-optimize-an-aggregation-pipeline.md).\n\nThe figure on this slide is titled: Unwind expansion."
+  },
+  {
+    "global_index": 112,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.4 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.4`](../slide-exercises/module-08/exercise-8.4-optimize-an-aggregation-pipeline.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Name the defects**\n- **Do:** The pipeline runs `$lookup` customers, then `$unwind` items, then `$match` PAID, then `$sort` by date, then `$group` summing `total`. List what is wrong and why `$group` after `$unwind` can over-count revenue.\n- **Expected:** Lookup and unwind happen before filtering; unused customer fields travel the pipeline; sort before the final metric is wasted work; summing parent `total` after\n\n**Step 2 — Propose a safer order**\n- **Do:** Write a conceptual stage order that preserves paid-order monthly revenue and unique customers. State where `$unwind` is allowed.\n- **Expected:** `$match` PAID (and date window if any) → `$project` needed fields → `$set` month → group for order-level metrics first, or unwind only to sum line quantities. `",
+    "notes": "We are starting Exercise 8.4 — Optimize an Aggregation Pipeline. We have about 20 min for this lab.\n\nReorder a lookup-first pipeline and avoid double-counting parent totals after $unwind.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.4-optimize-an-aggregation-pipeline.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Name the defects.\n\nStep 2 — Propose a safer order.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.4 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.4](../slide-exercises/module-08/exercise-8.4-optimize-an-aggregation-pipeline.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: The pipeline runs $lookup customers, then $unwind items, then $match PAID, then $sort by date, then $group summing total. List what is wrong and why $group after $unwind can over-count revenue.\n\nBullet 2 on the slide: Expected: Lookup and unwind happen before filtering; unused customer fields travel the pipeline; sort before the final metric is wasted work; summing parent total after.\n\nBullet 3 on the slide: Do: Write a conceptual stage order that preserves paid-order monthly revenue and unique customers. State where $unwind is allowed.\n\nBullet 4 on the slide: Expected: $match PAID (and date window if any) → $project needed fields → $set month → group for order-level metrics first, or unwind only to sum line quantities. `."
+  },
+  {
+    "global_index": 113,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.5 — Rationalize an Index Portfolio",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Map overlapping category indexes, low-selectivity `active`, and a hide-then-monitor plan.\n- **Lab guide:** [`Exercise 8.5`](../slide-exercises/module-08/exercise-8.5-rationalize-an-index-portfolio.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/21-redundant.svg\" alt=\"Overlapping category indexes\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.5 — Rationalize an Index Portfolio.\n\nThe slide title is: Exercise 8.5 — Rationalize an Index Portfolio.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Map overlapping category indexes, low-selectivity active, and a hide-then-monitor plan.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.5](../slide-exercises/module-08/exercise-8.5-rationalize-an-index-portfolio.md).\n\nThe figure on this slide is titled: Overlapping category indexes."
+  },
+  {
+    "global_index": 114,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.5 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.5`](../slide-exercises/module-08/exercise-8.5-rationalize-an-index-portfolio.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Map overlap**\n- **Do:** Given these indexes, mark which prefixes overlap and which queries each can support: { category: 1 } { category: 1, price: 1 } { category: 1, price: 1, name: 1 } { active: 1 } { category: 1, active: 1, price: 1 }\n- **Expected:** The three category+price variants overlap; `{ category: 1 }` is a prefix of the others. `{ active: 1 }` is low-selectivity and does not overlap those prefixes. \n\n**Step 2 — Safe testing plan**\n- **Do:** Write the sequence before dropping any index: workload review, explain, hide, monitor, drop with rollback. Name one index you would not hide on appearance alone.\n- **Expected:** Hide `{ category: 1 }` only after catalog and reporting explains still use a remaining compound index. Do not hide `{ category: 1, active: 1, price: 1 }` withou",
+    "notes": "We are starting Exercise 8.5 — Rationalize an Index Portfolio. We have about 20 min for this lab.\n\nMap overlapping prefixes, low-selectivity keys, and a hide-then-monitor removal plan.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.5-rationalize-an-index-portfolio.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Map overlap.\n\nStep 2 — Safe testing plan.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.5 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.5](../slide-exercises/module-08/exercise-8.5-rationalize-an-index-portfolio.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Given these indexes, mark which prefixes overlap and which queries each can support: { category: 1 } { category: 1, price: 1 } { category: 1, price: 1, name: 1 } { active: 1 } { category: 1, active: 1, price: 1 }.\n\nBullet 2 on the slide: Expected: The three category+price variants overlap; { category: 1 } is a prefix of the others. { active: 1 } is low-selectivity and does not overlap those prefixes.\n\nBullet 3 on the slide: Do: Write the sequence before dropping any index: workload review, explain, hide, monitor, drop with rollback. Name one index you would not hide on appearance alone.\n\nBullet 4 on the slide: Expected: Hide { category: 1 } only after catalog and reporting explains still use a remaining compound index. Do not hide { category: 1, active: 1, price: 1 } withou."
+  },
+  {
+    "global_index": 115,
+    "marp_class": "content fit-sm",
+    "heading": "Demo 8.4 — Apply Collection Validation",
+    "body_markdown": "- **Time:** 15 min\n- Require orderNumber, customerId, items, statuses, decimal total, createdAt\n- Test valid insert, missing field, wrong type, illegal status\n- Prefer `training_store_ops` so `orders` stays loadable",
+    "notes": "This slide lists key points under Demo 8.4 — Apply Collection Validation.\n\nThe slide title is: Demo 8.4 — Apply Collection Validation.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Require orderNumber, customerId, items, statuses, decimal total, createdAt.\n\nBullet 3 on the slide: Test valid insert, missing field, wrong type, illegal status.\n\nBullet 4 on the slide: Prefer training_store_ops so orders stays loadable."
+  },
+  {
+    "global_index": 116,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.5 — Demonstrate Role-Based Access",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Instructor-controlled environment only\n- App user: readWrite data; reporter: read; monitor: metrics; admin: separate identity\n- Never display real credentials\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/24-least-privilege.svg\" alt=\"Demonstrate Role-Based Access\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.5 — Demonstrate Role-Based Access.\n\nThe slide title is: Demo 8.5 — Demonstrate Role-Based Access.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Instructor-controlled environment only.\n\nBullet 3 on the slide: App user: readWrite data; reporter: read; monitor: metrics; admin: separate identity.\n\nBullet 4 on the slide: Never display real credentials.\n\nThe figure on this slide is titled: Demonstrate Role-Based Access."
+  },
+  {
+    "global_index": 117,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.6 — Identify an Unsafe Configuration",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 10 min\n- Public bind, auth disabled, shared admin, no TLS, no backup, no monitoring\n- Participants name risks and controls\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/28-sec-anti.svg\" alt=\"Identify an Unsafe Configuration\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.6 — Identify an Unsafe Configuration.\n\nThe slide title is: Demo 8.6 — Identify an Unsafe Configuration.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 10 min.\n\nBullet 2 on the slide: Public bind, auth disabled, shared admin, no TLS, no backup, no monitoring.\n\nBullet 3 on the slide: Participants name risks and controls.\n\nThe figure on this slide is titled: Identify an Unsafe Configuration."
+  },
+  {
+    "global_index": 118,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.6 — Design Least-Privilege Roles",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Permit/deny matrix for app, reporting, support, monitoring, backup, and DBA identities.\n- **Lab guide:** [`Exercise 8.6`](../slide-exercises/module-08/exercise-8.6-design-least-privilege-roles.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/24-least-privilege.svg\" alt=\"Least-privilege roles\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.6 — Design Least-Privilege Roles.\n\nThe slide title is: Exercise 8.6 — Design Least-Privilege Roles.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Permit/deny matrix for app, reporting, support, monitoring, backup, and DBA identities.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.6](../slide-exercises/module-08/exercise-8.6-design-least-privilege-roles.md).\n\nThe figure on this slide is titled: Least-privilege roles."
+  },
+  {
+    "global_index": 119,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.6 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.6`](../slide-exercises/module-08/exercise-8.6-design-least-privilege-roles.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Fill the permission matrix**\n- **Do:** For each identity — application service, reporting service, support engineer, monitoring service, backup service, database administrator — list one permitted operation and one prohibited operation on `training_store`.\n- **Expected:** App: read/write app collections, not userAdmin. Reporting: read approved collections, not update. Support: read (maybe limited PII), not drop. Monitoring: clust\n\n**Step 2 — Call out the anti-pattern**\n- **Do:** Write two sentences on why the application must not use a cluster-administrator account, even in training-like environments that later become production.\n- **Expected:** A stolen app credential would inherit every privilege. Least privilege limits blast radius and makes audit trails meaningful.",
+    "notes": "We are starting Exercise 8.6 — Design Least-Privilege Roles. We have about 20 min for this lab.\n\nDefine permit and deny operations for application, reporting, support, monitoring, backup, and DBA identities.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.6-design-least-privilege-roles.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Fill the permission matrix.\n\nStep 2 — Call out the anti-pattern.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.6 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.6](../slide-exercises/module-08/exercise-8.6-design-least-privilege-roles.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: For each identity — application service, reporting service, support engineer, monitoring service, backup service, database administrator — list one permitted operation and one prohibited operation on training_store.\n\nBullet 2 on the slide: Expected: App: read/write app collections, not userAdmin. Reporting: read approved collections, not update. Support: read (maybe limited PII), not drop. Monitoring: clust.\n\nBullet 3 on the slide: Do: Write two sentences on why the application must not use a cluster-administrator account, even in training-like environments that later become production.\n\nBullet 4 on the slide: Expected: A stolen app credential would inherit every privilege. Least privilege limits blast radius and makes audit trails meaningful."
+  },
+  {
+    "global_index": 120,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.7 — Identify Security Risks",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Rank six fictional risks and attach one mitigation to each.\n- **Lab guide:** [`Exercise 8.7`](../slide-exercises/module-08/exercise-8.7-identify-security-risks.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/28-sec-anti.svg\" alt=\"Security anti-patterns\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.7 — Identify Security Risks.\n\nThe slide title is: Exercise 8.7 — Identify Security Risks.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Rank six fictional risks and attach one mitigation to each.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.7](../slide-exercises/module-08/exercise-8.7-identify-security-risks.md).\n\nThe figure on this slide is titled: Security anti-patterns."
+  },
+  {
+    "global_index": 121,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.7 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.7`](../slide-exercises/module-08/exercise-8.7-identify-security-risks.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Rank the six risks**\n- **Do:** Rank these from most urgent to least: public database endpoint; shared administrator account; plaintext URI in source control; no TLS; unprotected backups; production data copied to development. Give a one-line business \n- **Expected:** Typical top three: public endpoint (internet attack surface), no TLS (credential and data interception), secrets in source control (credential leak). Shared adm\n\n**Step 2 — Propose mitigations**\n- **Do:** For each of the six, write one concrete control (network, identity, encryption, secret storage, or data handling).\n- **Expected:** Private network + allowlist; named accounts + MFA/rotation; secret manager; TLS with validation; encrypted backups with access control; masked or synthetic non-",
+    "notes": "We are starting Exercise 8.7 — Identify Security Risks. We have about 15 min for this lab.\n\nRank public exposure, shared admin, secrets in git, missing TLS, open backups, and prod-in-dev, then mitigate.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.7-identify-security-risks.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Rank the six risks.\n\nStep 2 — Propose mitigations.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.7 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.7](../slide-exercises/module-08/exercise-8.7-identify-security-risks.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Rank these from most urgent to least: public database endpoint; shared administrator account; plaintext URI in source control; no TLS; unprotected backups; production data copied to development. Give a one-line business.\n\nBullet 2 on the slide: Expected: Typical top three: public endpoint (internet attack surface), no TLS (credential and data interception), secrets in source control (credential leak). Shared adm.\n\nBullet 3 on the slide: Do: For each of the six, write one concrete control (network, identity, encryption, secret storage, or data handling).\n\nBullet 4 on the slide: Expected: Private network + allowlist; named accounts + MFA/rotation; secret manager; TLS with validation; encrypted backups with access control; masked or synthetic non-."
+  },
+  {
+    "global_index": 122,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.9 — Test a Backup and Restore Workflow",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Known test data → backup → change data → restore to an isolated target\n- Validate counts, samples, indexes, access, duration\n- Disposable environment only\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/31-restore-test.svg\" alt=\"Test a Backup and Restore Workflow\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.9 — Test a Backup and Restore Workflow.\n\nThe slide title is: Demo 8.9 — Test a Backup and Restore Workflow.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Known test data → backup → change data → restore to an isolated target.\n\nBullet 3 on the slide: Validate counts, samples, indexes, access, duration.\n\nBullet 4 on the slide: Disposable environment only.\n\nThe figure on this slide is titled: Test a Backup and Restore Workflow."
+  },
+  {
+    "global_index": 123,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.8 — Define RPO and RTO",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Set RPO, RTO, frequency, method, and validation for catalog, customers, orders, payments, and reviews.\n- **Lab guide:** [`Exercise 8.8`](../slide-exercises/module-08/exercise-8.8-define-rpo-and-rto.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/30-rpo-rto.svg\" alt=\"RPO and RTO\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.8 — Define RPO and RTO.\n\nThe slide title is: Exercise 8.8 — Define RPO and RTO.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Set RPO, RTO, frequency, method, and validation for catalog, customers, orders, payments, and reviews.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.8](../slide-exercises/module-08/exercise-8.8-define-rpo-and-rto.md).\n\nThe figure on this slide is titled: RPO and RTO."
+  },
+  {
+    "global_index": 124,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.8 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.8`](../slide-exercises/module-08/exercise-8.8-define-rpo-and-rto.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Assign objectives**\n- **Do:** For product catalog, customer profiles, orders, payments, and reviews, write RPO, RTO, and a backup frequency that could meet the RPO. Use the store as a small retailer, not a global bank.\n- **Expected:** Payments and orders typically get the tightest RPO (minutes) and tested point-in-time recovery. Catalog can often tolerate a longer RPO. Reviews are usually the\n\n**Step 2 — Name validation**\n- **Do:** For orders, write how you would prove a restore: counts, sample order numbers, indexes, and a checkout read.\n- **Expected:** Compare `countDocuments` to the pre-restore note; find O5001 and a paid total; `getIndexes()`; application can read an order. Backup success alone is not enough",
+    "notes": "We are starting Exercise 8.8 — Define RPO and RTO. We have about 15 min for this lab.\n\nSet recovery objectives, backup frequency, method, and validation for catalog, customers, orders, payments, and reviews.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.8-define-rpo-and-rto.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Assign objectives.\n\nStep 2 — Name validation.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.8 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.8](../slide-exercises/module-08/exercise-8.8-define-rpo-and-rto.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: For product catalog, customer profiles, orders, payments, and reviews, write RPO, RTO, and a backup frequency that could meet the RPO. Use the store as a small retailer, not a global bank.\n\nBullet 2 on the slide: Expected: Payments and orders typically get the tightest RPO (minutes) and tested point-in-time recovery. Catalog can often tolerate a longer RPO. Reviews are usually the.\n\nBullet 3 on the slide: Do: For orders, write how you would prove a restore: counts, sample order numbers, indexes, and a checkout read.\n\nBullet 4 on the slide: Expected: Compare countDocuments to the pre-restore note; find O5001 and a paid total; getIndexes(); application can read an order. Backup success alone is not enough."
+  },
+  {
+    "global_index": 125,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.7 — Inspect Health and Performance Metrics",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Ops rate, query latency, connections, CPU, memory, disk, lag, storage, slow queries\n- Correlate with a simulated load bump\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/32-monitor.svg\" alt=\"Inspect Health and Performance Metrics\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.7 — Inspect Health and Performance Metrics.\n\nThe slide title is: Demo 8.7 — Inspect Health and Performance Metrics.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Ops rate, query latency, connections, CPU, memory, disk, lag, storage, slow queries.\n\nBullet 3 on the slide: Correlate with a simulated load bump.\n\nThe figure on this slide is titled: Inspect Health and Performance Metrics."
+  },
+  {
+    "global_index": 126,
+    "marp_class": "content fit-sm",
+    "heading": "Demo 8.8 — Read and Correlate MongoDB Logs",
+    "body_markdown": "- **Time:** 15 min\n- Trace connection failure, auth failure, slow query, election, replication and storage warnings\n- Align timestamps with the application",
+    "notes": "This slide lists key points under Demo 8.8 — Read and Correlate MongoDB Logs.\n\nThe slide title is: Demo 8.8 — Read and Correlate MongoDB Logs.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Trace connection failure, auth failure, slow query, election, replication and storage warnings.\n\nBullet 3 on the slide: Align timestamps with the application."
+  },
+  {
+    "global_index": 127,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.9 — Design a Monitoring Dashboard",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Choose at most twelve on-call tiles, each with a purpose question, and drop two vanity metrics.\n- **Lab guide:** [`Exercise 8.9`](../slide-exercises/module-08/exercise-8.9-design-a-monitoring-dashboard.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/32-monitor.svg\" alt=\"Dashboard questions\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.9 — Design a Monitoring Dashboard.\n\nThe slide title is: Exercise 8.9 — Design a Monitoring Dashboard.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Choose at most twelve on-call tiles, each with a purpose question, and drop two vanity metrics.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.9](../slide-exercises/module-08/exercise-8.9-design-a-monitoring-dashboard.md).\n\nThe figure on this slide is titled: Dashboard questions."
+  },
+  {
+    "global_index": 128,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.9 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.9`](../slide-exercises/module-08/exercise-8.9-design-a-monitoring-dashboard.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Pick twelve tiles**\n- **Do:** Choose at most twelve dashboard tiles that a weekday on-call would actually use. For each, write the metric and the question it answers. Reject vanity metrics.\n- **Expected:** Examples: primary/alive, request latency p99, slow ops, CPU, disk %, connections vs limit, replication lag, oplog window, targeted vs scatter (if sharded), back\n\n**Step 2 — Drop two candidates**\n- **Do:** Name two metrics you would leave off the primary dashboard and why.\n- **Expected:** Per-collection document counts or raw opcounters without a baseline are noise. Shard-balancer internals may belong on a secondary view unless the cluster is sha",
+    "notes": "We are starting Exercise 8.9 — Design a Monitoring Dashboard. We have about 20 min for this lab.\n\nSelect essential on-call metrics with a purpose for each tile and drop vanity signals.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.9-design-a-monitoring-dashboard.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Pick twelve tiles.\n\nStep 2 — Drop two candidates.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.9 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.9](../slide-exercises/module-08/exercise-8.9-design-a-monitoring-dashboard.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Choose at most twelve dashboard tiles that a weekday on-call would actually use. For each, write the metric and the question it answers. Reject vanity metrics.\n\nBullet 2 on the slide: Expected: Examples: primary/alive, request latency p99, slow ops, CPU, disk %, connections vs limit, replication lag, oplog window, targeted vs scatter (if sharded), back.\n\nBullet 3 on the slide: Do: Name two metrics you would leave off the primary dashboard and why.\n\nBullet 4 on the slide: Expected: Per-collection document counts or raw opcounters without a baseline are noise. Shard-balancer internals may belong on a secondary view unless the cluster is sha."
+  },
+  {
+    "global_index": 129,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.10 — Set Alert Priorities",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 15 min\n- Classify eight alerts and attach first actions for critical and high.\n- **Lab guide:** [`Exercise 8.10`](../slide-exercises/module-08/exercise-8.10-set-alert-priorities.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/33-alerts.svg\" alt=\"Alert priorities\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.10 — Set Alert Priorities.\n\nThe slide title is: Exercise 8.10 — Set Alert Priorities.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 15 min.\n\nBullet 2 on the slide: Classify eight alerts and attach first actions for critical and high.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.10](../slide-exercises/module-08/exercise-8.10-set-alert-priorities.md).\n\nThe figure on this slide is titled: Alert priorities."
+  },
+  {
+    "global_index": 130,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.10 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.10`](../slide-exercises/module-08/exercise-8.10-set-alert-priorities.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Classify eight alerts**\n- **Do:** Classify: no primary; increasing replication lag; disk 90% full; backup failed; authentication-failure spike; slow-query increase; one secondary unavailable; high connection usage.\n- **Expected:** Critical: no primary. High: disk 90%, backup failed, auth-failure spike, lag still growing toward oplog risk. Medium: one secondary down (if majority remains), \n\n**Step 2 — Attach first actions**\n- **Do:** For critical and high items, write the first action and the runbook name you would open.\n- **Expected:** No primary → check replica-set status and network, do not reconfigure hastily. Disk 90% → identify growth, free space, page the owner. Backup failed → verify jo",
+    "notes": "We are starting Exercise 8.10 — Set Alert Priorities. We have about 15 min for this lab.\n\nClassify operational alerts and attach a first action for critical and high events.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.10-set-alert-priorities.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Classify eight alerts.\n\nStep 2 — Attach first actions.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.10 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.10](../slide-exercises/module-08/exercise-8.10-set-alert-priorities.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Classify: no primary; increasing replication lag; disk 90% full; backup failed; authentication-failure spike; slow-query increase; one secondary unavailable; high connection usage.\n\nBullet 2 on the slide: Expected: Critical: no primary. High: disk 90%, backup failed, auth-failure spike, lag still growing toward oplog risk. Medium: one secondary down (if majority remains),.\n\nBullet 3 on the slide: Do: For critical and high items, write the first action and the runbook name you would open.\n\nBullet 4 on the slide: Expected: No primary → check replica-set status and network, do not reconfigure hastily. Disk 90% → identify growth, free space, page the owner. Backup failed → verify jo."
+  },
+  {
+    "global_index": 131,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.11 — Diagnose an Operational Incident",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Post-release slowness: examined docs up, no election, filter changed, indexes unchanged.\n- **Lab guide:** [`Exercise 8.11`](../slide-exercises/module-08/exercise-8.11-diagnose-an-operational-incident.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/35-slow-app.svg\" alt=\"Slow application investigation\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.11 — Diagnose an Operational Incident.\n\nThe slide title is: Exercise 8.11 — Diagnose an Operational Incident.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Post-release slowness: examined docs up, no election, filter changed, indexes unchanged.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.11](../slide-exercises/module-08/exercise-8.11-diagnose-an-operational-incident.md).\n\nThe figure on this slide is titled: Slow application investigation."
+  },
+  {
+    "global_index": 132,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.11 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.11`](../slide-exercises/module-08/exercise-8.11-diagnose-an-operational-incident.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Form the hypothesis**\n- **Do:** Evidence: CPU moderately up; documents examined up sharply; no election; connections normal; a query filter changed; indexes unchanged. What is the likely cause, and what is not the cause?\n- **Expected:** Likely: the new filter no longer uses the existing index (predicate, type, or field name), causing a collection scan or a weakly selective plan. Not: failover, \n\n**Step 2 — Mitigate and prevent**\n- **Do:** Write immediate mitigation, evidence to collect, permanent correction, and one prevention action for the next release.\n- **Expected:** Mitigate: revert the filter or add a matching index if the new shape is intended. Collect: the exact query, explain before/after, deploy diff. Permanent: index",
+    "notes": "We are starting Exercise 8.11 — Diagnose an Operational Incident. We have about 20 min for this lab.\n\nExplain post-release slowness from a filter change using examined-document growth, not failover.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.11-diagnose-an-operational-incident.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Form the hypothesis.\n\nStep 2 — Mitigate and prevent.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.11 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.11](../slide-exercises/module-08/exercise-8.11-diagnose-an-operational-incident.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Evidence: CPU moderately up; documents examined up sharply; no election; connections normal; a query filter changed; indexes unchanged. What is the likely cause, and what is not the cause?.\n\nBullet 2 on the slide: Expected: Likely: the new filter no longer uses the existing index (predicate, type, or field name), causing a collection scan or a weakly selective plan. Not: failover,.\n\nBullet 3 on the slide: Do: Write immediate mitigation, evidence to collect, permanent correction, and one prevention action for the next release.\n\nBullet 4 on the slide: Expected: Mitigate: revert the filter or add a matching index if the new shape is intended. Collect: the exact query, explain before/after, deploy diff. Permanent: index."
+  },
+  {
+    "global_index": 133,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.12 — Create an Operational Runbook",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Fill a twelve-section runbook for one named alert.\n- **Lab guide:** [`Exercise 8.12`](../slide-exercises/module-08/exercise-8.12-create-an-operational-runbook.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/37-incident.svg\" alt=\"Incident workflow\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.12 — Create an Operational Runbook.\n\nThe slide title is: Exercise 8.12 — Create an Operational Runbook.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Fill a twelve-section runbook for one named alert.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.12](../slide-exercises/module-08/exercise-8.12-create-an-operational-runbook.md).\n\nThe figure on this slide is titled: Incident workflow."
+  },
+  {
+    "global_index": 134,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.12 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.12`](../slide-exercises/module-08/exercise-8.12-create-an-operational-runbook.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Fill the template**\n- **Do:** Pick one event. Write: alert name, meaning, business impact, required access, diagnostic commands, expected normal state, decision points, corrective actions, escalation, rollback, verification, and where the incident is\n- **Expected:** A complete page exists. Diagnostics are real commands (`rs.status()`, `explain`, disk checks). Corrective actions are sequenced. Escalation has a person or role\n\n**Step 2 — Add a verification step**\n- **Do:** Write how you know the incident is over (metric + user-facing check) and what you will change so it does not recur silently.\n- **Expected:** Example: primary exists for 15 minutes, checkout succeeds, lag < baseline. Follow-up: alert threshold, dashboard tile, or change-review item.",
+    "notes": "We are starting Exercise 8.12 — Create an Operational Runbook. We have about 20 min for this lab.\n\nWrite a twelve-section runbook for one named MongoDB alert.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.12-create-an-operational-runbook.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Fill the template.\n\nStep 2 — Add a verification step.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.12 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.12](../slide-exercises/module-08/exercise-8.12-create-an-operational-runbook.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Pick one event. Write: alert name, meaning, business impact, required access, diagnostic commands, expected normal state, decision points, corrective actions, escalation, rollback, verification, and where the incident is.\n\nBullet 2 on the slide: Expected: A complete page exists. Diagnostics are real commands (rs.status(), explain, disk checks). Corrective actions are sequenced. Escalation has a person or role.\n\nBullet 3 on the slide: Do: Write how you know the incident is over (metric + user-facing check) and what you will change so it does not recur silently.\n\nBullet 4 on the slide: Expected: Example: primary exists for 15 minutes, checkout succeeds, lag < baseline. Follow-up: alert threshold, dashboard tile, or change-review item."
+  },
+  {
+    "global_index": 135,
+    "marp_class": "split fit-md",
+    "heading": "Demo 8.10 — Conduct a Production-Readiness Review",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Score schema, queries, indexes, security, availability, backup, monitoring, runbooks, ownership\n- Prioritize critical / high / medium / low improvements\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/38-checklist.svg\" alt=\"Conduct a Production-Readiness Review\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Demo 8.10 — Conduct a Production-Readiness Review.\n\nThe slide title is: Demo 8.10 — Conduct a Production-Readiness Review.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Score schema, queries, indexes, security, availability, backup, monitoring, runbooks, ownership.\n\nBullet 3 on the slide: Prioritize critical / high / medium / low improvements.\n\nThe figure on this slide is titled: Conduct a Production-Readiness Review."
+  },
+  {
+    "global_index": 136,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.13 — Complete a Production-Readiness Assessment",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Score nine areas of the fictional deployment and classify ready / conditional / not ready.\n- **Lab guide:** [`Exercise 8.13`](../slide-exercises/module-08/exercise-8.13-complete-a-production-readiness-assessment.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/38-checklist.svg\" alt=\"Production-readiness checklist\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.13 — Complete a Production-Readiness Assessment.\n\nThe slide title is: Exercise 8.13 — Complete a Production-Readiness Assessment.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Score nine areas of the fictional deployment and classify ready / conditional / not ready.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.13](../slide-exercises/module-08/exercise-8.13-complete-a-production-readiness-assessment.md).\n\nThe figure on this slide is titled: Production-readiness checklist."
+  },
+  {
+    "global_index": 137,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.13 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.13`](../slide-exercises/module-08/exercise-8.13-complete-a-production-readiness-assessment.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Score nine areas**\n- **Do:** Using the fictional `training_store` production story on the slides (no validation, mixed price types, embedded unbounded reviews, broad queries, overlapping indexes, shared admin credentials, public network, untested fa\n- **Expected:** Most areas are Not ready. Indexes might be Conditional if some useful keys exist but overlap is unproven. Availability is Conditional (replica set exists, failo\n\n**Step 2 — Classify the deployment**\n- **Do:** Choose one overall label and list the three conditions that would have to be true before a go-live.\n- **Expected:** Not production-ready. Conditions typically: authentication + network restriction, tested backup restore, and indexed selective queries with a baseline. Shared a",
+    "notes": "We are starting Exercise 8.13 — Complete a Production-Readiness Assessment. We have about 25 min for this lab.\n\nScore a fictional deployment and classify it as ready, ready with conditions, or not ready.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.13-complete-a-production-readiness-assessment.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Score nine areas.\n\nStep 2 — Classify the deployment.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.13 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.13](../slide-exercises/module-08/exercise-8.13-complete-a-production-readiness-assessment.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Using the fictional training_store production story on the slides (no validation, mixed price types, embedded unbounded reviews, broad queries, overlapping indexes, shared admin credentials, public network, untested fa.\n\nBullet 2 on the slide: Expected: Most areas are Not ready. Indexes might be Conditional if some useful keys exist but overlap is unproven. Availability is Conditional (replica set exists, failo.\n\nBullet 3 on the slide: Do: Choose one overall label and list the three conditions that would have to be true before a go-live.\n\nBullet 4 on the slide: Expected: Not production-ready. Conditions typically: authentication + network restriction, tested backup restore, and indexed selective queries with a baseline. Shared a."
+  },
+  {
+    "global_index": 138,
+    "marp_class": "split",
+    "heading": "Module Summary",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- Intentional data modeling and efficient queries\n- Evidence-based indexes and layered security\n- Tested backups, monitoring, and alerting\n- Reliable replication and deliberate scaling\n- Documented troubleshooting and controlled change\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/40-course-map.svg\" alt=\"Module 8 sits on Modules 1–7\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Module Summary.\n\nThe slide title is: Module Summary.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Intentional data modeling and efficient queries.\n\nBullet 2 on the slide: Evidence-based indexes and layered security.\n\nBullet 3 on the slide: Tested backups, monitoring, and alerting.\n\nBullet 4 on the slide: Reliable replication and deliberate scaling.\n\nBullet 5 on the slide: Documented troubleshooting and controlled change.\n\nThe figure on this slide is titled: Module 8 sits on Modules 1–7.",
+    "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/066 - Module Summary.png"
+  },
+  {
+    "global_index": 139,
+    "marp_class": "content fit-sm",
+    "heading": "Hands-on Labs — Time-box Guide",
+    "body_markdown": "Full sequence: Labs 8.1–8.11 (~4 hours if every laptop does everything).\n\n**In the 3-day package,** prefer:\n\n1. Lab 8.2 query/projection\n2. Lab 8.3 monthly pipeline (or 8.4 if 5.6 already landed)\n3. Lab 8.6 validation on `training_store_ops`\n4. Lab 8.9 backup/restore isolated\n5. Lab 8.11 integrated challenge\n\nDiscussion labs 8.7, 8.8, 8.10 can be instructor-led with the worksheets.",
+    "notes": "Let's look at Hands-on Labs — Time-box Guide.\n\nThe slide title is: Hands-on Labs — Time-box Guide.\n\nThe slide says: Full sequence: Labs 8.1–8.11 (~4 hours if every laptop does everything).\n\nThe slide says: In the 3-day package, prefer:.\n\nThe slide says: 1. Lab 8.2 query/projection.\n\nThe slide says: 2. Lab 8.3 monthly pipeline (or 8.4 if 5.6 already landed).\n\nThe slide says: 3. Lab 8.6 validation on training_store_ops.\n\nThe slide says: 4. Lab 8.9 backup/restore isolated.\n\nThe slide says: 5. Lab 8.11 integrated challenge.\n\nThe slide says: Discussion labs 8.7, 8.8, 8.10 can be instructor-led with the worksheets.\n\nNumber 1 on the slide: Lab 8.2 query/projection.\n\nNumber 2 on the slide: Lab 8.3 monthly pipeline (or 8.4 if 5.6 already landed).\n\nNumber 3 on the slide: Lab 8.6 validation on training_store_ops.\n\nNumber 4 on the slide: Lab 8.9 backup/restore isolated.\n\nNumber 5 on the slide: Lab 8.11 integrated challenge."
+  },
+  {
+    "global_index": 140,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.1 — Data-Model Review and Repair",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Inspect types, growth, and snapshots; propose validation and an XBAD migration note.\n- **Lab guide:** [`Lab 8.1`](../slide-exercises/module-08/lab-8.1-data-model-review-and-repair.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/41-demo-model.svg\" alt=\"Model repair\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.1 — Data-Model Review and Repair.\n\nThe slide title is: Lab 8.1 — Data-Model Review and Repair.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Inspect types, growth, and snapshots; propose validation and an XBAD migration note.\n\nBullet 3 on the slide: Lab guide: [Lab 8.1](../slide-exercises/module-08/lab-8.1-data-model-review-and-repair.md).\n\nThe figure on this slide is titled: Model repair."
+  },
+  {
+    "global_index": 141,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.1 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.1`](../slide-exercises/module-08/lab-8.1-data-model-review-and-repair.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Inspect types and names**\n- **Do:** Run and record field-name and type surprises: use training_store db.products.find({}, { sku: 1, name: 1, price: 1, active: 1 }).limit(5) db.products.find({ sku: \"XBAD\" }, { sku: 1, price: 1 }) db.products.aggregate([ { $\n- **Expected:** `XBAD` shows `price` as string. Healthy products show Decimal128. That mixed type is the catalog anti-pattern to repair.\n\n**Step 2 — Check growth and snapshots**\n- **Do:** Compare `db.products.findOne({}, { reviews: 1, sku: 1 })` with `db.reviews.findOne()` and `db.orders.findOne({ orderNumber: \"O5001\" }, { items: 1, customerId: 1, shippingAddress: 1 })`. Note whether reviews are embedded \n- **Expected:** Reviews live in `reviews` (good). Orders embed line snapshots and reference `customerId` (good). Call out any missing snapshot fields you would still add (for e",
+    "notes": "This slide lists key points under Lab 8.1 — Steps 1–2.\n\nThe slide title is: Lab 8.1 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.1](../slide-exercises/module-08/lab-8.1-data-model-review-and-repair.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Inspect types and names.\n\nStep 2 — Check growth and snapshots.\n\nBullet 1 on the slide: Do: Run and record field-name and type surprises: use training_store db.products.find({}, { sku: 1, name: 1, price: 1, active: 1 }).limit(5) db.products.find({ sku: \"XBAD\" }, { sku: 1, price: 1 }) db.products.aggregate([ { $.\n\nBullet 2 on the slide: Expected: XBAD shows price as string. Healthy products show Decimal128. That mixed type is the catalog anti-pattern to repair.\n\nBullet 3 on the slide: Do: Compare db.products.findOne({}, { reviews: 1, sku: 1 }) with db.reviews.findOne() and db.orders.findOne({ orderNumber: \"O5001\" }, { items: 1, customerId: 1, shippingAddress: 1 }). Note whether reviews are embedded.\n\nBullet 4 on the slide: Expected: Reviews live in reviews (good). Orders embed line snapshots and reference customerId (good). Call out any missing snapshot fields you would still add (for e."
+  },
+  {
+    "global_index": 142,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.1 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Propose validation and migration**\n- **Do:** Write: (1) three validator rules for products, (2) what to do with `XBAD`, (3) whether to migrate in place or insert into a new collection first.\n- **Expected:** Rules include sku string, Decimal128 price, Boolean active. `XBAD` is converted or quarantined. Prefer adding compatible fields and `validationAction: \"warn\"` o",
+    "notes": "This slide lists key points under Lab 8.1 — Steps 3–3.\n\nThe slide title is: Lab 8.1 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Propose validation and migration.\n\nBullet 1 on the slide: Do: Write: (1) three validator rules for products, (2) what to do with XBAD, (3) whether to migrate in place or insert into a new collection first.\n\nBullet 2 on the slide: Expected: Rules include sku string, Decimal128 price, Boolean active. XBAD is converted or quarantined. Prefer adding compatible fields and validationAction: \"warn\" o."
+  },
+  {
+    "global_index": 143,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.2 — Query and Projection Optimization",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Baseline find({}), then filter, project, sort, limit, explain, and recommend an ESR index.\n- **Lab guide:** [`Lab 8.2`](../slide-exercises/module-08/lab-8.2-query-and-projection-optimization.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/11-selective-filter.svg\" alt=\"Query optimization lab\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.2 — Query and Projection Optimization.\n\nThe slide title is: Lab 8.2 — Query and Projection Optimization.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Baseline find({}), then filter, project, sort, limit, explain, and recommend an ESR index.\n\nBullet 3 on the slide: Lab guide: [Lab 8.2](../slide-exercises/module-08/lab-8.2-query-and-projection-optimization.md).\n\nThe figure on this slide is titled: Query optimization lab."
+  },
+  {
+    "global_index": 144,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.2 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.2`](../slide-exercises/module-08/lab-8.2-query-and-projection-optimization.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Baseline the broad query**\n- **Do:** Run and record nReturned and totalDocsExamined: use training_store db.orders.find({}).explain(\"executionStats\")\n- **Expected:** The plan examines every order. nReturned equals the collection size. This is the ‘return everything’ anti-pattern.\n\n**Step 2 — Add filter, projection, sort, and limit**\n- **Do:** Look up C101’s `_id`, then run: const c101 = db.customers.findOne({ customerNumber: \"C101\" })._id db.orders.find( { customerId: c101, paymentStatus: \"PAID\" }, { _id: 0, orderNumber: 1, fulfillmentStatus: 1, total: 1, cre\n- **Expected:** Only C101 paid orders, shaped fields, newest first, at most ten documents.",
+    "notes": "This slide lists key points under Lab 8.2 — Steps 1–2.\n\nThe slide title is: Lab 8.2 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.2](../slide-exercises/module-08/lab-8.2-query-and-projection-optimization.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Baseline the broad query.\n\nStep 2 — Add filter, projection, sort, and limit.\n\nBullet 1 on the slide: Do: Run and record nReturned and totalDocsExamined: use training_store db.orders.find({}).explain(\"executionStats\").\n\nBullet 2 on the slide: Expected: The plan examines every order. nReturned equals the collection size. This is the ‘return everything’ anti-pattern.\n\nBullet 3 on the slide: Do: Look up C101’s _id, then run: const c101 = db.customers.findOne({ customerNumber: \"C101\" })._id db.orders.find( { customerId: c101, paymentStatus: \"PAID\" }, { _id: 0, orderNumber: 1, fulfillmentStatus: 1, total: 1, cre.\n\nBullet 4 on the slide: Expected: Only C101 paid orders, shaped fields, newest first, at most ten documents."
+  },
+  {
+    "global_index": 145,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.2 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Explain and recommend an index**\n- **Do:** Run `.explain(\"executionStats\")` on the improved query. Record winning stage, docs examined, and whether a SORT stage appears. Write one candidate index.\n- **Expected:** Likely COLLSCAN on this small set unless Module 6 indexes remain. Candidate `{ customerId: 1, paymentStatus: 1, createdAt: -1 }`. Note examined vs returned.",
+    "notes": "This slide lists key points under Lab 8.2 — Steps 3–3.\n\nThe slide title is: Lab 8.2 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Explain and recommend an index.\n\nBullet 1 on the slide: Do: Run .explain(\"executionStats\") on the improved query. Record winning stage, docs examined, and whether a SORT stage appears. Write one candidate index.\n\nBullet 2 on the slide: Expected: Likely COLLSCAN on this small set unless Module 6 indexes remain. Candidate { customerId: 1, paymentStatus: 1, createdAt: -1 }. Note examined vs returned."
+  },
+  {
+    "global_index": 146,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.3 — Aggregation Pipeline Construction",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 30 min\n- Monthly paid sales with six metrics; two $group stages so unwind does not inflate revenue.\n- **Lab guide:** [`Lab 8.3`](../slide-exercises/module-08/lab-8.3-aggregation-pipeline-construction.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/16-unwind.svg\" alt=\"Monthly sales pipeline\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.3 — Aggregation Pipeline Construction.\n\nThe slide title is: Lab 8.3 — Aggregation Pipeline Construction.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 30 min.\n\nBullet 2 on the slide: Monthly paid sales with six metrics; two $group stages so unwind does not inflate revenue.\n\nBullet 3 on the slide: Lab guide: [Lab 8.3](../slide-exercises/module-08/lab-8.3-aggregation-pipeline-construction.md).\n\nThe figure on this slide is titled: Monthly sales pipeline."
+  },
+  {
+    "global_index": 147,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.3 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.3`](../slide-exercises/module-08/lab-8.3-aggregation-pipeline-construction.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Filter and stamp the month**\n- **Do:** Start a pipeline that matches `paymentStatus: \"PAID\"` and sets `month` from `createdAt` (UTC date-to-string `YYYY-MM` is acceptable in training). db.orders.aggregate([ { $match: { paymentStatus: \"PAID\" } }, { $set: { mon\n- **Expected:** About 13 paid orders remain. Each document has a `month` such as `2026-07`.\n\n**Step 2 — Unwind safely, then group twice**\n- **Do:** Unwind `items`, group by `{ month: \"$month\", orderNumber: \"$orderNumber\" }` keeping `total` with `$first`, `customerId` with `$first`, and `units` as `$sum` of `$items.quantity`. Then group by month: `orderCount: { $sum:\n- **Expected:** Revenue is not multiplied by line count. Units come from item quantities. July–September 2026 months appear.",
+    "notes": "This slide lists key points under Lab 8.3 — Steps 1–2.\n\nThe slide title is: Lab 8.3 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.3](../slide-exercises/module-08/lab-8.3-aggregation-pipeline-construction.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Filter and stamp the month.\n\nStep 2 — Unwind safely, then group twice.\n\nBullet 1 on the slide: Do: Start a pipeline that matches paymentStatus: \"PAID\" and sets month from createdAt (UTC date-to-string YYYY-MM is acceptable in training). db.orders.aggregate([ { $match: { paymentStatus: \"PAID\" } }, { $set: { mon.\n\nBullet 2 on the slide: Expected: About 13 paid orders remain. Each document has a month such as 2026-07.\n\nBullet 3 on the slide: Do: Unwind items, group by { month: \"$month\", orderNumber: \"$orderNumber\" } keeping total with $first, customerId with $first, and units as $sum of $items.quantity. Then group by month: `orderCount: { $sum:.\n\nBullet 4 on the slide: Expected: Revenue is not multiplied by line count. Units come from item quantities. July–September 2026 months appear."
+  },
+  {
+    "global_index": 148,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.3 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Sort and shape**\n- **Do:** Add `$set` for `uniqueCustomerCount: { $size: \"$uniqueCustomers\" }` and `averageOrderValue: { $divide: [\"$revenue\", \"$orderCount\"] }`, `$sort` by `_id` / month, and a final `$project` that outputs month, orderCount, reve\n- **Expected:** One document per month, sorted, with all six business metrics. No leftover `_id` object unless you alias it to `month`.",
+    "notes": "This slide lists key points under Lab 8.3 — Steps 3–3.\n\nThe slide title is: Lab 8.3 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Sort and shape.\n\nBullet 1 on the slide: Do: Add $set for uniqueCustomerCount: { $size: \"$uniqueCustomers\" } and averageOrderValue: { $divide: [\"$revenue\", \"$orderCount\"] }, $sort by _id / month, and a final $project that outputs month, orderCount, reve.\n\nBullet 2 on the slide: Expected: One document per month, sorted, with all six business metrics. No leftover _id object unless you alias it to month."
+  },
+  {
+    "global_index": 149,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.4 — Aggregation Pipeline Tuning",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Compare lookup-first versus match-first; verify C101 revenue by hand.\n- **Lab guide:** [`Lab 8.4`](../slide-exercises/module-08/lab-8.4-aggregation-pipeline-tuning.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/15-early-match.svg\" alt=\"Pipeline tuning\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.4 — Aggregation Pipeline Tuning.\n\nThe slide title is: Lab 8.4 — Aggregation Pipeline Tuning.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Compare lookup-first versus match-first; verify C101 revenue by hand.\n\nBullet 3 on the slide: Lab guide: [Lab 8.4](../slide-exercises/module-08/lab-8.4-aggregation-pipeline-tuning.md).\n\nThe figure on this slide is titled: Pipeline tuning."
+  },
+  {
+    "global_index": 150,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.4 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.4`](../slide-exercises/module-08/lab-8.4-aggregation-pipeline-tuning.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Run the slow shape**\n- **Do:** Run this inefficient pipeline once and save the result documents plus `explain(\"executionStats\")` notes (stage order, docs leaving `$lookup`): db.orders.aggregate([ { $lookup: { from: \"customers\", localField: \"customerId\n- **Expected:** Lookup and unwind run on unpaid orders too. Revenue is inflated where orders have multiple items. Record the output even if the numbers look ‘busy’.\n\n**Step 2 — Rewrite and compare**\n- **Do:** Rewrite: `$match` PAID first, `$project` only fields you need, `$group` by `customerId` summing `$total` **without** unwinding, then `$lookup` names, then `$sort`. Compare revenue to a manual `find` of paid totals for C1\n- **Expected:** C101’s paid `total` sum matches the grouped revenue. Unpaid orders never enter `$lookup`. Explain shows a smaller working set after `$match`.",
+    "notes": "This slide lists key points under Lab 8.4 — Steps 1–2.\n\nThe slide title is: Lab 8.4 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.4](../slide-exercises/module-08/lab-8.4-aggregation-pipeline-tuning.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Run the slow shape.\n\nStep 2 — Rewrite and compare.\n\nBullet 1 on the slide: Do: Run this inefficient pipeline once and save the result documents plus explain(\"executionStats\") notes (stage order, docs leaving $lookup): db.orders.aggregate([ { $lookup: { from: \"customers\", localField: \"customerId.\n\nBullet 2 on the slide: Expected: Lookup and unwind run on unpaid orders too. Revenue is inflated where orders have multiple items. Record the output even if the numbers look ‘busy’.\n\nBullet 3 on the slide: Do: Rewrite: $match PAID first, $project only fields you need, $group by customerId summing $total without unwinding, then $lookup names, then $sort. Compare revenue to a manual find of paid totals for C1.\n\nBullet 4 on the slide: Expected: C101’s paid total sum matches the grouped revenue. Unpaid orders never enter $lookup. Explain shows a smaller working set after $match."
+  },
+  {
+    "global_index": 151,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.4 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Index recommendation**\n- **Do:** Write whether `{ paymentStatus: 1, createdAt: -1 }` (or `{ paymentStatus: 1 }`) would help this pipeline’s `$match`, and whether a `$lookup` on `customers._id` already has an index.\n- **Expected:** `_id` is already indexed. A `paymentStatus` (and optional date) index can support the early `$match`. Do not index every grouped field.",
+    "notes": "This slide lists key points under Lab 8.4 — Steps 3–3.\n\nThe slide title is: Lab 8.4 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Index recommendation.\n\nBullet 1 on the slide: Do: Write whether { paymentStatus: 1, createdAt: -1 } (or { paymentStatus: 1 }) would help this pipeline’s $match, and whether a $lookup on customers._id already has an index.\n\nBullet 2 on the slide: Expected: _id is already indexed. A paymentStatus (and optional date) index can support the early $match. Do not index every grouped field."
+  },
+  {
+    "global_index": 152,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.5 — Index Design and Validation",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Inventory indexes, create history and paid-report keys, explain, do not drop.\n- **Lab guide:** [`Lab 8.5`](../slide-exercises/module-08/lab-8.5-index-design-and-validation.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/19-index-shape.svg\" alt=\"Index validation\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.5 — Index Design and Validation.\n\nThe slide title is: Lab 8.5 — Index Design and Validation.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Inventory indexes, create history and paid-report keys, explain, do not drop.\n\nBullet 3 on the slide: Lab guide: [Lab 8.5](../slide-exercises/module-08/lab-8.5-index-design-and-validation.md).\n\nThe figure on this slide is titled: Index validation."
+  },
+  {
+    "global_index": 153,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.5 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.5`](../slide-exercises/module-08/lab-8.5-index-design-and-validation.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — List current indexes**\n- **Do:** Run `db.orders.getIndexes()`, `db.products.getIndexes()`, and `db.reviews.getIndexes()`. Note leftovers from Module 6.\n- **Expected:** A written inventory exists. `_id_` is present. Extra indexes from Day 3 morning are labeled, not blindly dropped.\n\n**Step 2 — Create or reuse two useful indexes**\n- **Do:** If missing, create training indexes (names optional): db.orders.createIndex( { customerId: 1, paymentStatus: 1, createdAt: -1 }, { name: \"ix_orders_cust_pay_date\" } ) db.orders.createIndex( { paymentStatus: 1, createdAt:\n- **Expected:** Winning plans show IXSCAN (unless a better leftover index wins). Examined counts are written down. Prefix overlap between the two new indexes is noted.",
+    "notes": "This slide lists key points under Lab 8.5 — Steps 1–2.\n\nThe slide title is: Lab 8.5 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.5](../slide-exercises/module-08/lab-8.5-index-design-and-validation.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — List current indexes.\n\nStep 2 — Create or reuse two useful indexes.\n\nBullet 1 on the slide: Do: Run db.orders.getIndexes(), db.products.getIndexes(), and db.reviews.getIndexes(). Note leftovers from Module 6.\n\nBullet 2 on the slide: Expected: A written inventory exists. _id_ is present. Extra indexes from Day 3 morning are labeled, not blindly dropped.\n\nBullet 3 on the slide: Do: If missing, create training indexes (names optional): db.orders.createIndex( { customerId: 1, paymentStatus: 1, createdAt: -1 }, { name: \"ix_orders_cust_pay_date\" } ) db.orders.createIndex( { paymentStatus: 1, createdAt:.\n\nBullet 4 on the slide: Expected: Winning plans show IXSCAN (unless a better leftover index wins). Examined counts are written down. Prefix overlap between the two new indexes is noted."
+  },
+  {
+    "global_index": 154,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.5 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Overlap decision**\n- **Do:** State whether both new indexes should survive in production, or whether one prefix makes the other a hide candidate. Do **not** drop indexes in this lab.\n- **Expected:** A sentence exists: keep both only if both query shapes are hot; otherwise hide the redundant one after monitoring. No `dropIndex` in this lab.",
+    "notes": "This slide lists key points under Lab 8.5 — Steps 3–3.\n\nThe slide title is: Lab 8.5 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Overlap decision.\n\nBullet 1 on the slide: Do: State whether both new indexes should survive in production, or whether one prefix makes the other a hide candidate. Do not drop indexes in this lab.\n\nBullet 2 on the slide: Expected: A sentence exists: keep both only if both query shapes are hot; otherwise hide the redundant one after monitoring. No dropIndex in this lab."
+  },
+  {
+    "global_index": 155,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.6 — Schema Validation Implementation",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 20 min\n- Validator on training_store_ops.orders_validated; prove valid and three invalid inserts.\n- **Lab guide:** [`Lab 8.6`](../slide-exercises/module-08/lab-8.6-schema-validation-implementation.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/41-demo-model.svg\" alt=\"Collection validation\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.6 — Schema Validation Implementation.\n\nThe slide title is: Lab 8.6 — Schema Validation Implementation.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 20 min.\n\nBullet 2 on the slide: Validator on training_store_ops.orders_validated; prove valid and three invalid inserts.\n\nBullet 3 on the slide: Lab guide: [Lab 8.6](../slide-exercises/module-08/lab-8.6-schema-validation-implementation.md).\n\nThe figure on this slide is titled: Collection validation."
+  },
+  {
+    "global_index": 156,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.6 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.6`](../slide-exercises/module-08/lab-8.6-schema-validation-implementation.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Create a scratch collection**\n- **Do:** Copy two paid orders into a new collection so production-shaped data exists without locking `orders`: use training_store_ops db.orders_validated.drop() db.getSiblingDB(\"training_store\").orders.find({ paymentStatus: \"PAID\n- **Expected:** `training_store_ops.orders_validated` has two documents.\n\n**Step 2 — Attach the validator**\n- **Do:** Run `collMod` (or `createCollection`) with `$jsonSchema` requiring `orderNumber` (string), `customerId` (objectId), `items` (array `minItems: 1`), `paymentStatus` enum `PAID`/`PENDING`/`FAILED`, `fulfillmentStatus` enum \n- **Expected:** `collMod` / create succeeds. `db.getCollectionInfos({ name: \"orders_validated\" })` shows the validator.",
+    "notes": "This slide lists key points under Lab 8.6 — Steps 1–2.\n\nThe slide title is: Lab 8.6 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.6](../slide-exercises/module-08/lab-8.6-schema-validation-implementation.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Create a scratch collection.\n\nStep 2 — Attach the validator.\n\nBullet 1 on the slide: Do: Copy two paid orders into a new collection so production-shaped data exists without locking orders: use training_store_ops db.orders_validated.drop() db.getSiblingDB(\"training_store\").orders.find({ paymentStatus: \"PAID.\n\nBullet 2 on the slide: Expected: training_store_ops.orders_validated has two documents.\n\nBullet 3 on the slide: Do: Run collMod (or createCollection) with $jsonSchema requiring orderNumber (string), customerId (objectId), items (array minItems: 1), paymentStatus enum PAID/PENDING/FAILED, fulfillmentStatus enum.\n\nBullet 4 on the slide: Expected: collMod / create succeeds. db.getCollectionInfos({ name: \"orders_validated\" }) shows the validator."
+  },
+  {
+    "global_index": 157,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.6 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Prove accept and reject**\n- **Do:** Insert one valid order (new `orderNumber`). Then attempt: missing `orderNumber`; `total: \"9.99\"`; `paymentStatus: \"PAID_NOW\"`. Record the error messages.\n- **Expected:** Valid insert succeeds. Each invalid insert is rejected. Existing copied documents remain.",
+    "notes": "This slide lists key points under Lab 8.6 — Steps 3–3.\n\nThe slide title is: Lab 8.6 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Prove accept and reject.\n\nBullet 1 on the slide: Do: Insert one valid order (new orderNumber). Then attempt: missing orderNumber; total: \"9.99\"; paymentStatus: \"PAID_NOW\". Record the error messages.\n\nBullet 2 on the slide: Expected: Valid insert succeeds. Each invalid insert is rejected. Existing copied documents remain."
+  },
+  {
+    "global_index": 158,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.7 — Security Configuration Review",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Mark findings on the fictional YAML; P1–P3 remediation; role sketches with redacted passwords.\n- **Lab guide:** [`Lab 8.7`](../slide-exercises/module-08/lab-8.7-security-configuration-review.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/28-sec-anti.svg\" alt=\"Unsafe configuration\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.7 — Security Configuration Review.\n\nThe slide title is: Lab 8.7 — Security Configuration Review.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Mark findings on the fictional YAML; P1–P3 remediation; role sketches with redacted passwords.\n\nBullet 3 on the slide: Lab guide: [Lab 8.7](../slide-exercises/module-08/lab-8.7-security-configuration-review.md).\n\nThe figure on this slide is titled: Unsafe configuration."
+  },
+  {
+    "global_index": 159,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.7 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.7`](../slide-exercises/module-08/lab-8.7-security-configuration-review.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Mark every finding**\n- **Do:** Read the fictional configuration in the worksheet below. List every unsafe item under network, identity, encryption, secrets, backup, logging, and environment.\n- **Expected:** Findings include `bindIp: 0.0.0.0` with no auth, disabled security, shared `admin/admin`, mongodb:// without TLS, URI in source, open backup bucket, verbose log\n\n**Step 2 — Prioritize remediation**\n- **Do:** Write a P1 / P2 / P3 list with owners (role names, not classmates’ personal emails). P1 must be items that would stop a go-live.\n- **Expected:** P1: enable auth, restrict bind/firewall, TLS, remove secrets from git, stop public backup. P2: least-privilege roles, log redaction, env separation. P3: audit l",
+    "notes": "This slide lists key points under Lab 8.7 — Steps 1–2.\n\nThe slide title is: Lab 8.7 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.7](../slide-exercises/module-08/lab-8.7-security-configuration-review.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Mark every finding.\n\nStep 2 — Prioritize remediation.\n\nBullet 1 on the slide: Do: Read the fictional configuration in the worksheet below. List every unsafe item under network, identity, encryption, secrets, backup, logging, and environment.\n\nBullet 2 on the slide: Expected: Findings include bindIp: 0.0.0.0 with no auth, disabled security, shared admin/admin, mongodb:// without TLS, URI in source, open backup bucket, verbose log.\n\nBullet 3 on the slide: Do: Write a P1 / P2 / P3 list with owners (role names, not classmates’ personal emails). P1 must be items that would stop a go-live.\n\nBullet 4 on the slide: Expected: P1: enable auth, restrict bind/firewall, TLS, remove secrets from git, stop public backup. P2: least-privilege roles, log redaction, env separation. P3: audit l."
+  },
+  {
+    "global_index": 160,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.7 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Design roles only**\n- **Do:** Do **not** enable authentication on the shared class database. Write `createRole` / `createUser` sketches for `appUser` and `reportUser` using placeholder names only.\n- **Expected:** appUser: readWrite on `training_store`. reportUser: read on `training_store`. Neither is root. No real passwords in the notes.",
+    "notes": "This slide lists key points under Lab 8.7 — Steps 3–3.\n\nThe slide title is: Lab 8.7 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Design roles only.\n\nBullet 1 on the slide: Do: Do not enable authentication on the shared class database. Write createRole / createUser sketches for appUser and reportUser using placeholder names only.\n\nBullet 2 on the slide: Expected: appUser: readWrite on training_store. reportUser: read on training_store. Neither is root. No real passwords in the notes."
+  },
+  {
+    "global_index": 161,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.8 — Monitoring and Log Analysis",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 25 min\n- Timeline from sample logs; cause is the filter field/case change; propose an alert.\n- **Lab guide:** [`Lab 8.8`](../slide-exercises/module-08/lab-8.8-monitoring-and-log-analysis.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/35-slow-app.svg\" alt=\"Log correlation\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.8 — Monitoring and Log Analysis.\n\nThe slide title is: Lab 8.8 — Monitoring and Log Analysis.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 25 min.\n\nBullet 2 on the slide: Timeline from sample logs; cause is the filter field/case change; propose an alert.\n\nBullet 3 on the slide: Lab guide: [Lab 8.8](../slide-exercises/module-08/lab-8.8-monitoring-and-log-analysis.md).\n\nThe figure on this slide is titled: Log correlation."
+  },
+  {
+    "global_index": 162,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.8 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.8`](../slide-exercises/module-08/lab-8.8-monitoring-and-log-analysis.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Build the timeline**\n- **Do:** Using the sample log and metric extract below, write a timeline with at least four rows: time, signal, source (app or mongod).\n- **Expected:** Order is roughly: deploy at 14:02 → query shape change in app logs → documentsExamined rise at 14:04 → slow query log lines → customer checkout latency. No elec\n\n**Step 2 — Name cause and alert**\n- **Do:** State the likely root cause in one sentence. Write one alert (metric, threshold idea, severity) that would have paged sooner, and one runbook step to add.\n- **Expected:** Cause: post-deploy filter no longer matches the index. Alert: slow query rate or examined/returned ratio vs baseline, high severity during checkout hours. Runbo",
+    "notes": "This slide lists key points under Lab 8.8 — Steps 1–2.\n\nThe slide title is: Lab 8.8 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.8](../slide-exercises/module-08/lab-8.8-monitoring-and-log-analysis.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Build the timeline.\n\nStep 2 — Name cause and alert.\n\nBullet 1 on the slide: Do: Using the sample log and metric extract below, write a timeline with at least four rows: time, signal, source (app or mongod).\n\nBullet 2 on the slide: Expected: Order is roughly: deploy at 14:02 → query shape change in app logs → documentsExamined rise at 14:04 → slow query log lines → customer checkout latency. No elec.\n\nBullet 3 on the slide: Do: State the likely root cause in one sentence. Write one alert (metric, threshold idea, severity) that would have paged sooner, and one runbook step to add.\n\nBullet 4 on the slide: Expected: Cause: post-deploy filter no longer matches the index. Alert: slow query rate or examined/returned ratio vs baseline, high severity during checkout hours. Runbo."
+  },
+  {
+    "global_index": 163,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.8 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Recommend a dashboard change**\n- **Do:** Name two tiles that should sit next to each other so this incident is obvious next time.\n- **Expected:** Application p99 latency beside mongod slow-ops / documents examined (or query planner collection-scan count). CPU-only would have missed it.",
+    "notes": "This slide lists key points under Lab 8.8 — Steps 3–3.\n\nThe slide title is: Lab 8.8 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Recommend a dashboard change.\n\nBullet 1 on the slide: Do: Name two tiles that should sit next to each other so this incident is obvious next time.\n\nBullet 2 on the slide: Expected: Application p99 latency beside mongod slow-ops / documents examined (or query planner collection-scan count). CPU-only would have missed it."
+  },
+  {
+    "global_index": 164,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.9 — Backup and Restore Verification",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 30 min\n- Dump training_store; restore to training_store_restore; verify counts, sample, indexes, duration vs RTO.\n- **Lab guide:** [`Lab 8.9`](../slide-exercises/module-08/lab-8.9-backup-and-restore-verification.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/31-restore-test.svg\" alt=\"Backup and restore\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.9 — Backup and Restore Verification.\n\nThe slide title is: Lab 8.9 — Backup and Restore Verification.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 30 min.\n\nBullet 2 on the slide: Dump training_store; restore to training_store_restore; verify counts, sample, indexes, duration vs RTO.\n\nBullet 3 on the slide: Lab guide: [Lab 8.9](../slide-exercises/module-08/lab-8.9-backup-and-restore-verification.md).\n\nThe figure on this slide is titled: Backup and restore."
+  },
+  {
+    "global_index": 165,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.9 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.9`](../slide-exercises/module-08/lab-8.9-backup-and-restore-verification.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Record the source**\n- **Do:** In notes: `db.orders.countDocuments()`, `db.products.countDocuments()`, three `orderNumber` values, and `db.orders.getIndexes()`. Use `training_store`.\n- **Expected:** Counts match the loader (about 17 orders, 13 products) unless the class mutated data — write the actual numbers. Three order numbers and index names are recorde\n\n**Step 2 — Take a backup**\n- **Do:** From the course repo in PowerShell (MongoDB Database Tools must be on PATH), run: New-Item -ItemType Directory -Force -Path .\\datasets\\backups | Out-Null mongodump --uri=\"mongodb://localhost:27017\" --db=training_store --\n- **Expected:** A dump directory (or JSON export) exists. The command finished without authentication errors (or the instructor supplied a URI).",
+    "notes": "This slide lists key points under Lab 8.9 — Steps 1–2.\n\nThe slide title is: Lab 8.9 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.9](../slide-exercises/module-08/lab-8.9-backup-and-restore-verification.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Record the source.\n\nStep 2 — Take a backup.\n\nBullet 1 on the slide: Do: In notes: db.orders.countDocuments(), db.products.countDocuments(), three orderNumber values, and db.orders.getIndexes(). Use training_store.\n\nBullet 2 on the slide: Expected: Counts match the loader (about 17 orders, 13 products) unless the class mutated data — write the actual numbers. Three order numbers and index names are recorde.\n\nBullet 3 on the slide: Do: From the course repo in PowerShell (MongoDB Database Tools must be on PATH), run: New-Item -ItemType Directory -Force -Path .\\datasets\\backups | Out-Null mongodump --uri=\"mongodb://localhost:27017\" --db=training_store --.\n\nBullet 4 on the slide: Expected: A dump directory (or JSON export) exists. The command finished without authentication errors (or the instructor supplied a URI)."
+  },
+  {
+    "global_index": 166,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.9 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Restore isolated and verify**\n- **Do:** Restore into a **new** database name: mongorestore --uri=\"mongodb://localhost:27017\" --nsFrom=\"training_store.*\" --nsTo=\"training_store_restore.*\" --drop \".\\datasets\\backups\\lab89\\training_store\" Then in `mongosh`: compa\n- **Expected:** Counts match the source note. Sample order exists. Indexes are present (rebuild may apply for some logical imports). Elapsed time is written and compared to a c",
+    "notes": "This slide lists key points under Lab 8.9 — Steps 3–3.\n\nThe slide title is: Lab 8.9 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Restore isolated and verify.\n\nBullet 1 on the slide: Do: Restore into a new database name: mongorestore --uri=\"mongodb://localhost:27017\" --nsFrom=\"training_store.\" --nsTo=\"training_store_restore.\" --drop \".\\datasets\\backups\\lab89\\training_store\" Then in mongosh: compa.\n\nBullet 2 on the slide: Expected: Counts match the source note. Sample order exists. Indexes are present (rebuild may apply for some logical imports). Elapsed time is written and compared to a c."
+  },
+  {
+    "global_index": 167,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.10 — Troubleshooting Challenge",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 30 min\n- Five concurrent symptoms; do not collapse them; ordered investigation plus verify steps.\n- **Lab guide:** [`Lab 8.10`](../slide-exercises/module-08/lab-8.10-troubleshooting-challenge.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/34-troubleshoot.svg\" alt=\"Multi-incident challenge\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.10 — Troubleshooting Challenge.\n\nThe slide title is: Lab 8.10 — Troubleshooting Challenge.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 30 min.\n\nBullet 2 on the slide: Five concurrent symptoms; do not collapse them; ordered investigation plus verify steps.\n\nBullet 3 on the slide: Lab guide: [Lab 8.10](../slide-exercises/module-08/lab-8.10-troubleshooting-challenge.md).\n\nThe figure on this slide is titled: Multi-incident challenge."
+  },
+  {
+    "global_index": 168,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.10 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.10`](../slide-exercises/module-08/lab-8.10-troubleshooting-challenge.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Separate the incidents**\n- **Do:** Symptoms: product browsing is slow; some orders are missing from a report; secondary lag is increasing; authentication failures appear in logs; disk utilization is approaching its threshold. Write five problem statements\n- **Expected:** Five independent hypotheses exist (for example: missing catalog index; report `$match` type/status bug; secondary I/O or network; brute force or bad app secret;\n\n**Step 2 — Order the investigation**\n- **Do:** Rank what you would check first for a live checkout site and why. Attach one evidence source per symptom (explain, log field, `rs.printSecondaryReplicationInfo()`, auth log, `db.stats()` / disk).\n- **Expected:** Auth failures and disk may be P1 if they threaten availability; lag if oplog is at risk; slow browse if revenue is hurting; missing report rows if finance is bl",
+    "notes": "This slide lists key points under Lab 8.10 — Steps 1–2.\n\nThe slide title is: Lab 8.10 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.10](../slide-exercises/module-08/lab-8.10-troubleshooting-challenge.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Separate the incidents.\n\nStep 2 — Order the investigation.\n\nBullet 1 on the slide: Do: Symptoms: product browsing is slow; some orders are missing from a report; secondary lag is increasing; authentication failures appear in logs; disk utilization is approaching its threshold. Write five problem statements.\n\nBullet 2 on the slide: Expected: Five independent hypotheses exist (for example: missing catalog index; report $match type/status bug; secondary I/O or network; brute force or bad app secret;.\n\nBullet 3 on the slide: Do: Rank what you would check first for a live checkout site and why. Attach one evidence source per symptom (explain, log field, rs.printSecondaryReplicationInfo(), auth log, db.stats() / disk).\n\nBullet 4 on the slide: Expected: Auth failures and disk may be P1 if they threaten availability; lag if oplog is at risk; slow browse if revenue is hurting; missing report rows if finance is bl."
+  },
+  {
+    "global_index": 169,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.10 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Actions and verification**\n- **Do:** For each of the five: one immediate action, one long-term correction, one verification signal.\n- **Expected:** Table with 5 rows. Immediate actions are reversible (hide index, rotate a leaked demo password, page storage). Verification is a metric or query result, not ‘lo",
+    "notes": "This slide lists key points under Lab 8.10 — Steps 3–3.\n\nThe slide title is: Lab 8.10 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Actions and verification.\n\nBullet 1 on the slide: Do: For each of the five: one immediate action, one long-term correction, one verification signal.\n\nBullet 2 on the slide: Expected: Table with 5 rows. Immediate actions are reversible (hide index, rotate a leaked demo password, page storage). Verification is a metric or query result, not ‘lo."
+  },
+  {
+    "global_index": 170,
+    "marp_class": "split fit-md",
+    "heading": "Lab 8.11 — Final Integrated Production Challenge",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 45–60 min\n- Schema fix, validation, pipeline, explains, ops pack, and a scored checklist.\n- **Lab guide:** [`Lab 8.11`](../slide-exercises/module-08/lab-8.11-final-integrated-production-challenge.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/42-lab-challenge.svg\" alt=\"Integrated production challenge\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Lab 8.11 — Final Integrated Production Challenge.\n\nThe slide title is: Lab 8.11 — Final Integrated Production Challenge.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 45–60 min.\n\nBullet 2 on the slide: Schema fix, validation, pipeline, explains, ops pack, and a scored checklist.\n\nBullet 3 on the slide: Lab guide: [Lab 8.11](../slide-exercises/module-08/lab-8.11-final-integrated-production-challenge.md).\n\nThe figure on this slide is titled: Integrated production challenge."
+  },
+  {
+    "global_index": 171,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.11 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Lab 8.11`](../slide-exercises/module-08/lab-8.11-final-integrated-production-challenge.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Fix one schema problem**\n- **Do:** Document `XBAD`’s string `price` (or another real defect you found). On `training_store_ops`, copy products and convert the bad price **or** quarantine the document. Do not silently rewrite historical orders.\n- **Expected:** A before/after note exists. `training_store` catalog may stay unchanged; the ops copy shows the repaired type.\n\n**Step 2 — Validation + monthly pipeline**\n- **Do:** Reuse or complete Lab 8.6 validation on `orders_validated`. Run your Lab 8.3/8.4 monthly paid-sales pipeline against `training_store.orders` and save the result documents.\n- **Expected:** Validator rejects a bad insert. Pipeline output has month, order count, revenue, AOV, unique customers, units sold.",
+    "notes": "This slide lists key points under Lab 8.11 — Steps 1–2.\n\nThe slide title is: Lab 8.11 — Steps 1–2.\n\nThe slide says: Lab guide: [Lab 8.11](../slide-exercises/module-08/lab-8.11-final-integrated-production-challenge.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 1 — Fix one schema problem.\n\nStep 2 — Validation + monthly pipeline.\n\nBullet 1 on the slide: Do: Document XBAD’s string price (or another real defect you found). On training_store_ops, copy products and convert the bad price or quarantine the document. Do not silently rewrite historical orders.\n\nBullet 2 on the slide: Expected: A before/after note exists. training_store catalog may stay unchanged; the ops copy shows the repaired type.\n\nBullet 3 on the slide: Do: Reuse or complete Lab 8.6 validation on orders_validated. Run your Lab 8.3/8.4 monthly paid-sales pipeline against training_store.orders and save the result documents.\n\nBullet 4 on the slide: Expected: Validator rejects a bad insert. Pipeline output has month, order count, revenue, AOV, unique customers, units sold."
+  },
+  {
+    "global_index": 172,
+    "marp_class": "fit-md",
+    "heading": "Lab 8.11 — Steps 3–4",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Indexes and explain**\n- **Do:** Ensure at least one history index and one paid-report index exist (create on `training_store` only if the instructor allows Day 3 leftovers). Explain the C101 history query and the pipeline `$match`. Record IXSCAN vs COL\n- **Expected:** Two explain summaries are in the notes. Overlap is mentioned if both indexes share a prefix.\n\n**Step 4 — Ops pack**\n- **Do:** In one page: least-privilege table (app vs report vs admin); RPO/RTO for orders; three critical alerts; one runbook (backup failed or no primary); checklist scores for the six production-readiness areas.\n- **Expected:** The page is complete. Classification is Ready with conditions or Not ready, with evidence. No production-ready claim without auth, tested restore, and restricte",
+    "notes": "This slide lists key points under Lab 8.11 — Steps 3–4.\n\nThe slide title is: Lab 8.11 — Steps 3–4.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nStep 3 — Indexes and explain.\n\nStep 4 — Ops pack.\n\nBullet 1 on the slide: Do: Ensure at least one history index and one paid-report index exist (create on training_store only if the instructor allows Day 3 leftovers). Explain the C101 history query and the pipeline $match. Record IXSCAN vs COL.\n\nBullet 2 on the slide: Expected: Two explain summaries are in the notes. Overlap is mentioned if both indexes share a prefix.\n\nBullet 3 on the slide: Do: In one page: least-privilege table (app vs report vs admin); RPO/RTO for orders; three critical alerts; one runbook (backup failed or no primary); checklist scores for the six production-readiness areas.\n\nBullet 4 on the slide: Expected: The page is complete. Classification is Ready with conditions or Not ready, with evidence. No production-ready claim without auth, tested restore, and restricte."
+  },
+  {
+    "global_index": 173,
+    "marp_class": "split fit-md",
+    "heading": "Exercise 8.14 — Production-Readiness Review for training_store",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- **Time:** 45 min\n- Six-part action plan and a classification with evidence. Not production-ready is the defensible call.\n- **Lab guide:** [`Exercise 8.14`](../slide-exercises/module-08/exercise-8.14-practical-challenge.md)\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/42-lab-challenge.svg\" alt=\"Practical challenge\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Exercise 8.14 — Production-Readiness Review for training_store.\n\nThe slide title is: Exercise 8.14 — Production-Readiness Review for training_store.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Time: 45 min.\n\nBullet 2 on the slide: Six-part action plan and a classification with evidence. Not production-ready is the defensible call.\n\nBullet 3 on the slide: Lab guide: [Exercise 8.14](../slide-exercises/module-08/exercise-8.14-practical-challenge.md).\n\nThe figure on this slide is titled: Practical challenge."
+  },
+  {
+    "global_index": 174,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.14 — Steps 1–2",
+    "body_markdown": "**Lab guide:** [`Exercise 8.14`](../slide-exercises/module-08/exercise-8.14-practical-challenge.md)\n\n**Follow along (Windows) — key steps:**\n\n**Step 1 — Write model and performance recommendations**\n- **Do:** Correct BSON types; separate unbounded reviews; preserve order snapshots; add validation; plan migration. Then rewrite broad queries, add projections, tune the sales aggregation, recommend indexes, flag redundant indexes\n- **Expected:** A two-section note exists. Reviews are a collection. Prices are Decimal128. Queries are selective. Indexes follow ESR. At least one overlapping index is flagged\n\n**Step 2 — Write security, reliability, and monitoring**\n- **Do:** Restrict network access; replace shared credentials; least privilege; TLS; secret storage; audit privileged activity. Test failover; review lag and oplog; define RPO/RTO; test restore. Add query, connection, storage, rep\n- **Expected:** Security list includes network, authn, authz, TLS, secrets. Reliability includes tested failover and restore plus RPO/RTO. Monitoring has owners, not only metri",
+    "notes": "We are starting Exercise 8.14 — Production-Readiness Review for training_store. We have about 45 min for this lab.\n\nProduce a six-part action plan and an evidence-based production-readiness classification.\n\nThe full lab guide is in slide-exercises/module-08/exercise-8.14-practical-challenge.md if you need extra detail.\n\nOn Windows: PowerShell in the integrated terminal — Ctrl+backtick — and the Agent panel — Ctrl+I. Open the repo folder with File → Open Folder.\n\nStep 1 — Write model and performance recommendations.\n\nStep 2 — Write security, reliability, and monitoring.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.14 — Steps 1–2.\n\nThe slide says: Lab guide: [Exercise 8.14](../slide-exercises/module-08/exercise-8.14-practical-challenge.md).\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Correct BSON types; separate unbounded reviews; preserve order snapshots; add validation; plan migration. Then rewrite broad queries, add projections, tune the sales aggregation, recommend indexes, flag redundant indexes.\n\nBullet 2 on the slide: Expected: A two-section note exists. Reviews are a collection. Prices are Decimal128. Queries are selective. Indexes follow ESR. At least one overlapping index is flagged.\n\nBullet 3 on the slide: Do: Restrict network access; replace shared credentials; least privilege; TLS; secret storage; audit privileged activity. Test failover; review lag and oplog; define RPO/RTO; test restore. Add query, connection, storage, rep.\n\nBullet 4 on the slide: Expected: Security list includes network, authn, authz, TLS, secrets. Reliability includes tested failover and restore plus RPO/RTO. Monitoring has owners, not only metri."
+  },
+  {
+    "global_index": 175,
+    "marp_class": "fit-md",
+    "heading": "Exercise 8.14 — Steps 3–3",
+    "body_markdown": "**Follow along (Windows) — key steps:**\n\n**Step 3 — Classify with evidence**\n- **Do:** Select Production-ready, Ready with conditions, or Not production-ready. Cite evidence from the current environment list (no validation, public network, untested restore, CPU-only monitoring, and the rest).\n- **Expected:** Not production-ready is the defensible call. Ready with conditions is acceptable only if conditions are explicit and blocking. Production-ready is not justified",
+    "notes": "Now for Steps 3–3.\n\nStep 3 — Classify with evidence.\n\nI'll give you a few minutes to work — raise your hand if you get stuck.\n\nThe slide title is: Exercise 8.14 — Steps 3–3.\n\nThe slide says: Follow along (Windows) — key steps:.\n\nBullet 1 on the slide: Do: Select Production-ready, Ready with conditions, or Not production-ready. Cite evidence from the current environment list (no validation, public network, untested restore, CPU-only monitoring, and the rest).\n\nBullet 2 on the slide: Expected: Not production-ready is the defensible call. Ready with conditions is acceptable only if conditions are explicit and blocking. Production-ready is not justified."
+  },
+  {
+    "global_index": 176,
+    "marp_class": "content fit-sm",
+    "heading": "Final Course Knowledge Assessment",
+    "body_markdown": "Write short answers (pairs or solo):\n\n1. Why design schemas around access patterns?\n2. Why are unbounded arrays dangerous?\n3. Why return only required fields?\n4. Why reduce aggregation input early?\n5. What risk does `$unwind` introduce?\n6. Why index `$lookup` foreign fields?\n7. Why not index every field?\n8. What is least privilege?\n9. Authentication vs authorization?\n10. Why TLS?",
+    "notes": "Let's look at Final Course Knowledge Assessment.\n\nThe slide title is: Final Course Knowledge Assessment.\n\nThe slide says: Write short answers (pairs or solo):.\n\nThe slide says: 1. Why design schemas around access patterns?.\n\nThe slide says: 2. Why are unbounded arrays dangerous?.\n\nThe slide says: 3. Why return only required fields?.\n\nThe slide says: 4. Why reduce aggregation input early?.\n\nThe slide says: 5. What risk does $unwind introduce?.\n\nThe slide says: 6. Why index $lookup foreign fields?.\n\nThe slide says: 7. Why not index every field?.\n\nThe slide says: 8. What is least privilege?.\n\nThe slide says: 9. Authentication vs authorization?.\n\nThe slide says: 10. Why TLS?.\n\nNumber 1 on the slide: Why design schemas around access patterns?.\n\nNumber 2 on the slide: Why are unbounded arrays dangerous?.\n\nNumber 3 on the slide: Why return only required fields?.\n\nNumber 4 on the slide: Why reduce aggregation input early?.\n\nNumber 5 on the slide: What risk does $unwind introduce?.\n\nNumber 6 on the slide: Why index $lookup foreign fields?.\n\nNumber 7 on the slide: Why not index every field?.\n\nNumber 8 on the slide: What is least privilege?.\n\nNumber 9 on the slide: Authentication vs authorization?.\n\nNumber 10 on the slide: Why TLS?."
+  },
+  {
+    "global_index": 177,
+    "marp_class": "content fit-sm",
+    "heading": "Final Course Knowledge Assessment (continued)",
+    "body_markdown": "11. Why keep credentials out of source code?\n12. Why is replication not a backup?\n13. What do RPO and RTO mean?\n14. Why test restores?\n15. Metrics for a slow query?\n16. Metrics for replication problems?\n17. What makes an alert actionable?\n18. What belongs in a runbook?\n19. Why rollback plans for production changes?\n20. What evidence is required before calling a deployment production-ready?",
+    "notes": "Let's look at Final Course Knowledge Assessment (continued).\n\nThe slide title is: Final Course Knowledge Assessment (continued).\n\nThe slide says: 11. Why keep credentials out of source code?.\n\nThe slide says: 12. Why is replication not a backup?.\n\nThe slide says: 13. What do RPO and RTO mean?.\n\nThe slide says: 14. Why test restores?.\n\nThe slide says: 15. Metrics for a slow query?.\n\nThe slide says: 16. Metrics for replication problems?.\n\nThe slide says: 17. What makes an alert actionable?.\n\nThe slide says: 18. What belongs in a runbook?.\n\nThe slide says: 19. Why rollback plans for production changes?.\n\nThe slide says: 20. What evidence is required before calling a deployment production-ready?.\n\nNumber 11 on the slide: Why keep credentials out of source code?.\n\nNumber 12 on the slide: Why is replication not a backup?.\n\nNumber 13 on the slide: What do RPO and RTO mean?.\n\nNumber 14 on the slide: Why test restores?.\n\nNumber 15 on the slide: Metrics for a slow query?.\n\nNumber 16 on the slide: Metrics for replication problems?.\n\nNumber 17 on the slide: What makes an alert actionable?.\n\nNumber 18 on the slide: What belongs in a runbook?.\n\nNumber 19 on the slide: Why rollback plans for production changes?.\n\nNumber 20 on the slide: What evidence is required before calling a deployment production-ready?."
+  },
+  {
+    "global_index": 178,
+    "marp_class": "content fit-sm",
+    "heading": "Final Practical Assessment",
+    "body_markdown": "Design a production-oriented e-commerce MongoDB solution:\n\n1. Collections and sample documents\n2. Embed vs reference decisions\n3. CRUD queries and one aggregation\n4. Index strategy; replica-set architecture; sharding recommendation\n5. Security checklist; backup/recovery; monitoring; one runbook\n\n**Bar:** correct BSON types, access-pattern design, bounded growth, accurate queries and aggregations, evidence-based indexes, HA and scale that match the load, least privilege, tested recovery, actionable ops.",
+    "notes": "Let's look at Final Practical Assessment.\n\nThe slide title is: Final Practical Assessment.\n\nThe slide says: Design a production-oriented e-commerce MongoDB solution:.\n\nThe slide says: 1. Collections and sample documents.\n\nThe slide says: 2. Embed vs reference decisions.\n\nThe slide says: 3. CRUD queries and one aggregation.\n\nThe slide says: 4. Index strategy; replica-set architecture; sharding recommendation.\n\nThe slide says: 5. Security checklist; backup/recovery; monitoring; one runbook.\n\nThe slide says: Bar: correct BSON types, access-pattern design, bounded growth, accurate queries and aggregations, evidence-based indexes, HA and scale that match the load, least privilege, tested recovery, actionable ops.\n\nNumber 1 on the slide: Collections and sample documents.\n\nNumber 2 on the slide: Embed vs reference decisions.\n\nNumber 3 on the slide: CRUD queries and one aggregation.\n\nNumber 4 on the slide: Index strategy; replica-set architecture; sharding recommendation.\n\nNumber 5 on the slide: Security checklist; backup/recovery; monitoring; one runbook."
+  },
+  {
+    "global_index": 179,
+    "marp_class": "content fit-sm",
+    "heading": "Participant Action Plan",
+    "body_markdown": "Before the next work week, write:\n\n- One schema or validation change you will propose\n- One query or index you will `explain`\n- One security control you will verify (auth, network, secrets)\n- One restore test you will schedule\n- One alert or runbook you will add\n- A named owner for each item",
+    "notes": "This slide lists key points under Participant Action Plan.\n\nThe slide title is: Participant Action Plan.\n\nThe slide says: Before the next work week, write:.\n\nBullet 1 on the slide: One schema or validation change you will propose.\n\nBullet 2 on the slide: One query or index you will explain.\n\nBullet 3 on the slide: One security control you will verify (auth, network, secrets).\n\nBullet 4 on the slide: One restore test you will schedule.\n\nBullet 5 on the slide: One alert or runbook you will add.\n\nBullet 6 on the slide: A named owner for each item."
+  },
+  {
+    "global_index": 180,
+    "marp_class": "content fit-sm",
+    "heading": "Module 8 Completion Checklist",
+    "body_markdown": "Participants can:\n\n- [ ] Review and improve a MongoDB data model\n- [ ] Spot query and aggregation inefficiencies\n- [ ] Recommend and validate indexes\n- [ ] Apply layered security and least privilege\n- [ ] Explain backup/recovery, RPO, and RTO\n- [ ] Select metrics and actionable alerts\n- [ ] Diagnose common incidents and write a runbook\n- [ ] Complete a production-readiness assessment",
+    "notes": "This slide lists key points under Module 8 Completion Checklist.\n\nThe slide title is: Module 8 Completion Checklist.\n\nThe slide says: Participants can:.\n\nBullet 1 on the slide: [ ] Review and improve a MongoDB data model.\n\nBullet 2 on the slide: [ ] Spot query and aggregation inefficiencies.\n\nBullet 3 on the slide: [ ] Recommend and validate indexes.\n\nBullet 4 on the slide: [ ] Apply layered security and least privilege.\n\nBullet 5 on the slide: [ ] Explain backup/recovery, RPO, and RTO.\n\nBullet 6 on the slide: [ ] Select metrics and actionable alerts.\n\nBullet 7 on the slide: [ ] Diagnose common incidents and write a runbook.\n\nBullet 8 on the slide: [ ] Complete a production-readiness assessment."
+  },
+  {
+    "global_index": 181,
+    "marp_class": "content fit-sm",
+    "heading": "Questions and Answers",
+    "body_markdown": "Open floor.\n\nParking-lot prompts if the room is quiet:\n\n- Would you go live on training_store tonight? Why not?\n- Where does your current team store the database URI?\n- When did you last restore a backup on purpose?\n- Which alert would you delete this week?\n\nDriver-language wiring belongs in the sample-app README, not a new module.",
+    "notes": "This slide lists key points under Questions and Answers.\n\nThe slide title is: Questions and Answers.\n\nThe slide says: Open floor.\n\nThe slide says: Parking-lot prompts if the room is quiet:.\n\nThe slide says: Driver-language wiring belongs in the sample-app README, not a new module.\n\nBullet 1 on the slide: Would you go live on training_store tonight? Why not?.\n\nBullet 2 on the slide: Where does your current team store the database URI?.\n\nBullet 3 on the slide: When did you last restore a backup on purpose?.\n\nBullet 4 on the slide: Which alert would you delete this week?."
+  },
+  {
+    "global_index": 182,
+    "marp_class": "content fit-sm",
+    "heading": "Course Review",
+    "body_markdown": "Day 1 — Why documents, a working instance, a schema for training_store.\n\nDay 2 — Query language and aggregation on the same data.\n\nDay 3 — Indexes and explain; replica sets and sharding; production operations.\n\nThe dataset stayed still so the skills could compound.",
+    "notes": "Let's look at Course Review.\n\nThe slide title is: Course Review.\n\nThe slide says: Day 1 — Why documents, a working instance, a schema for training_store.\n\nThe slide says: Day 2 — Query language and aggregation on the same data.\n\nThe slide says: Day 3 — Indexes and explain; replica sets and sharding; production operations.\n\nThe slide says: The dataset stayed still so the skills could compound."
+  },
+  {
+    "global_index": 183,
+    "marp_class": "split",
+    "heading": "Next Steps and Continued Learning",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- Apply the six-area checklist to one real database\n- Schedule a restore test and a failover test\n- Read current MongoDB security and ops manuals for your version and platform\n- Practice `explain` on the queries that pay the bills\n- Keep secrets out of git\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-08/45-day3-close.svg\" alt=\"From indexed shapes to operable systems\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Next Steps and Continued Learning.\n\nThe slide title is: Next Steps and Continued Learning.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Apply the six-area checklist to one real database.\n\nBullet 2 on the slide: Schedule a restore test and a failover test.\n\nBullet 3 on the slide: Read current MongoDB security and ops manuals for your version and platform.\n\nBullet 4 on the slide: Practice explain on the queries that pay the bills.\n\nBullet 5 on the slide: Keep secrets out of git.\n\nThe figure on this slide is titled: From indexed shapes to operable systems."
+  }
+]

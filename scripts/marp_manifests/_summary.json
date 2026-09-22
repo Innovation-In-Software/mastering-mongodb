@@ -1,0 +1,113 @@
+{
+  "deck_path": "slides/course-complete-marp-with-notes.md",
+  "total_slides_parsed": 1052,
+  "module_boundary_pattern": "<!-- _header: 'Module N — <Module Title>' --> immediately followed by <!-- _class: lead --> and an '# <Module Title>' heading on the same slide",
+  "course_intro_slide_count": 2,
+  "course_closing_slide_count": 0,
+  "modules": {
+    "01": {
+      "divider_heading": "Introduction to NoSQL Databases",
+      "slide_count": 51,
+      "global_index_range": [
+        3,
+        53
+      ],
+      "diagram_title_count": 30,
+      "matched_count": 30,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "02": {
+      "divider_heading": "MongoDB Installation and Setup",
+      "slide_count": 78,
+      "global_index_range": [
+        54,
+        131
+      ],
+      "diagram_title_count": 43,
+      "matched_count": 43,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "03": {
+      "divider_heading": "Data Modeling with MongoDB",
+      "slide_count": 155,
+      "global_index_range": [
+        132,
+        286
+      ],
+      "diagram_title_count": 104,
+      "matched_count": 104,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "04": {
+      "divider_heading": "The MongoDB Query Language",
+      "slide_count": 178,
+      "global_index_range": [
+        287,
+        464
+      ],
+      "diagram_title_count": 46,
+      "matched_count": 46,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "05": {
+      "divider_heading": "The Aggregation Framework",
+      "slide_count": 150,
+      "global_index_range": [
+        465,
+        614
+      ],
+      "diagram_title_count": 87,
+      "matched_count": 87,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "06": {
+      "divider_heading": "Indexing and Query Performance",
+      "slide_count": 142,
+      "global_index_range": [
+        615,
+        756
+      ],
+      "diagram_title_count": 61,
+      "matched_count": 61,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "07": {
+      "divider_heading": "Introduction to Replication and Sharding",
+      "slide_count": 148,
+      "global_index_range": [
+        757,
+        904
+      ],
+      "diagram_title_count": 73,
+      "matched_count": 73,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    },
+    "08": {
+      "divider_heading": "MongoDB Best Practices, Security, and Troubleshooting",
+      "slide_count": 148,
+      "global_index_range": [
+        905,
+        1052
+      ],
+      "diagram_title_count": 65,
+      "matched_count": 65,
+      "unmatched_count": 0,
+      "matched_png_missing_on_disk": 0,
+      "unmatched_titles": []
+    }
+  }
+}

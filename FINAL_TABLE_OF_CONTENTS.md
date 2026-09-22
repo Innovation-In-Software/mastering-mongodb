@@ -14,6 +14,7 @@ Day assignments follow the redistributed schedule in [`README.md`](README.md), n
 | **Modules** | 8 |
 | **Lessons** | 53 |
 | **Slide exercises** | 144 lab guides in `slide-exercises/` |
+| **Day labs** | [`labs/`](labs/README.md) (7 sequenced labs matching the outline + PPT hands-on) |
 | **Slide deck (present)** | [`slides/course-complete-marp-with-notes.html`](slides/course-complete-marp-with-notes.html) |
 | **Slide deck (source)** | [`slides/course-complete-marp-with-notes.md`](slides/course-complete-marp-with-notes.md) |
 | **Cheatsheet** | [`COURSE-CHEATSHEET.md`](COURSE-CHEATSHEET.md) |
@@ -410,4 +411,6 @@ All labs reuse one application dataset under `datasets/training_store`:
 
 Do not invent a second application dataset for later modules. Day 3 indexes the same queries and pipeline written on Day 2. Module 6 Lab 6.7 may create a scratch `sessions` collection only to demonstrate TTL expiration.
 
-After `load.js`, expect **6 customers, 12 products, 17 orders (13 PAID), 6 reviews**. Reload at the start of Day 2 so Module 5 has paid orders across July–September 2026. O6499 has no matching customer (for `$lookup`). Some paid orders omit `shippingFee` (for `$ifNull`).
+After `load.js`, expect **6 customers, 13 products, 17 orders (13 PAID), 6 reviews**. Reload at the start of Day 2 so Module 5 has paid orders across July–September 2026. O6499 has no matching customer (for `$lookup`). Some paid orders omit `shippingFee` (for `$ifNull`).
+
+**Student day labs** (outline hands-on + PPT Exercises rewritten for this dataset): [`labs/README.md`](labs/README.md). **Application connection demo:** [`sample-app/README.md`](sample-app/README.md).

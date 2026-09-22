@@ -1,0 +1,12 @@
+{
+  "name": "mastering-mongodb-sample-app",
+  "private": true,
+  "type": "module",
+  "description": "Thin MongoDB connection demo for Mastering MongoDB (Innovation In Software).",
+  "scripts": {
+    "start": "node connect.mjs"
+  },
+  "dependencies": {
+    "mongodb": "^6.19.0"
+  }
+}

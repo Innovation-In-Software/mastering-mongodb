@@ -68,7 +68,7 @@ Get every participant onto a working instance, then shift into document thinking
 | ~1.5–2 h | 2 | Installation and Setup | Deployment options; `mongod` / `mongosh` / Compass; connection strings; first write-and-read |
 | ~3 h | 3 | Data Modeling with MongoDB | Documents, collections, databases; schemas and access patterns; embed vs reference |
 
-**Labs:** choose a deployment, interpret a URI, install or provision MongoDB, connect with `mongosh` and Compass · create and populate collections against the sample application dataset.
+**Labs:** [`Lab 1`](labs/day-01-lab-01-install-connect-verify.md) install/connect · [`Lab 2`](labs/day-01-lab-02-model-and-populate.md) model and populate.
 
 ### Day 2 — Working with data (~6 hours)
 
@@ -79,7 +79,7 @@ The two skills used every day: retrieve and change documents, then reshape them 
 | ~3 h (or 6–7 h full) | 4 | The MongoDB Query Language | `find` / `findOne`; comparison, logical, array, and update operators; projections; safe writes |
 | ~3 h | 5 | The Aggregation Framework | Pipeline structure; `$match`, `$group`, `$project`, `$sort`, `$limit`; multi-stage analytics |
 
-**Labs:** construct complex queries and perform data manipulations · build a multi-stage aggregation pipeline.
+**Labs:** [`Lab 3`](labs/day-02-lab-03-complex-queries-and-updates.md) queries and updates · [`Lab 4`](labs/day-02-lab-04-aggregation-pipeline.md) aggregation pipeline. Reload `datasets/training_store/load.js` first.
 
 ### Day 3 — Performance and production (~6 hours)
 
@@ -91,7 +91,7 @@ Make Day 2’s queries and pipelines fast, then cover how MongoDB stays availabl
 | ~2 h (or 3–3.5 h full) | 7 | Introduction to Replication and Sharding | Replica sets, elections, read/write guarantees; shards, keys, routing |
 | ~2 h (or 3–3.5 h full) | 8 | MongoDB Best Practices, Security, and Troubleshooting | Modeling, queries, indexes, security, backup/restore, monitoring, troubleshooting, production-readiness checklist |
 
-**Labs:** add indexes and read `explain` output on the Day 2 queries and pipeline · inspect a replica set (`rs.status()`) and reason about shard keys · production-readiness labs (validation, restore to an isolated database, runbooks). Time-box Module 6 to Labs 6.1–6.4 and 6.11, Module 7 to Lab 7.1 plus the challenge, and Module 8 to Labs 8.2, 8.3, 8.6, 8.9, and 8.11 when the afternoon is shared.
+**Labs:** [`Lab 5`](labs/day-03-lab-05-index-and-explain.md) index and `explain` · [`Lab 6`](labs/day-03-lab-06-replication-and-sharding.md) replica set / shard key · [`Lab 7`](labs/day-03-lab-07-production-readiness.md) go-live. Time-box extra `slide-exercises` to Module 6 Labs 6.1–6.4 and 6.11, Module 7 Lab 7.1 plus the challenge, and Module 8 Labs 8.2, 8.3, 8.6, 8.9, and 8.11 when the afternoon is shared. Application connection: [`sample-app/`](sample-app/README.md).
 
 ---
 
@@ -108,6 +108,18 @@ MasteringMongoDB/
 ├── COURSE-CHEATSHEET.md                   # Operator and concept glossary by module
 ├── course.config.yaml                     # Course name, days, module list
 ├── diagram-prompt.md                      # Prompt for generating slide SVGs
+│
+├── labs/                                  # Day labs (outline + PPT hands-on, live dataset)
+│   ├── README.md
+│   ├── day-01-lab-01-install-connect-verify.md
+│   ├── day-01-lab-02-model-and-populate.md
+│   ├── day-02-lab-03-complex-queries-and-updates.md
+│   ├── day-02-lab-04-aggregation-pipeline.md
+│   ├── day-03-lab-05-index-and-explain.md
+│   ├── day-03-lab-06-replication-and-sharding.md
+│   └── day-03-lab-07-production-readiness.md
+│
+├── decks/pptx/                            # Instructor PowerPoint exports
 │
 ├── slides/
 │   ├── course-complete-marp-with-notes.md     # Single monolithic deck (do not split)
@@ -171,7 +183,9 @@ MasteringMongoDB/
 │       └── load.js
 │
 ├── sample-app/                            # Thin app used for "connect MongoDB"
-│   └── README.md                          # Language + connection string only
+│   ├── README.md
+│   ├── connect.mjs                        # Node.js driver
+│   └── connect.py                         # Python driver
 │
 └── scripts/                               # Deck maintenance (from the template)
     ├── themes/flat-gaia.css
@@ -188,9 +202,11 @@ MasteringMongoDB/
 |--------|------|
 | `slides/` | One deck for all three days. Module openers use `<!-- _header: 'Module N — Title' -->`. |
 | `slides/assets/module-NN/` | SVGs only; referenced as `<img src="assets/module-NN/file.svg" width="720">`. |
-| `slide-exercises/module-NN/` | Lab guides named `exercise-M.N-slug.md`. Each must include `## Steps from the training slides`. |
+| `labs/` | Sequenced student labs matching the outline hands-on blocks and PPT Exercises 1–12, rewritten for live `training_store` field names. |
+| `slide-exercises/module-NN/` | In-class guides named `exercise-M.N-slug.md` or `lab-N.M-slug.md`. Each must include `## Steps from the training slides`. |
 | `datasets/` | One sample application dataset reused on Days 1–3 so modeling, queries, aggregation, and indexes stay consistent. |
-| `sample-app/` | Small, language-agnostic connection demo for the “connect MongoDB to applications” objective. Keep it thin. |
+| `sample-app/` | Small Node.js + Python connection demo for the “connect MongoDB to applications” objective. URI from `MONGODB_URI` only. |
+| `decks/pptx/` | Per-module PowerPoint files generated from Marp manifests. |
 | `scripts/` | Template maintenance pipeline. Do not invent a second build system. |
 
 Module 7 includes replica-set inspection labs (Atlas URI) plus optional instructor-controlled failover and sharding labs. Module 1 now includes classification, a rows-to-document exercise, and a first `mongosh` exploration of `training_store`.
