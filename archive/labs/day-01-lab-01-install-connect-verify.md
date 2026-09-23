@@ -1,7 +1,7 @@
 # Lab 1: Install, Connect, and Verify
 
 **Day 1 · Module 2**  
-**PPT:** `decks/pptx/MongoDB_Module02_Installation_and_Setup.pptx` (Practical Lab)  
+**PPT:** `decks/pptx/MongoDB_Day1_Run_MongoDB_and_Model_Documents.pptx` — Module 2 section (Practical Lab)  
 **Time:** 40 min  
 **Difficulty:** Beginner
 

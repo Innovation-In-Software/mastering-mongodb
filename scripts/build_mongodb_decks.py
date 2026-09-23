@@ -2,9 +2,10 @@
 """CLI driver: manifest JSON -> native .pptx deck for Mastering MongoDB.
 
 Usage:
-    python build_mongodb_decks.py --intro
-    python build_mongodb_decks.py --module 1
-    python build_mongodb_decks.py --all
+    python build_mongodb_decks.py --day 1          # one day deck (intro + that day's modules)
+    python build_mongodb_decks.py --all            # all three day decks
+    python build_mongodb_decks.py --intro          # standalone intro deck
+    python build_mongodb_decks.py --module 1       # standalone module deck
 """
 from __future__ import annotations
 
@@ -64,6 +65,15 @@ MODULE_TOPIC_CHIPS: dict[int, list[str]] = {
 }
 
 
+# Day decks -- file names come from the README "Three-day outline" themes.
+# Which modules belong to each day comes from course.config.yaml.
+DAY_FILE_SLUGS = {
+    1: "Run_MongoDB_and_Model_Documents",
+    2: "Query_and_Transform_Data",
+    3: "Tune_Scale_and_Ship",
+}
+
+
 def load_config() -> dict:
     return yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
 
@@ -79,28 +89,49 @@ def build_deck(manifest_path: Path, out_path: Path, *, default_kicker_fn, chips:
     chips -- this deck's cover-slide topic-chip row (only used on the lead
     record; see MODULE_TOPIC_CHIPS).
     """
-    records = json.loads(manifest_path.read_text(encoding="utf-8"))
+    return build_combined_deck([(manifest_path, default_kicker_fn, chips)], out_path)
+
+
+def build_combined_deck(segments: list[tuple[Path, object, list[str] | None]], out_path: Path) -> dict:
+    """Render several manifests, in order, into one deck at out_path.
+
+    Each segment is (manifest_path, kicker_fn, chips). Every segment keeps its
+    own lead/cover slide and chips; page numbers run on through the whole deck.
+    """
     prs = K.new_presentation()
     layout = K.blank_layout(prs)
 
-    stats = {"title": 0, "diagram": 0, "table": 0, "code": 0, "plain": 0, "skipped": 0}
+    stats = {"title": 0, "topics": 0, "packed": 0, "skipped": 0}
     page_num = 0
-    seen_lead = False
 
-    for record in records:
-        marp_class = (record.get("marp_class") or "").strip()
-        is_lead = marp_class == "lead"
-        kicker = default_kicker_fn(record, is_lead and not seen_lead)
-        if is_lead:
-            seen_lead = True
-            slide, kind = R.render_record(prs, layout, record, None, kicker, REPO_ROOT, chips=chips)
-        else:
-            page_num += 1
-            slide, kind = R.render_record(prs, layout, record, page_num, kicker, REPO_ROOT)
-            if slide is None:
-                page_num -= 1  # skipped record didn't consume a page number
+    for manifest_path, default_kicker_fn, chips in segments:
+        records = json.loads(manifest_path.read_text(encoding="utf-8"))
+        # "X" / "X (cont.)" source records become one flow, re-paginated to fill slides.
+        records = R.merge_continuations(records)
+        # Topics between cover slides are packed as one continuous 20pt flow
+        # (R.render_flow): topics share slides, diagrams float beside text.
+        run: list[dict] = []
 
-        stats[kind] = stats.get(kind, 0) + 1
+        def flush():
+            nonlocal page_num
+            if run:
+                slides = R.render_flow(prs, layout, run, page_num + 1, REPO_ROOT)
+                page_num += len(slides)
+                stats["topics"] += len(run)
+                stats["packed"] += len(slides)
+                run.clear()
+
+        for record in records:
+            if (record.get("marp_class") or "").strip() == "lead":
+                flush()
+                R.render_record(prs, layout, record, None, None, REPO_ROOT, chips=chips)
+                stats["title"] += 1
+            elif (record.get("heading") or "").strip() or any(
+                    (p.get("body_markdown") or "").strip() for p in record["_parts"]):
+                run.append(record)
+            else:
+                stats["skipped"] += 1
+        flush()
 
     K.save_presentation(prs, out_path)
 
@@ -119,20 +150,14 @@ def print_summary(name: str, stats: dict) -> None:
     print(f"\n=== {name} ===")
     print(f"  slides written : {stats['written_slides']}")
     print(f"  file size      : {stats['file_size_kb']} KB")
-    print(f"  title slides   : {stats['title']}")
-    print(f"  diagram slides : {stats['diagram']}")
-    print(f"  table slides   : {stats['table']}")
-    print(f"  code slides    : {stats['code']}")
-    print(f"  plain bullets  : {stats['plain']}")
+    print(f"  cover slides   : {stats['title']}")
+    print(f"  topics         : {stats['topics']}  packed onto {stats['packed']} content slides")
     print(f"  skipped blanks : {stats['skipped']}")
 
 
 def build_intro() -> dict:
-    def kicker_fn(record, is_first_lead):
-        return None if is_first_lead else "Course Introduction"
-
     out_path = OUT_DIR / "MongoDB_Course_Introduction.pptx"
-    stats = build_deck(MANIFEST_DIR / "course_intro.json", out_path, default_kicker_fn=kicker_fn,
+    stats = build_deck(MANIFEST_DIR / "course_intro.json", out_path, default_kicker_fn=intro_kicker,
                         chips=MODULE_TOPIC_CHIPS[0])
     print_summary(out_path.name, stats)
     return stats
@@ -150,25 +175,57 @@ def build_module(n: int) -> dict:
     return stats
 
 
+def day_out_name(day: int) -> str:
+    return f"MongoDB_Day{day}_{DAY_FILE_SLUGS[day]}.pptx"
+
+
+def intro_kicker(record, is_first_lead):
+    return None if is_first_lead else "Course Introduction"
+
+
+def build_day(day: int) -> dict:
+    """Day deck: Day 1 opens with the course introduction, then each module
+    assigned to that day in course.config.yaml, in module order."""
+    modules = sorted(m["id"] for m in load_config()["modules"] if m["day"] == day)
+    if not modules:
+        raise SystemExit(f"course.config.yaml assigns no modules to day {day}")
+
+    segments = []
+    if day == 1:
+        segments.append((MANIFEST_DIR / "course_intro.json", intro_kicker, MODULE_TOPIC_CHIPS[0]))
+    for n in modules:
+        segments.append((MANIFEST_DIR / f"module{n:02d}.json",
+                         lambda record, is_first_lead, n=n: f"Day {day} · Module {n}",
+                         MODULE_TOPIC_CHIPS.get(n)))
+
+    out_path = OUT_DIR / day_out_name(day)
+    stats = build_combined_deck(segments, out_path)
+    print_summary(f"{out_path.name} (modules {', '.join(map(str, modules))})", stats)
+    return stats
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--module", type=int, action="append", choices=range(1, 9),
                         help="Build a single module deck (1-8). May be repeated.")
     parser.add_argument("--intro", action="store_true", help="Build the course-introduction deck.")
-    parser.add_argument("--all", action="store_true", help="Build the intro deck and all 8 modules.")
+    parser.add_argument("--day", type=int, action="append", choices=range(1, 4),
+                        help="Build a day deck (1-3). May be repeated.")
+    parser.add_argument("--all", action="store_true", help="Build all three day decks.")
     args = parser.parse_args()
 
-    if not (args.module or args.intro or args.all):
-        parser.error("nothing to do -- pass --intro, --module N, or --all")
+    if not (args.module or args.intro or args.day or args.all):
+        parser.error("nothing to do -- pass --day N, --all, --intro, or --module N")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
 
     if args.all:
-        build_intro()
-        for n in range(1, 9):
-            build_module(n)
+        for day in (1, 2, 3):
+            build_day(day)
     else:
+        for day in sorted(set(args.day or [])):
+            build_day(day)
         if args.intro:
             build_intro()
         for n in sorted(set(args.module or [])):

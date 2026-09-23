@@ -31,7 +31,7 @@
     "global_index": 5,
     "marp_class": "split",
     "heading": "Aggregation Pipeline Structure",
-    "body_markdown": "An aggregation pipeline is an array of stage documents:\n\n```javascript\ndb.collection.aggregate([\n  { stage1 },\n  { stage2 },\n  { stage3 }\n])\n```\n\nA simple example is:\n\n```javascript\ndb.products.aggregate([\n  {\n    $match: {\n      category: \"Electronics\"\n    }\n  },\n  {\n    $project: {\n      _id: 0,\n      name: 1,\n      price: 1\n    }\n  },\n  {\n    $sort: {\n      price: 1\n    }\n  }\n])\n```\n\nThe pipeline operates as follows:",
+    "body_markdown": "An aggregation pipeline is an array of stage documents:\n\n```javascript\ndb.collection.aggregate([\n  { stage1 },\n  { stage2 },\n  { stage3 }\n])\n```\n\nA simple example is:\n\n```javascript\ndb.orders.aggregate([\n  {\n    $match: {\n      status: \"completed\"\n    }\n  },\n  {\n    $group: {\n      _id: \"$customerId\",\n      totalSpent: {\n        $sum: \"$total\"\n      },\n      orders: {\n        $sum: 1\n      }\n    }\n  },\n  {\n    $sort: {\n      totalSpent: -1\n    }\n  }\n])\n```\n\nThe pipeline operates as follows:",
     "notes": "An aggregation pipeline is an array of stage documents:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/004 - What Is an Aggregation Pipeline-.png"
   },
@@ -46,7 +46,7 @@
     "global_index": 7,
     "marp_class": "split",
     "heading": "Stage order matters",
-    "body_markdown": "The output from one stage becomes the input to the next stage.\n\nThese pipelines do not necessarily mean the same thing:\n\n```javascript\n[\n  { $limit: 5 },\n  { $sort: { price: -1 } }\n]\n```\n\nThis takes an initial set of five documents and sorts those five.\n\n```javascript\n[\n  { $sort: { price: -1 } },\n  { $limit: 5 }\n]\n```\n\nThis finds the five most expensive products.",
+    "body_markdown": "The output from one stage becomes the input to the next stage.\n\nThese pipelines do not necessarily mean the same thing:\n\n```javascript\n[\n  { $group: { _id: \"$customerId\", totalSpent: { $sum: \"$total\" } } },\n  { $match: { status: \"completed\" } }\n]\n```\n\nThis groups all ten orders first. The grouped documents contain only `_id` and `totalSpent`, so the later `status` filter cannot match.\n\n```javascript\n[\n  { $match: { status: \"completed\" } },\n  { $group: { _id: \"$customerId\", totalSpent: { $sum: \"$total\" } } }\n]\n```\n\nThis filters to the six completed orders first and groups only those.",
     "notes": "The output from one stage becomes the input to the next stage.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/009 - Stage Order Matters.png"
   },
@@ -75,7 +75,7 @@
     "global_index": 11,
     "marp_class": "split",
     "heading": "Filter using comparison operators",
-    "body_markdown": "```javascript\ndb.products.aggregate([\n  {\n    $match: {\n      price: {\n        $gte: NumberDecimal(\"40.00\"),\n        $lte: NumberDecimal(\"100.00\")\n      }\n    }\n  }\n])\n```",
+    "body_markdown": "```javascript\ndb.products.aggregate([\n  {\n    $match: {\n      price: {\n        $gte: NumberDecimal(\"50.00\"),\n        $lt: NumberDecimal(\"500.00\")\n      },\n      stock: {\n        $gt: 0\n      }\n    }\n  }\n])\n```",
     "notes": "Covers Filter using comparison operators.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/014 - $match with Comparison Operators.png"
   },
@@ -141,7 +141,7 @@
     "global_index": 20,
     "marp_class": "split",
     "heading": "Group by multiple fields",
-    "body_markdown": "```javascript\ndb.orders.aggregate([\n  {\n    $group: {\n      _id: {\n        status: \"$status\",\n        customerId: \"$customerId\"\n      },\n      orderCount: {\n        $sum: 1\n      },\n      totalValue: {\n        $sum: \"$total\"\n      }\n    }\n  }\n])\n```\n\nEach unique combination of `status` and `customerId` creates a separate group.",
+    "body_markdown": "```javascript\ndb.orders.aggregate([\n  {\n    $group: {\n      _id: {\n        customer: \"$customerId\",\n        status: \"$status\"\n      },\n      orderCount: {\n        $sum: 1\n      },\n      totalAmount: {\n        $sum: \"$total\"\n      }\n    }\n  }\n])\n```\n\nEach unique combination of `status` and `customerId` creates a separate group.",
     "notes": "Each unique combination of `status` and `customerId` creates a separate group.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/047 - Grouping by Multiple Fields.png"
   },
@@ -178,7 +178,7 @@
     "global_index": 25,
     "marp_class": "split",
     "heading": "Select fields",
-    "body_markdown": "`$project` controls the output shape.\n\nIt can:\n\n- Include fields\n- Exclude fields\n- Rename fields\n- Create calculated fields\n- Restructure documents\n- Apply expressions\n\n```javascript\ndb.products.aggregate([\n  {\n    $project: {\n      _id: 0,\n      sku: 1,\n      name: 1,\n      price: 1\n    }\n  }\n])\n```",
+    "body_markdown": "`$project` controls the output shape.\n\nIt can:\n\n- Include fields\n- Exclude fields\n- Rename fields\n- Create calculated fields\n- Restructure documents\n- Apply expressions\n\n```javascript\ndb.orders.aggregate([\n  {\n    $project: {\n      _id: 0,\n      orderId: \"$_id\",\n      customerId: 1,\n      orderDate: 1,\n      itemCount: { $size: \"$items\" },\n      total: { $add: [\"$subtotal\", \"$tax\"] }\n    }\n  }\n])\n```",
     "notes": "Covers Select fields.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/019 - The $project Stage.png"
   },
@@ -186,7 +186,7 @@
     "global_index": 26,
     "marp_class": "split",
     "heading": "Rename a field in the result",
-    "body_markdown": "```javascript\ndb.products.aggregate([\n  {\n    $project: {\n      _id: 0,\n      productName: \"$name\",\n      unitPrice: \"$price\"\n    }\n  }\n])\n```\n\nThis changes only the pipeline result. It does not rename fields in stored documents.",
+    "body_markdown": "```javascript\ndb.orders.aggregate([\n  {\n    $project: {\n      _id: 0,\n      orderId: \"$_id\",\n      customer: \"$customerId\",\n      placedOn: \"$orderDate\",\n      amount: \"$total\",\n      status: 1\n    }\n  }\n])\n```\n\nThis changes only the pipeline result. It does not rename fields in stored documents.",
     "notes": "This changes only the pipeline result. It does not rename fields in stored documents.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/023 - Renaming Fields with $project.png"
   },
@@ -322,7 +322,7 @@
     "global_index": 45,
     "marp_class": "split",
     "heading": "Working with Order-Item Arrays",
-    "body_markdown": "Each order contains an `items` array:\n\n```javascript\n{\n  orderNumber: \"ORD-2026-1002\",\n  items: [\n    {\n      sku: \"ELEC-1002\",\n      productName: \"Mechanical Keyboard\",\n      quantity: 1,\n      lineTotal: NumberDecimal(\"89.99\")\n    },\n    {\n      sku: \"BOOK-2001\",\n      productName: \"MongoDB Fundamentals\",\n      quantity: 1,\n      lineTotal: NumberDecimal(\"49.99\")\n    }\n  ]\n}\n```\n\nTo analyze individual products, the array must first be expanded.",
+    "body_markdown": "Each order contains an `items` array:\n\n```javascript\n{\n  orderNumber: \"ORD-2026-1002\",\n  items: [\n    {\n      productName: \"Laptop\",\n      quantity: 1,\n      price: NumberDecimal(\"1200.00\")\n    },\n    {\n      productName: \"Mouse\",\n      quantity: 2,\n      price: NumberDecimal(\"25.00\")\n    },\n    {\n      productName: \"Bag\",\n      quantity: 1,\n      price: NumberDecimal(\"60.00\")\n    }\n  ]\n}\n```\n\nTo analyze individual products, the array must first be expanded.",
     "notes": "Each order contains an `items` array:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module05/057 - Working with Order Items.png"
   },
@@ -330,8 +330,8 @@
     "global_index": 46,
     "marp_class": "content",
     "heading": "`$unwind`",
-    "body_markdown": "```javascript\ndb.orders.aggregate([\n  {\n    $unwind: \"$items\"\n  }\n])\n```\n\nOne order containing two items becomes two pipeline documents.\n\nThe original stored order is not changed.",
-    "notes": "One order containing two items becomes two pipeline documents."
+    "body_markdown": "```javascript\ndb.orders.aggregate([\n  {\n    $unwind: \"$items\"\n  }\n])\n```\n\nOne order containing three items becomes three pipeline documents.\n\nThe original stored order is not changed.",
+    "notes": "One order containing three items becomes three pipeline documents."
   },
   {
     "global_index": 47,

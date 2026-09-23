@@ -1,5 +1,8 @@
 # DrKaur Course Authoring Guide
 
+> **Note (current layout):** this file indexes the earlier single Marp deck and the guides now kept in `archive/slide-exercises/`. The current decks are in `decks/pptx_new/`, and the exercises and labs they use are listed in [`labs/EXERCISES-INDEX.md`](labs/EXERCISES-INDEX.md) and [`labs/LABS-INDEX.md`](labs/LABS-INDEX.md).
+
+
 Step-by-step playbook for designing instructor-led courses with Marp slides, lab guides, and the Python maintenance scripts in this template.
 
 ---

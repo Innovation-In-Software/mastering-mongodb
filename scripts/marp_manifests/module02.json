@@ -95,8 +95,8 @@
     "global_index": 13,
     "marp_class": "split",
     "heading": "Atlas Provisioning Process",
-    "body_markdown": "MongoDB Atlas provides managed database deployments in the cloud.\n\n1. Create or sign in to a MongoDB Atlas account.\n2. Create an organization or use an existing one.\n3. Create a project.\n4. Create a database deployment.\n5. Select the available free or paid configuration.\n6. Select a cloud provider and region.\n7. Create a database user.\n8. Add your current IP address to the IP access list.\n9. Obtain the deployment’s connection string.\n\nAtlas requires an appropriate database user and an allowed client IP address before the client can connect.",
-    "notes": "Nine-step Atlas flow: account, org, project, deployment, tier, provider, database user, IP access list, connection string.",
+    "body_markdown": "MongoDB Atlas provides managed database deployments in the cloud.\n\n1. Create or sign in to a MongoDB Atlas account.\n2. Create an organization or use an existing one.\n3. Create a project.\n4. Create a database deployment.\n5. Select the available free or paid configuration.\n6. Select a cloud provider and region.\n7. Add your current IP address to the IP access list.\n8. Create a database user.\n9. Obtain the deployment’s connection string.\n\nAtlas requires an appropriate database user and an allowed client IP address before the client can connect.",
+    "notes": "Nine-step Atlas flow: account, org, project, deployment, tier, provider, IP access list, database user, connection string.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module02/008 - Cloud Provisioning Process.png"
   },
   {
@@ -186,7 +186,7 @@
     "global_index": 25,
     "marp_class": "split",
     "heading": "Inserting Your First Document",
-    "body_markdown": "```javascript\ndb.products.insertOne({\n  name: \"Wireless Mouse\",\n  category: \"Electronics\",\n  price: 39.99,\n  stock: 120\n})\n```\n\nMongoDB adds an `_id` field if one is not supplied:\n\n```javascript\n{\n  acknowledged: true,\n  insertedId: ObjectId(\"...\")\n}\n```",
+    "body_markdown": "```javascript\ndb.products.insertOne({\n  sku: \"TS-001\",\n  name: \"Classic Tee\",\n  category: \"Apparel\",\n  price: 29.99,\n  stock: 120\n})\n```\n\nMongoDB adds an `_id` field if one is not supplied:\n\n```javascript\n{\n  acknowledged: true,\n  insertedId: ObjectId(\"...\")\n}\n```",
     "notes": "insertOne() adds a product document; MongoDB generates an _id automatically when one isn't supplied.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module02/034 - Inserting Your First Document.png"
   },
@@ -194,7 +194,7 @@
     "global_index": 26,
     "marp_class": "split",
     "heading": "Retrieving Documents",
-    "body_markdown": "```javascript\ndb.products.find()\n```\n\nA more targeted query is:\n\n```javascript\ndb.products.find({\n  category: \"Electronics\"\n})\n```",
+    "body_markdown": "```javascript\ndb.products.find()\n```\n\nA more targeted query is:\n\n```javascript\ndb.products.find({\n  category: \"Apparel\"\n})\n```",
     "notes": "find() returns everything in the collection; a filter narrows it to a specific category.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module02/036 - Retrieving and Verifying Data.png"
   },
@@ -209,14 +209,14 @@
     "global_index": 28,
     "marp_class": "content",
     "heading": "Verifying the Database and Collection",
-    "body_markdown": "```javascript\nshow dbs\nshow collections\n```\n\nThe environment should now contain:\n\n```text\ntraining_store\n    └── products\n          ├── Wireless Mouse\n          ├── Mechanical Keyboard\n          └── MongoDB Fundamentals\n```",
+    "body_markdown": "```javascript\nshow dbs\nshow collections\n```\n\nThe environment should now contain:\n\n```text\ntraining_store\n    └── products\n          ├── Classic Tee\n          ├── Mechanical Keyboard\n          └── MongoDB Fundamentals\n```",
     "notes": "show dbs / show collections now surface training_store and products, holding the three inserted documents."
   },
   {
     "global_index": 29,
     "marp_class": "content",
     "heading": "Updating a Document",
-    "body_markdown": "```javascript\ndb.products.updateOne(\n  { name: \"Wireless Mouse\" },\n  { $set: { stock: 110 } }\n)\n```\n\nVerify the change:\n\n```javascript\ndb.products.findOne({\n  name: \"Wireless Mouse\"\n})\n```",
+    "body_markdown": "```javascript\ndb.products.updateOne(\n  { name: \"Classic Tee\" },\n  { $set: { stock: 110 } }\n)\n```\n\nVerify the change:\n\n```javascript\ndb.products.findOne({\n  name: \"Classic Tee\"\n})\n```",
     "notes": "updateOne() with $set changes one field; findOne() verifies the change took effect."
   },
   {
@@ -379,8 +379,8 @@
     "global_index": 52,
     "marp_class": "split",
     "heading": "Module Summary",
-    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- MongoDB may run locally, in a container, on a server, or as a managed service\n- `mongod` is the server; `mongosh` and Compass are clients\n- Connection strings describe how clients reach MongoDB\n- Ping verifies connectivity; write-and-read verifies usable access\n- Protect credentials and network access\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-02/12-client-connection-options.svg\" alt=\"Three clients converging on one MongoDB deployment\" width=\"720\">\n\n</div>\n</div>",
-    "notes": "This slide includes a diagram — Module Summary.\n\nThe slide title is: Module Summary.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: MongoDB may run locally, in a container, on a server, or as a managed service.\n\nBullet 2 on the slide: mongod is the server; mongosh and Compass are clients.\n\nBullet 3 on the slide: Connection strings describe how clients reach MongoDB.\n\nBullet 4 on the slide: Ping verifies connectivity; write-and-read verifies usable access.\n\nBullet 5 on the slide: Protect credentials and network access.\n\nThe figure on this slide is titled: Three clients converging on one MongoDB deployment.",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- MongoDB may run locally, in a container, on a server, or as a managed service\n- `mongod` is the server; `mongosh` and Compass are clients\n- Connection strings describe how clients reach MongoDB\n- Ping verifies connectivity; write-and-read verifies usable access\n- Protect credentials and network access\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-02/12-client-connection-options.svg\" alt=\"Module 2 flow: deploy, install mongod, connect, first write/read, secure and troubleshoot\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Module Summary.\n\nThe slide title is: Module Summary.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: MongoDB may run locally, in a container, on a server, or as a managed service.\n\nBullet 2 on the slide: mongod is the server; mongosh and Compass are clients.\n\nBullet 3 on the slide: Connection strings describe how clients reach MongoDB.\n\nBullet 4 on the slide: Ping verifies connectivity; write-and-read verifies usable access.\n\nBullet 5 on the slide: Protect credentials and network access.\n\nThe figure on this slide shows the Module 2 flow: deploy, install mongod, connect, first write/read, secure and troubleshoot.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module02/045 - Module Summary.png"
   },
   {

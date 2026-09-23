@@ -67,7 +67,7 @@
     "global_index": 10,
     "marp_class": "split",
     "heading": "Use consistent field names",
-    "body_markdown": "Avoid several names for the same concept:\n\n```javascript\n{ customerId: ObjectId(\"...\") }\n{ customer_id: ObjectId(\"...\") }\n{ custId: ObjectId(\"...\") }\n```\n\nChoose and enforce one:\n\n```javascript\n{\n  customerId: ObjectId(\"...\")\n}\n```\n\nA common convention is:",
+    "body_markdown": "Avoid several names for the same concept:\n\n```javascript\n{ productId: ObjectId(\"...\") }\n{ product_id: ObjectId(\"...\") }\n{ prodId: ObjectId(\"...\") }\n```\n\nChoose and enforce one:\n\n```javascript\n{\n  productId: ObjectId(\"...\")\n}\n```\n\nA common convention is:",
     "notes": "Avoid several names for the same concept:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/010 - Use Consistent Field Names and Types.png"
   },
@@ -96,7 +96,7 @@
     "global_index": 14,
     "marp_class": "split",
     "heading": "Preserve historical snapshots",
-    "body_markdown": "An order should preserve the information applicable when it was placed.\n\n```javascript\n{\n  items: [\n    {\n      productId: ObjectId(\"...\"),\n      productName: \"Wireless Mouse\",\n      unitPrice: NumberDecimal(\"39.99\")\n    }\n  ]\n}\n```\n\nIf the current product is renamed or repriced, the historical order remains accurate.\n\nThis is intentional duplication, not accidental inconsistency.",
+    "body_markdown": "An order should preserve the information applicable when it was placed.\n\n```javascript\n{\n  items: [\n    {\n      productId: \"P101\",\n      productName: \"Course Bundle\",\n      unitPrice: NumberDecimal(\"89.00\")\n    }\n  ]\n}\n```\n\nIf the current product is renamed or repriced, the historical order remains accurate.\n\nThis is intentional duplication, not accidental inconsistency.",
     "notes": "An order should preserve the information applicable when it was placed.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/013 - Preserve Historical Snapshots.png"
   },
@@ -126,7 +126,7 @@
     "global_index": 18,
     "marp_class": "split",
     "heading": "Plan for Schema Evolution",
-    "body_markdown": "Production schemas change over time.\n\nSuppose version 1 uses:\n\n```javascript\n{\n  name: \"Wireless Mouse\",\n  price: NumberDecimal(\"39.99\")\n}\n```\n\nVersion 2 adds:\n\n```javascript\n{\n  schemaVersion: 2,\n  active: true,\n  pricing: {\n    amount: NumberDecimal(\"39.99\"),\n    currency: \"CAD\"\n  }\n}\n```\n\nUseful migration approaches include:",
+    "body_markdown": "Production schemas change over time.\n\nSuppose version 1 uses:\n\n```javascript\n{\n  name: \"Wireless Mouse\",\n  price: NumberDecimal(\"39.99\")\n}\n```\n\nVersion 2 adds:\n\n```javascript\n{\n  schemaVersion: 2,\n  category: \"Electronics\"\n}\n```\n\nUseful migration approaches include:",
     "notes": "Production schemas change over time.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/012 - Plan for Schema Evolution.png"
   },
@@ -148,7 +148,7 @@
     "global_index": 21,
     "marp_class": "split",
     "heading": "Understand query shapes",
-    "body_markdown": "A query shape includes:\n\n- Filter fields\n- Operators\n- Sort fields\n- Projection\n- Collation\n- Limit\n- Aggregation stages\n\nExample:\n\n```javascript\ndb.orders.find(\n  {\n    customerId: customerId,\n    status: \"Completed\"\n  },\n  {\n    orderNumber: 1,\n    total: 1,\n    orderedAt: 1\n  }\n).sort({\n  orderedAt: -1\n}).limit(20)\n```\n\nPotential index:\n\n```javascript\ndb.orders.createIndex({\n  customerId: 1,\n  status: 1,\n  orderedAt: -1\n})\n```",
+    "body_markdown": "A query shape includes:\n\n- Filter fields\n- Operators\n- Sort fields\n- Projection\n- Collation\n- Limit\n- Aggregation stages\n\nExample:\n\n```javascript\ndb.orders.find(\n  {\n    customerId: customerId,\n    status: \"PAID\"\n  },\n  {\n    orderNumber: 1,\n    total: 1,\n    orderDate: 1\n  }\n).sort({\n  orderDate: -1\n}).limit(20)\n```\n\nPotential index:\n\n```javascript\ndb.orders.createIndex({\n  customerId: 1,\n  status: 1,\n  orderDate: -1\n})\n```",
     "notes": "A query shape includes:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/026 - Design Indexes Around Query Shapes.png"
   },
@@ -163,7 +163,7 @@
     "global_index": 23,
     "marp_class": "split",
     "heading": "Project only needed fields",
-    "body_markdown": "For application queries:\n\n```javascript\ndb.products.find(\n  {\n    category: \"Electronics\"\n  },\n  {\n    _id: 0,\n    sku: 1,\n    name: 1,\n    price: 1\n  }\n)\n```\n\nThis reduces unnecessary network transfer and application processing.\n\nWithin aggregation, early projection may help when it removes very large fields, although MongoDB can optimize straightforward field dependencies automatically.",
+    "body_markdown": "For application queries:\n\n```javascript\ndb.products.find(\n  {\n    category: \"Books\"\n  },\n  {\n    _id: 0,\n    sku: 1,\n    name: 1,\n    price: 1\n  }\n)\n```\n\nThis reduces unnecessary network transfer and application processing.\n\nWithin aggregation, early projection may help when it removes very large fields, although MongoDB can optimize straightforward field dependencies automatically.",
     "notes": "For application queries:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/017 - Return Only Required Fields.png"
   },
@@ -192,7 +192,7 @@
     "global_index": 27,
     "marp_class": "split",
     "heading": "Index important queries",
-    "body_markdown": "Create indexes for frequent, important query patterns:\n\n```javascript\ndb.products.createIndex(\n  {\n    sku: 1\n  },\n  {\n    unique: true\n  }\n)\n\ndb.products.createIndex({\n  category: 1,\n  price: 1\n})\n\ndb.orders.createIndex({\n  customerId: 1,\n  orderedAt: -1\n})\n\ndb.reviews.createIndex({\n  productId: 1,\n  createdAt: -1\n})\n```",
+    "body_markdown": "Create indexes for frequent, important query patterns:\n\n```javascript\ndb.products.createIndex(\n  {\n    sku: 1\n  },\n  {\n    unique: true\n  }\n)\n\ndb.products.createIndex({\n  category: 1,\n  price: 1\n})\n\ndb.orders.createIndex({\n  customerId: 1,\n  status: 1,\n  orderDate: -1\n})\n\ndb.reviews.createIndex({\n  productId: 1,\n  createdAt: -1\n})\n```",
     "notes": "Create indexes for frequent, important query patterns:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module08/025 - Indexing Best Practices.png"
   },

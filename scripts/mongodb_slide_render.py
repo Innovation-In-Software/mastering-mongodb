@@ -8,21 +8,24 @@ in mongodb_deck_kit.py, restyled to match the Innovation In Software house
 theme (ported from the sibling MD287 project's md287_deck_kit.py):
 
 - ``lead`` records (module/course openers) -> the white-background
-  ``K.chapter_slide`` module-divider layout.
-- Plain bullet/objectives slides -> auto-shrinking red title block + bullets
-  styled with the ported marker/enumerator/lead-in logic + a cream KEY
-  TAKEAWAY bar when the source has a "Key message:" callout.
-- Split+diagram slides -> title block + left bullet panel + right diagram
-  (uniform-scaled, centered, never stretched) + same takeaway/rail/footer.
-- Table slides -> title block + navy-header/zebra-row table.
-- Code slides -> title block + Consolas CARD_BG/CARD_LINE card box(es).
+  ``K.chapter_slide`` cover layout (no tag or byline).
+- Everything between two covers -> one packed flow (render_flow): topics
+  run on from slide to slide at a fixed 18pt body size (tables and code
+  14pt), a topic starting
+  mid-slide gets a bold red subheading, a slide opening mid-topic is titled
+  "<topic> (cont.)", diagrams float at the right of their topic's text,
+  short lists run in two columns, and key takeaways are inline cards.
 
-All slides get the red/black right-edge rail, 14pt gray footer, and rotated
-red page number via ``K.add_rail_and_footer``.
+Consecutive "X" / "X (cont.)" source records (and an exercise/lab intro and
+its step records) are merged into one topic first (merge_continuations).
+Nothing is dropped: every block is drawn, and only identical repeated
+blocks within a merged topic are shown once. Each slide's speaker notes hold
+the notes of every topic that starts on it. Titles are 20-24pt, and "Innovation In Software" appears nowhere but that
+footer.
 
-Markdown parsing (bullets, tables, code fences, split-div extraction, dedup
-of repeated blocks) is unchanged from the original renderer -- only the
-drawing calls were restyled.
+All slides get the red/black right-edge rail, copyright footer, and rotated
+red page number via ``K.add_rail_and_footer``. render_record (one record ->
+its own slides) is still used for cover slides.
 """
 from __future__ import annotations
 
@@ -242,6 +245,10 @@ def parse_blocks(text: str) -> list[dict]:
             rest = re.sub(r"^\*\*key message:\*\*\s*", "", para_text, flags=re.I)
             blocks.append({"type": "keymsg", "text": strip_markdown_title(rest)})
         else:
+            # A stray markdown heading ("### Advantages of ...") shows as a bold line.
+            heading = re.match(r"^#{1,6}\s+(.*)$", para_text)
+            if heading:
+                para_text = f"**{strip_markdown_title(heading.group(1))}**"
             blocks.append({"type": "bullets", "items": [(0, "para", "", para_text)]})
 
     return _dedupe_repeated_blocks(blocks)
@@ -256,6 +263,8 @@ def _block_signature(b: dict):
         return ("code", b["text"])
     if b["type"] == "keymsg":
         return ("keymsg", b["text"])
+    if b["type"] in ("diagram", "float"):
+        return (b["type"], str(b["path"]))
     return ("unknown",)
 
 
@@ -282,68 +291,154 @@ def _dedupe_repeated_blocks(blocks: list[dict]) -> list[dict]:
 
 
 def pop_keymsg(blocks: list[dict]) -> tuple[list[dict], str | None]:
-    """Pull the (at most one) keymsg block out; it renders as a slide-level
+    """Pull the keymsg blocks out; together they render as one slide-level
     KEY TAKEAWAY bar pinned to the bottom, not inline with the other blocks."""
     out = []
-    keymsg_text = None
+    msgs: list[str] = []
     for b in blocks:
-        if b["type"] == "keymsg" and keymsg_text is None:
-            keymsg_text = b["text"]
+        if b["type"] == "keymsg":
+            if b["text"] and b["text"] not in msgs:
+                msgs.append(b["text"])
             continue
         out.append(b)
-    return out, keymsg_text
+    return out, (" ".join(msgs) or None)
+
+
+# ---------------------------------------------------------------------------
+# Brand scrub -- "Innovation In Software" appears on slides only in the
+# copyright footer, never in slide body text.
+# ---------------------------------------------------------------------------
+_BRAND_RES = (
+    re.compile(r"Innovation In Software(?: Corporation)?\s*[·•|]\s*", re.I),
+    re.compile(r"\s*[·•|]\s*Innovation In Software(?: Corporation)?", re.I),
+    re.compile(r"\s*\bInnovation In Software(?: Corporation)?\b\s*", re.I),
+)
+
+
+def scrub_brand(text: str | None) -> str | None:
+    if not text:
+        return text
+    for rx in _BRAND_RES:
+        text = rx.sub(" " if rx is _BRAND_RES[2] else "", text)
+    return text
+
+
+# ---------------------------------------------------------------------------
+# Continuation merge -- the source splits many topics into "X", "X (cont.)",
+# "X (cont.)" records holding a few lines each. Consecutive records on the
+# same topic are merged into one flow and re-paginated to fill each slide.
+# ---------------------------------------------------------------------------
+_CONT_RE = re.compile(r"\s*\((?:cont(?:inued)?\.?)\)\s*$", re.I)
+
+
+def base_heading(heading: str | None) -> str:
+    return _CONT_RE.sub("", (heading or "").strip())
+
+
+# "Lab 7.8 — Analyze Query Routing", "Lab 7.8 — Steps 1–2", ... are one activity.
+_ACTIVITY_RE = re.compile(r"^((?:exercise|lab|demo|challenge)\s+\d+(?:\.\d+)*)\b", re.I)
+
+
+def _activity_id(heading: str) -> str | None:
+    m = _ACTIVITY_RE.match(strip_markdown_title(heading or ""))
+    return m.group(1).lower() if m else None
+
+
+def merge_continuations(records: list[dict]) -> list[dict]:
+    """Merge consecutive records on the same topic: the same heading apart
+    from "(cont.)", or the same exercise / lab / demo number."""
+    out: list[dict] = []
+    for r in records:
+        is_lead = (r.get("marp_class") or "").strip() == "lead"
+        base = base_heading(r.get("heading"))
+        prev = out[-1] if out else None
+        same_activity = prev is not None and _activity_id(base) is not None \
+            and _activity_id(base) == _activity_id(prev.get("heading"))
+        if (prev is not None and not is_lead and base
+                and (prev.get("marp_class") or "").strip() != "lead"
+                and (base_heading(prev.get("heading")) == base or same_activity)):
+            prev["_parts"].append(r)
+            continue
+        out.append({**r, "heading": base or r.get("heading"), "_parts": [r]})
+    return out
 
 
 # ---------------------------------------------------------------------------
 # Sizing heuristics (character-count based -- no font-metrics dependency)
+#
+# Body text never goes below K.MIN_PT (20pt). Each slide group picks the
+# largest size from PT_LADDER that doesn't need more slides than 20pt would,
+# so sparse content grows to fill the slide instead of leaving it empty.
+# Content that doesn't fit one slide continues on "(cont.)" slides.
 # ---------------------------------------------------------------------------
-CHAR_W = 0.0073  # inches per point per character, ~Nirmala UI at BODY_PT_BASE
+CHAR_W = 0.0066  # inches per point per character, ~Nirmala UI (calibrated against a render)
+
+PT_LADDER = (28, 26, 24, 22, 20)
+MAX_TABLE_PT = 24
+MAX_CODE_PT = 24
+BULLET_SPACE_AFTER = 0.20  # of the font size
+LINE_SPACING = 0.90  # PowerPoint line-spacing multiple for body text (Nirmala UI has generous leading)
+FIT_MARGIN = 0.97  # leave a little slack instead of maxing out to the pixel
+GAP = int(Inches(0.08))
+CONT_SUFFIX = " (cont.)"
+IMAGE_MIN_H = int(Inches(2.6))  # a diagram never shrinks below this to share a slide
+
+
+CODE_PT = 14.0   # code blocks
+TABLE_PT = 14.0  # table cells
+
+
+def _code_pt(pt) -> float:
+    return CODE_PT
+
+
+def _table_scale(pt) -> float:
+    return TABLE_PT / K.TABLE_PT
 
 
 def _chars_per_line(width, pt) -> int:
     return max(10, int(int(width) / 914400 / (CHAR_W * pt)))
 
 
-BODY_PT_BASE = 13.0
-# Absolute pt sizes this deck's bullet text may render at, largest first. A
-# sparse slide (few bullets, lots of room) gets bumped up toward 24pt instead
-# of sitting at a fixed 13pt with dead space below; a dense slide still falls
-# back down this same ladder for overflow protection, same as before.
-BODY_PT_LADDER = (20, 18, 16, 14, 12, 11, 10, 9, 8)
-SCALE_STEPS = tuple(pt / BODY_PT_BASE for pt in BODY_PT_LADDER)
-BULLET_SPACE_AFTER_PT = 5.0  # was 3.0 -- more breathing room between bullets
-FIT_MARGIN = 0.94  # leave a little slack instead of maxing out to the pixel
-
-CODE_PT_STEPS = (17, 15, 13, 12, 11, 10, 9, 8, 7, 6)
-
-
 def _item_lines(item, width, pt) -> int:
     level, kind, marker, text = item
     indent_w = int(Inches(0.28)) * level
     usable = max(int(Inches(1.0)), int(width) - indent_w - int(Inches(0.32)))
-    cpl = _chars_per_line(usable, pt)
-    return max(1, -(-(len(text) + 3) // cpl))
+    return _wrapped_lines(text, _chars_per_line(usable, pt) - 3)
 
 
-def estimate_bullets_height(items, width, scale: float) -> int:
-    pt = BODY_PT_BASE * scale
-    line_h = int(Inches(pt / 72 * 1.32))
-    h = int(Inches(0.05))
+def _wrapped_lines(text: str, cpl: int) -> int:
+    """Lines `text` wraps to, simulating word wrap. Widths are in body-font
+    characters: inline `code` (Consolas) and **bold** runs are wider than
+    regular Nirmala UI text, and a word never splits across lines unless it
+    is longer than a whole line."""
+    words: list[float] = []
+    for seg, style in parse_inline(text):
+        weight = 1.32 if style.get("code") else 1.08 if style.get("bold") else 1.0
+        for w in seg.split():
+            words.append(len(w) * weight)
+    cpl = max(8, cpl)
+    lines, cur = 1, 0.0
+    for w in words:
+        need = w if cur == 0 else cur + 1 + w
+        if need <= cpl:
+            cur = need
+            continue
+        if cur > 0:
+            lines += 1
+        while w > cpl:  # an over-long token breaks mid-word
+            lines += 1
+            w -= cpl
+        cur = w
+    return lines
+
+
+def estimate_bullets_height(items, width, pt) -> int:
+    line_h = int(Inches(pt / 72 * 1.2 * LINE_SPACING))
+    h = int(Inches(0.03))
     for item in items:
-        h += _item_lines(item, width, pt) * line_h + int(Pt(BULLET_SPACE_AFTER_PT * scale))
-    return h
-
-
-def _table_scale(scale: float) -> float:
-    """Sparse-table growth is capped lower than bullet growth (18pt max)."""
-    return min(scale, K.TABLE_MAX_SCALE)
-
-
-def estimate_table_height(headers, rows, width, scale: float) -> int:
-    return K.estimate_table_height(headers, rows, width, scale=_table_scale(scale))
-
-
-GAP = int(Inches(0.10))
+        h += _item_lines(item, width, pt) * line_h + int(Pt(pt * BULLET_SPACE_AFTER))
+    return h - int(Pt(pt * BULLET_SPACE_AFTER))  # no spacing after the last item
 
 
 # ---------------------------------------------------------------------------
@@ -383,36 +478,258 @@ def _extract_chip_items(value: str) -> list[str] | None:
     return parts
 
 
-def estimate_stack_height(blocks, width, scale: float) -> int:
-    total = 0
-    for b in blocks:
-        callout = detect_callout_block(b)
-        if callout:
-            label, value = callout
-            chips = _extract_chip_items(value)
-            if chips:
-                total += K.estimate_callout_chip_height(width, label, chips)
-            else:
-                total += K.estimate_callout_text_height(width, label, len(strip_markdown_title(value)))
-        elif b["type"] == "bullets":
-            total += estimate_bullets_height(b["items"], width, scale)
-        elif b["type"] == "table":
-            total += estimate_table_height(b["headers"], b["rows"], width, scale)
-        else:
-            continue
-        total += GAP
-    return total
+def block_height(b: dict, width, pt) -> int:
+    """Estimated drawn height of one block at body size pt (no GAP)."""
+    if b["type"] == "image":
+        return b.get("h", b["min_h"])
+    callout = detect_callout_block(b)
+    if callout:
+        label, value = callout
+        chips = _extract_chip_items(value)
+        if chips:
+            return K.estimate_callout_chip_height(width, label, chips)
+        return K.estimate_callout_text_height(width, label, len(strip_markdown_title(value)), pt)
+    if b["type"] == "bullets":
+        return estimate_bullets_height(b["items"], width, pt)
+    if b["type"] == "table":
+        return K.estimate_table_height(b["headers"], b["rows"], width, scale=_table_scale(pt))
+    if b["type"] == "code":
+        return K.estimate_code_height(b["text"], width, _code_pt(pt))
+    return 0
 
 
-def fit_stack_scale(blocks, width, available: int) -> float:
-    stackable = [b for b in blocks if b["type"] in ("bullets", "table")]
-    if not stackable:
+def stack_height(blocks, width, pt) -> int:
+    if not blocks:
+        return 0
+    return sum(block_height(b, width, pt) + GAP for b in blocks) - GAP
+
+
+def _aspect(path: Path) -> float:
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            return im.size[0] / max(1, im.size[1])
+    except Exception:
         return 1.0
-    budget = max(1, int(available * FIT_MARGIN))
-    for scale in SCALE_STEPS:
-        if estimate_stack_height(stackable, width, scale) <= budget:
-            return scale
-    return SCALE_STEPS[-1]
+
+
+def image_block(path: Path, width, max_h: int) -> dict:
+    """A diagram in the flow: wants its natural height at full width (capped
+    at a full slide), may shrink to IMAGE_MIN_H to share a slide with text."""
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            iw, ih = im.size
+        natural = int(int(width) * ih / max(1, iw))
+    except Exception:
+        natural = max_h
+    desired = min(max_h, natural)
+    return {"type": "image", "path": path, "desired": desired,
+            "min_h": min(desired, max(IMAGE_MIN_H, int(desired * 0.45)))}
+
+
+# ---------------------------------------------------------------------------
+# Pagination -- pack blocks, in source order, into pages of a given height.
+# A block that doesn't fit in what's left of a page is split at a natural
+# boundary: bullets between items, tables between rows (header repeated),
+# code between lines (preferring a blank line). Callout cards never split.
+# ---------------------------------------------------------------------------
+def _largest_prefix(n: int, fits) -> int:
+    k = 0
+    while k < n and fits(k + 1):
+        k += 1
+    return k
+
+
+def split_block(b: dict, width, room: int, page_empty: bool, pt, *, min_side: int = 2):
+    """(head, tail): head fits in `room`, tail continues on the next page.
+
+    head is None when nothing useful fits (move the whole block on); tail is
+    None when the whole block fits. On an empty page at least one item / row /
+    line is always taken so pagination can't stall.
+    """
+    if detect_callout_block(b) or b["type"] not in ("bullets", "table", "code"):
+        return (b, None) if page_empty else (None, b)
+
+    if b["type"] == "bullets":
+        items = b["items"]
+        n = len(items)
+        k = _largest_prefix(n, lambda k: estimate_bullets_height(items[:k], width, pt) <= room)
+        # Don't strand a lead-in line ("**Step 2**", "Examples:") or a parent
+        # bullet at the bottom of a page, away from what it introduces.
+        while 1 < k < n and (items[k - 1][1] == "para" or items[k][0] > items[k - 1][0]):
+            k -= 1
+        if k >= n:
+            return b, None
+        # A split list keeps at least min_side items on each side.
+        if n - k < min_side:
+            k = n - min_side
+        if k < min_side and not page_empty:
+            return None, b
+        k = max(1, k)
+        return {"type": "bullets", "items": items[:k]}, {"type": "bullets", "items": items[k:]}
+
+    if b["type"] == "table":
+        headers, rows = b["headers"], b["rows"]
+        n = len(rows)
+        k = _largest_prefix(
+            n, lambda k: K.estimate_table_height(headers, rows[:k], width, scale=_table_scale(pt)) <= room)
+        if k == 0:
+            if not page_empty:
+                return None, b
+            k = 1
+        if k >= n:
+            return b, None
+        return ({"type": "table", "headers": headers, "rows": rows[:k]},
+                {"type": "table", "headers": headers, "rows": rows[k:]})
+
+    # code
+    lines = b["text"].split("\n")
+    n = len(lines)
+    k = _largest_prefix(
+        n, lambda k: K.estimate_code_height("\n".join(lines[:k]), width, _code_pt(pt)) <= room)
+    if k < n:
+        # Prefer to break at a blank line a few lines back, and never leave a
+        # single orphan line for the next slide.
+        for j in range(k - 1, max(1, k - 5), -1):
+            if not lines[j].strip():
+                k = j
+                break
+        if n - k == 1 and k > 2:
+            k -= 1
+    if k < 3 and not page_empty:
+        return None, b
+    k = max(1, k)
+    if k >= n:
+        return b, None
+    head = "\n".join(lines[:k]).rstrip("\n")
+    tail = "\n".join(lines[k:]).lstrip("\n")
+    return {**b, "text": head}, {**b, "text": tail}
+
+
+KEEP_WHOLE_BULLETS = 4  # lists this short move to the next slide rather than split
+
+
+def _is_lead_in(b: dict, nxt: dict | None = None) -> bool:
+    """A lone paragraph that introduces the block after it: one ending in ":",
+    or a short caption line directly above a code sample."""
+    if b["type"] != "bullets" or len(b["items"]) != 1 or b["items"][0][1] != "para":
+        return False
+    text = strip_markdown_title(b["items"][0][3]).rstrip()
+    if text.endswith(":"):
+        return True
+    return nxt is not None and nxt["type"] == "code" and len(text) <= 80
+
+
+def _first_unit_height(b: dict, width, pt) -> int:
+    """Smallest piece of b that could open a page (for keep-with-next)."""
+    if b["type"] == "image":
+        return b["min_h"]
+    if detect_callout_block(b):
+        return block_height(b, width, pt)
+    if b["type"] == "bullets":
+        return estimate_bullets_height(b["items"][:1], width, pt)
+    if b["type"] == "table":
+        return K.estimate_table_height(b["headers"], b["rows"][:1], width, scale=_table_scale(pt))
+    if b["type"] == "code":
+        return K.estimate_code_height("\n".join(b["text"].split("\n")[:3]), width, _code_pt(pt))
+    return 0
+
+
+def _keep_whole(b: dict) -> bool:
+    if b["type"] in ("code", "table"):
+        return True
+    return b["type"] == "bullets" and len(b["items"]) <= KEEP_WHOLE_BULLETS
+
+
+def _keep_with_height(nxt: dict, width, cap_rest: int, pt) -> int:
+    """How much of the next block must share a slide with a lead-in: all of
+    it when it will move as one piece anyway, otherwise its first unit."""
+    full = block_height(nxt, width, pt) + GAP
+    if _keep_whole(nxt) and full <= cap_rest * FIT_MARGIN:
+        return full
+    return _first_unit_height(nxt, width, pt)
+
+
+def _paginate_once(blocks, width, cap_first: int, cap_rest: int, pt,
+                   keep_whole: bool = True) -> list[list[dict]]:
+    pages: list[list[dict]] = [[]]
+    used, cap = 0, cap_first
+    queue = [({k: v for k, v in b.items() if k != "h"} if b["type"] == "image" else b) for b in blocks]
+
+    def new_page():
+        nonlocal used, cap
+        pages.append([])
+        used, cap = 0, cap_rest
+
+    while queue:
+        b = queue.pop(0)
+        limit = int(cap * FIT_MARGIN)
+        room = limit - used - (GAP if pages[-1] else 0)
+
+        if b["type"] == "image":
+            # A diagram takes what's left of the slide if that's enough for
+            # it, otherwise it starts the next slide.
+            if room >= b["min_h"] or not pages[-1]:
+                h = max(min(b["desired"], room), min(b["min_h"], room))
+                pages[-1].append({**b, "h": h})
+                used += h + (GAP if len(pages[-1]) > 1 else 0)
+            else:
+                queue.insert(0, b)
+                new_page()
+            continue
+
+        h = block_height(b, width, pt)
+        # Keep a lead-in line on the same slide as the start of what it introduces.
+        if pages[-1] and queue and _is_lead_in(b, queue[0]) and \
+                h + GAP + _keep_with_height(queue[0], width, cap_rest, pt) > room:
+            queue.insert(0, b)
+            new_page()
+            continue
+        if h <= room:
+            pages[-1].append(b)
+            used += h + (GAP if len(pages[-1]) > 1 else 0)
+            continue
+        # A code block, table, or short list that fits on a slide of its own
+        # moves over whole instead of being cut in two.
+        if keep_whole and pages[-1] and _keep_whole(b) and h <= cap_rest * FIT_MARGIN:
+            queue.insert(0, b)
+            new_page()
+            continue
+        head, tail = split_block(b, width, room, not pages[-1], pt)
+        if head is not None:
+            pages[-1].append(head)
+            used += block_height(head, width, pt) + (GAP if len(pages[-1]) > 1 else 0)
+        if tail is None:
+            continue
+        queue.insert(0, tail)
+        new_page()
+    if len(pages) > 1 and not pages[-1]:
+        pages.pop()
+    return pages
+
+
+def paginate(blocks, width, cap_first: int, cap_rest: int, pt) -> list[list[dict]]:
+    """Pack blocks onto as few slides as possible, then even them out: once
+    N slides are needed, retry with a lower per-slide target so the content
+    spreads across those N slides instead of leaving a near-empty last one."""
+    pages = _paginate_once(blocks, width, cap_first, cap_rest, pt)
+    if len(pages) > 1:
+        # Keeping code/tables/short lists whole is a nicety, not worth a
+        # whole extra slide -- drop it when that saves one.
+        loose = _paginate_once(blocks, width, cap_first, cap_rest, pt, keep_whole=False)
+        if len(loose) < len(pages):
+            pages = loose
+    n = len(pages)
+    if n <= 1 or any(b["type"] == "image" for b in blocks):
+        return pages
+    total = stack_height(blocks, width, pt)
+    for slack in (1.10, 1.20, 1.35):
+        target = int(total / n * slack / FIT_MARGIN)
+        trial = _paginate_once(blocks, width, min(cap_first, target), min(cap_rest, target), pt)
+        if len(trial) == n:
+            return trial
+    return pages
 
 
 # ---------------------------------------------------------------------------
@@ -432,9 +749,8 @@ def _add_bullet_text(paragraph, text: str, pt: float) -> None:
             K.add_rich_run(paragraph, [(seg_text, style)], size=pt, color=K.INK)
 
 
-def draw_bullets(slide, x, y, width, items, scale: float) -> int:
-    pt = BODY_PT_BASE * scale
-    height = estimate_bullets_height(items, width, scale)
+def draw_bullets(slide, x, y, width, items, pt) -> int:
+    height = estimate_bullets_height(items, width, pt)
     box = K.add_textbox(slide, x, y, width, height)
     tf = box.text_frame
     tf.word_wrap = True
@@ -442,7 +758,8 @@ def draw_bullets(slide, x, y, width, items, scale: float) -> int:
     for level, kind, marker, text in items:
         p = tf.paragraphs[0] if first else tf.add_paragraph()
         first = False
-        p.space_after = Pt(BULLET_SPACE_AFTER_PT * scale)
+        p.space_after = Pt(pt * BULLET_SPACE_AFTER)
+        p.line_spacing = LINE_SPACING
         p.space_before = Pt(0)
         indent = "    " * level
         if indent:
@@ -478,16 +795,16 @@ def draw_bullets(slide, x, y, width, items, scale: float) -> int:
     return height
 
 
-def draw_table(slide, x, y, width, headers, rows, scale: float) -> int:
-    return K.add_table(slide, x, y, width, headers, rows, scale=_table_scale(scale))
-
-
-def draw_stack(slide, x, y, width, blocks, scale: float, *, badge_seed: int = 0) -> int:
+def draw_stack(slide, x, y, width, blocks, pt, *, badge_seed: int = 0) -> int:
+    """Draw blocks top to bottom in source order. Returns the height used."""
     cursor = y
     callout_i = 0
     for b in blocks:
         callout = detect_callout_block(b)
-        if callout:
+        if b["type"] == "image":
+            h = b["h"]
+            K.add_picture_fitted(slide, b["path"], x, cursor, width, h)
+        elif callout:
             label, value = callout
             chips = _extract_chip_items(value)
             if chips:
@@ -496,316 +813,786 @@ def draw_stack(slide, x, y, width, blocks, scale: float, *, badge_seed: int = 0)
                     badge_start=badge_seed + callout_i,
                 )
             else:
-                segments = parse_inline(value)
-                h = K.add_callout_text_card(slide, x, cursor, width, label, segments)
+                h = K.add_callout_text_card(slide, x, cursor, width, label, parse_inline(value), pt=pt)
             callout_i += 1
         elif b["type"] == "bullets":
-            h = draw_bullets(slide, x, cursor, width, b["items"], scale)
+            h = draw_bullets(slide, x, cursor, width, b["items"], pt)
         elif b["type"] == "table":
-            h = draw_table(slide, x, cursor, width, b["headers"], b["rows"], scale)
+            h = K.add_table(slide, x, cursor, width, b["headers"], b["rows"], scale=_table_scale(pt))
+        elif b["type"] == "code":
+            cpt = _code_pt(pt)
+            h = K.estimate_code_height(b["text"], width, cpt)
+            K.add_code_block(slide, x, cursor, width, h, b["text"], font_pt=cpt)
         else:
             continue
         cursor += h + GAP
     return cursor - y
 
 
-def fit_code_font(code_blocks, width, available_h) -> int:
-    n = max(1, len(code_blocks))
-    per_block_h = available_h / n if n > 1 else available_h
-    for pt in CODE_PT_STEPS:
-        ok = True
-        for cb in code_blocks:
-            if K.estimate_code_height(cb["text"], width, pt) > per_block_h:
-                ok = False
-                break
-        if ok:
-            return pt
-    return CODE_PT_STEPS[-1]
-
-
-CODE_CARD_ABS_MAX_BOTTOM = int(Inches(7.02))  # ~0.08in clear of the 7.098in footer text
-
-
-def draw_code_blocks(slide, x, y, width, height, code_blocks, *, font_pt=None) -> int:
-    """Draw one or more code cards.
-
-    ``height`` is the *budget* used to pick a font size (via fit_code_font),
-    but a card is sized to what its own text actually needs at that font,
-    never truncated shorter -- that was the original bug: a card capped to
-    the panel's nominal leftover space while its text, sized independently,
-    needed a bit more, so the last line or two rendered below the card
-    entirely. A card is free to grow past that nominal budget (most
-    over-budget cases are only a few tenths of an inch, e.g. a dense bullet
-    stack above it left less room than hoped), but never past
-    CODE_CARD_ABS_MAX_BOTTOM -- an absolute slide-position ceiling clear of
-    the footer -- which bounds the one remaining failure mode: a single code
-    block so long that not even the smallest CODE_PT_STEPS size is close to
-    fitting (which belongs split across multiple slides at the
-    content-authoring stage, not shrunk to illegibility or left to push the
-    card past the footer/off the slide).
-    """
-    n = len(code_blocks)
-    if n == 0:
-        return 0
-    abs_max_h = max(int(Inches(0.5)), CODE_CARD_ABS_MAX_BOTTOM - y)
-    if n == 2:
-        gap = int(Inches(0.16))
-        col_w = (width - gap) // 2
-        font_pt = font_pt if font_pt is not None else fit_code_font(code_blocks, col_w, height)
-        h0 = K.estimate_code_height(code_blocks[0]["text"], col_w, font_pt)
-        h1 = K.estimate_code_height(code_blocks[1]["text"], col_w, font_pt)
-        h = min(max(h0, h1, int(Inches(0.6))), abs_max_h)
-        K.add_code_block(slide, x, y, col_w, h, code_blocks[0]["text"], font_pt=font_pt)
-        K.add_code_block(slide, x + col_w + gap, y, col_w, h, code_blocks[1]["text"], font_pt=font_pt)
-        return h
-    # 1, or >2 stacked
-    font_pt = font_pt if font_pt is not None else fit_code_font(code_blocks, width, height)
-    cursor = y
-    for cb in code_blocks:
-        needed = K.estimate_code_height(cb["text"], width, font_pt)
-        remaining_abs = max(int(Inches(0.5)), CODE_CARD_ABS_MAX_BOTTOM - cursor)
-        h = max(int(Inches(0.5)), min(needed, remaining_abs))
-        K.add_code_block(slide, x, cursor, width, h, cb["text"], font_pt=font_pt)
-        cursor += h + GAP
-    return cursor - y
-
-
 # ---------------------------------------------------------------------------
-# Panel heading -- an icon badge (a real emoji glyph, not a plain dot) + bold
-# RED all-caps label above a bullet panel, ported from the reference theme's
-# add_panel_bullets icon+heading pattern (which the split/table/code layouts
-# here weren't using yet).
-#
-# The icon is picked by a keyword heuristic over the slide's own heading
-# text -- the same semantic mapping the MD287 reference deck's authors
-# applied by hand (objectives -> target, checklists/best-practice -> check
-# mark, warnings/anti-patterns -> warning sign, hands-on content -> tools,
-# and so on), just automated here since these decks have far too many
-# slides to hand-pick one icon each. It doesn't need to be exhaustive, only
-# meaningfully varied instead of one static dot everywhere -- order matters
-# (more specific patterns are checked first) since some headings match more
-# than one keyword.
-# ---------------------------------------------------------------------------
-_PANEL_ICON_RULES: tuple[tuple[re.Pattern, str], ...] = (
-    (re.compile(r"learning objective", re.I), "🎯"),
-    (re.compile(r"\b(checklist|best practice|readiness|criteria|production[- ]ready)\b", re.I), "✅"),
-    (re.compile(r"\b(mistake|anti-pattern|misconception|warning|caution|risk|failure|"
-                r"problem|troubleshoot|diagnos)", re.I), "⚠️"),
-    (re.compile(r"^(demo|lab|exercise)\b|\bhands-on\b", re.I), "🛠️"),
-    (re.compile(r"knowledge check|questions? and answers?|q&a|discussion prompt|exit ticket", re.I), "❓"),
-    (re.compile(r"\b(roadmap|overview|module summary|module outcome|course wrap-up|"
-                r"course summary|module completion|transition to module)\b", re.I), "🧭"),
-    (re.compile(r"explain\(\)", re.I), "📊"),
-    (re.compile(r"\b(metric\w*|monitor\w*|performance|statistic\w*|dashboard\w*|"
-                r"aggregat\w*|report\w*|benchmark\w*)\b", re.I), "📊"),
-    (re.compile(r"\b(tip|insight|example|use case|scenario)\b", re.I), "💡"),
-    (re.compile(r"\b(key term|definition|glossary|terminology|what is)\b", re.I), "🔑"),
-)
-_PANEL_ICON_DEFAULT = "📌"
-
-
-def panel_heading_icon(title: str) -> str:
-    t = title or ""
-    for pattern, icon in _PANEL_ICON_RULES:
-        if pattern.search(t):
-            return icon
-    return _PANEL_ICON_DEFAULT
-
-
-def panel_heading_label(title: str) -> str:
-    t = (title or "").lower()
-    if "learning objective" in t:
-        return "YOU WILL BE ABLE TO"
-    return "KEY POINTS"
-
-
-def _drop_redundant_intro(blocks: list[dict]) -> list[dict]:
-    """Drop a leading single-line "...:" lead-in once a heading already says it.
-
-    e.g. "By the end of this module you will be able to:" directly above a
-    bullet list is now redundant with the "YOU WILL BE ABLE TO" panel
-    heading, so skip re-printing it verbatim.
-    """
-    if not blocks:
-        return blocks
-    b0 = blocks[0]
-    if b0["type"] == "bullets" and len(b0["items"]) == 1:
-        _level, kind, _marker, text = b0["items"][0]
-        stripped = text.strip()
-        if kind == "para" and stripped.endswith(":") and len(stripped) <= 110 \
-                and not stripped.startswith("**"):
-            return blocks[1:]
-    return blocks
-
-
-# ---------------------------------------------------------------------------
-# Panel-level render (bullets/tables auto-fit, plus code blocks). The
-# key-takeaway bar is handled at the record level (pop_keymsg / K.add_key_takeaway)
-# so it always spans the full slide width and is bottom-anchored like the
-# reference, regardless of which panel(s) the slide has.
-#
-# The whole content group (heading + bullets/table/callouts + code) is sized
-# first, then vertically distributed within the available box instead of
-# being pinned to the top -- this is the main fix for slides that used to
-# leave the bottom 40-50% of the panel empty.
-# ---------------------------------------------------------------------------
-def render_panel(slide, x, y, width, height, blocks, *, title: str = "",
-                  badge_color=None, badge_seed: int = 0):
-    """Render a full block list into one panel. Returns which kinds were used."""
-    blocks = list(blocks)
-    code_blocks = [b for b in blocks if b["type"] == "code"]
-    other_blocks = [b for b in blocks if b["type"] in ("bullets", "table")]
-
-    used = {"table": any(b["type"] == "table" for b in other_blocks), "code": bool(code_blocks)}
-
-    has_bullets = any(b["type"] == "bullets" for b in other_blocks)
-    heading_label = panel_heading_label(title) if has_bullets else None
-    if heading_label == "YOU WILL BE ABLE TO":
-        # Only the learning-objectives panel repeats its own heading verbatim
-        # as a leading "By the end of this module you will be able to:" line
-        # -- drop that one redundant lead-in. A generic "KEY POINTS" panel's
-        # first paragraph is real content (e.g. "For example, ..."), not a
-        # restatement of the heading, so it must never be silently dropped.
-        other_blocks = _drop_redundant_intro(other_blocks)
-    heading_h = (K.PANEL_HEADING_H + K.PANEL_HEADING_GAP) if heading_label else 0
-
-    code_reserve = 0
-    if code_blocks:
-        code_reserve = min(int(height * 0.45), max(int(Inches(1.4)), int(height * 0.35)))
-
-    fit_available = max(int(Inches(0.3)), height - heading_h - code_reserve)
-    scale = fit_stack_scale(other_blocks, width, fit_available) if other_blocks else 1.0
-    stack_est = estimate_stack_height(other_blocks, width, scale) if other_blocks else 0
-
-    code_est = 0
-    font_pt = None
-    if code_blocks:
-        remaining_for_code = max(int(Inches(0.6)), height - heading_h - stack_est)
-        font_pt = fit_code_font(code_blocks, width, remaining_for_code)
-        if len(code_blocks) == 2:
-            gap = int(Inches(0.16))
-            col_w = (width - gap) // 2
-            code_est = max(K.estimate_code_height(cb["text"], col_w, font_pt) for cb in code_blocks)
-        else:
-            code_est = sum(K.estimate_code_height(cb["text"], width, font_pt) + GAP for cb in code_blocks)
-
-    total_est = heading_h + stack_est + code_est
-    offset = max(0, (height - total_est) // 2)
-    offset = min(offset, int(height * 0.4))
-    cursor = y + offset
-
-    if heading_label:
-        K.add_panel_heading(slide, x, cursor, width, heading_label, badge_color=badge_color,
-                             icon=panel_heading_icon(title))
-        cursor += heading_h
-
-    if other_blocks:
-        used_h = draw_stack(slide, x, cursor, width, other_blocks, scale, badge_seed=badge_seed)
-        cursor += used_h
-
-    if code_blocks:
-        remaining = max(int(Inches(0.6)), y + height - cursor)
-        # Re-fit the code font against the *actual* remaining space at draw
-        # time instead of reusing the earlier estimate: the bullet stack's
-        # real rendered height can differ slightly from estimate_stack_height's
-        # prediction (word-wrap rounding, etc.), and reusing a font chosen
-        # against the stale estimate can leave a code card sized too tall for
-        # what's actually left below it -- visually overflowing past its own
-        # card boundary. Recomputing here is the same cost as the estimate
-        # already paid and removes that whole class of mismatch.
-        used_h = draw_code_blocks(slide, x, cursor, width, remaining, code_blocks)
-        cursor += used_h + GAP
-
-    return used
-
-
-# ---------------------------------------------------------------------------
-# Top-level: one manifest record -> one slide
+# Top-level: one manifest record (or a merged run of "(cont.)" records) ->
+# one or more slides. Content is top-aligned under the title and packed down
+# to the copyright line; there are no kicker labels or generic panel headings.
 # ---------------------------------------------------------------------------
 CONTENT_TOP_MARGIN = int(Inches(0.10))
 
-# Bullet panel narrower / gap tighter than before (was 4.85in / 0.25in) so the
-# diagram panel gets meaningfully more width -- and since it's uniform-scaled
-# and width-limited on most of these diagrams, more height too.
-SPLIT_TEXT_W = int(Inches(4.20))
+# Diagram beside text (only when that text fits there at 20pt or larger).
+SPLIT_TEXT_W = int(Inches(4.80))
 SPLIT_GAP = int(Inches(0.20))
 SPLIT_IMAGE_X = int(K.CONTENT_X) + SPLIT_TEXT_W + SPLIT_GAP
 SPLIT_IMAGE_W = int(K.CONTENT_W) - SPLIT_TEXT_W - SPLIT_GAP
 
+TAKEAWAY_GAP = int(Inches(0.12))
+
+
+def _content_top(title: str) -> int:
+    return max(K.content_top_for(None, title), CONTENT_TOP_MARGIN + int(Inches(0.55)))
+
+
+def _start_slide(prs, layout, title):
+    slide = K.new_slide(prs, layout)
+    top = K.add_title_block(slide, title=title)
+    return slide, max(top, CONTENT_TOP_MARGIN + int(Inches(0.55)))
+
+
+def _record_parts(record: dict, repo_root: Path):
+    """(blocks-with-diagrams-in-flow, diagram paths, notes) for a record or a
+    merged run of continuation records."""
+    blocks: list[dict] = []
+    diagrams: list[Path] = []
+    notes: list[str] = []
+    for part in record.get("_parts") or [record]:
+        body_raw = scrub_brand(part.get("body_markdown") or "")
+        col_text, was_split = extract_col_text(body_raw)
+        diagram_rel = part.get("diagram_png")
+        diagram_path = (Path(repo_root) / diagram_rel) if diagram_rel else None
+        has_diagram = bool(diagram_path and diagram_path.exists())
+        blocks.extend(parse_blocks(col_text if (was_split or has_diagram) else body_raw))
+        if has_diagram:
+            blocks.append({"type": "diagram", "path": diagram_path})
+            diagrams.append(diagram_path)
+        n = scrub_brand(part.get("notes"))
+        if n and n.strip() and n.strip() not in notes:
+            notes.append(n.strip())
+    return _dedupe_repeated_blocks(blocks), diagrams, "\n\n".join(notes) or None
+
+
+def _fill_page(page: list[dict], width, room: int, pt):
+    """Use the space pagination left over on one slide: diagrams grow back
+    toward full size, and text on a text-only slide takes the largest size
+    from PT_LADDER that still fits. Returns (page, pt)."""
+    images = [b for b in page if b["type"] == "image"]
+    if images:
+        text_h = stack_height([b for b in page if b["type"] != "image"], width, pt)
+        spare = room - text_h - GAP * (len(page) - 1) - sum(b["h"] for b in images)
+        out = []
+        for b in page:
+            if b["type"] == "image" and spare > 0:
+                grow = min(spare, b["desired"] - b["h"])
+                if grow > 0:
+                    b = {**b, "h": b["h"] + grow}
+                    spare -= grow
+            out.append(b)
+        return out, pt
+    for p in PT_LADDER:
+        if p < pt:
+            break
+        if stack_height(page, width, p) <= room:
+            return page, p
+    return page, pt
+
 
 def render_record(prs, layout, record: dict, page_num: int | None, kicker: str | None,
                    repo_root: Path, chips: list[str] | None = None):
-    """Render one manifest record. Returns (slide_or_None, kind) where kind is
-    one of 'skipped', 'title', 'diagram', 'table', 'code', 'plain'.
+    """Render one manifest record (or a merge_continuations group). Returns
+    (slides, kind) where slides is the list of slides drawn (empty when
+    skipped; continuation slides follow the first, numbered page_num,
+    page_num + 1, ...) and kind is one of 'skipped', 'title', 'diagram',
+    'table', 'code', 'plain'.
 
+    ``kicker`` is accepted for the builder's call signature but no longer
+    drawn -- slides carry no "Day N · Module N" / "Course Introduction" label.
     ``chips`` (only used for a ``lead`` record) is the cover slide's row of
     4-5 short topic labels -- see K.add_topic_chip_row."""
-    heading_raw = (record.get("heading") or "").strip()
-    body_raw = record.get("body_markdown") or ""
+    heading_raw = scrub_brand((record.get("heading") or "").strip())
     marp_class = (record.get("marp_class") or "").strip()
+    parts = record.get("_parts") or [record]
 
-    if not heading_raw and not body_raw.strip():
-        return None, "skipped"
+    if not heading_raw and not any((p.get("body_markdown") or "").strip() for p in parts):
+        return [], "skipped"
 
     title = strip_markdown_title(heading_raw) or "Untitled"
 
     if marp_class == "lead":
-        subtitle = flatten_markdown(body_raw)
-        tag = (kicker or "COURSE INTRODUCTION").upper()
-        slide = K.chapter_slide(
-            prs, layout, tag=tag, title=title, subtitle=subtitle, module_label=tag,
-            chips=chips, notes=record.get("notes"),
-        )
-        return slide, "title"
+        subtitle = flatten_markdown(scrub_brand(record.get("body_markdown") or ""))
+        slide = K.chapter_slide(prs, layout, title=title, subtitle=subtitle, chips=chips,
+                                notes=scrub_brand(record.get("notes")))
+        return [slide], "title"
 
-    slide = K.new_slide(prs, layout)
-    part_label = kicker.upper() if kicker else None
-    top = K.add_title_block(slide, title=title, part_label=part_label)
-    top = max(top, CONTENT_TOP_MARGIN + int(Inches(0.55)))
+    flow, diagrams, notes = _record_parts(record, repo_root)
+    flow, keymsg_text = pop_keymsg(flow)
+    text_blocks = [b for b in flow if b["type"] != "diagram"]
 
-    col_text, was_split = extract_col_text(body_raw)
-    diagram_rel = record.get("diagram_png")
-    diagram_path = (Path(repo_root) / diagram_rel) if diagram_rel else None
-    has_diagram = bool(diagram_path and diagram_path.exists())
+    reserve = (K.takeaway_height(keymsg_text) + TAKEAWAY_GAP) if keymsg_text else 0
+    bottom = int(K.CONTENT_BOTTOM)
+    first_top = _content_top(title)
+    # Source headings sometimes already say "(cont.)" -- don't double it.
+    cont_title = title if title.lower().rstrip().endswith(CONT_SUFFIX.strip()) else title + CONT_SUFFIX
+    cont_top = _content_top(cont_title)
+    width = int(K.CONTENT_W)
 
-    blocks = parse_blocks(col_text if (was_split or has_diagram) else body_raw)
-    if not was_split and not has_diagram:
-        blocks = parse_blocks(body_raw)
-
-    blocks, keymsg_text = pop_keymsg(blocks)
-
-    # Content stops at the house TAKEAWAY_Y line (matching the reference's
-    # content_slide), growing that reserve upward when a takeaway bar is
-    # present so the bar never overlaps the panels above it.
-    bar_growth = (
-        K.takeaway_height(keymsg_text) - int(K.TAKEAWAY_H) if keymsg_text else 0
-    )
-    available_h = max(int(Inches(0.6)), int(K.TAKEAWAY_Y) - bar_growth - top)
-
+    slides = []
     badge_seed = page_num or 0
-    badge_color = K.BADGE_COLORS[badge_seed % len(K.BADGE_COLORS)]
 
-    if has_diagram:
-        # Any slide with a matched diagram (split-class or plain content-class
-        # slides that also got a diagram match) gets the two-panel treatment:
-        # text panel left, image panel right.
-        used = render_panel(slide, K.CONTENT_X, top, SPLIT_TEXT_W, available_h, blocks,
-                             title=title, badge_color=badge_color, badge_seed=badge_seed)
-        K.add_picture_fitted(slide, diagram_path, SPLIT_IMAGE_X, top, SPLIT_IMAGE_W, available_h)
-        kind = "diagram"
-    else:
-        used = render_panel(slide, K.CONTENT_X, top, K.CONTENT_W, available_h, blocks,
-                             title=title, badge_color=badge_color, badge_seed=badge_seed)
-        if used["table"]:
-            kind = "table"
-        elif used["code"]:
-            kind = "code"
+    def finish(slide, *, takeaway: bool):
+        if takeaway and keymsg_text:
+            K.add_key_takeaway(slide, keymsg_text)
+        K.add_rail_and_footer(slide, None if page_num is None else page_num + len(slides))
+        K.set_notes(slide, notes if not slides else f"(Continued: {title}.)")
+        slides.append(slide)
+
+    # 1) One diagram beside its text -- when that text is plain bullets /
+    #    callouts and fits there on one slide at 20pt or more.
+    if len(diagrams) == 1 and text_blocks and all(b["type"] == "bullets" for b in text_blocks) \
+            and _aspect(diagrams[0]) <= 2.0:  # a wide, short diagram reads better below its text
+        room = int((bottom - reserve - first_top) * FIT_MARGIN)
+        pt = next((p for p in PT_LADDER if stack_height(text_blocks, SPLIT_TEXT_W, p) <= room), None)
+        if pt is not None:
+            slide, top = _start_slide(prs, layout, title)
+            draw_stack(slide, K.CONTENT_X, top, SPLIT_TEXT_W, text_blocks, pt, badge_seed=badge_seed)
+            K.add_picture_fitted(slide, diagrams[0], SPLIT_IMAGE_X, top, SPLIT_IMAGE_W,
+                                 bottom - reserve - top)
+            finish(slide, takeaway=True)
+            return slides, "diagram"
+
+    # 2) Everything in one top-aligned flow at full width, diagrams in place,
+    #    split across slides as needed at the largest size that doesn't add
+    #    slides.
+    cap_first = bottom - first_top
+    cap_rest = bottom - cont_top
+    blocks = [image_block(b["path"], width, cap_rest) if b["type"] == "diagram" else b for b in flow]
+
+    def layout_at(pt):
+        pages = paginate(blocks, width, cap_first, cap_rest, pt)
+        if keymsg_text:
+            li = len(pages) - 1
+            cap_li = cap_first if li == 0 else cap_rest
+            if stack_height(pages[li], width, pt) > (cap_li - reserve) * FIT_MARGIN:
+                redo = paginate(pages[li], width, cap_li - reserve, cap_rest - reserve, pt)
+                pages = pages[:li] + redo
+        return pages
+
+    min_pages = len(layout_at(K.MIN_PT))
+    pt, pages = K.MIN_PT, None
+    for p in PT_LADDER:
+        trial = layout_at(p)
+        if len(trial) <= min_pages:
+            pt, pages = p, trial
+            break
+
+    for i, page in enumerate(pages):
+        is_last = i == len(pages) - 1
+        room = int(((cap_first if i == 0 else cap_rest) - (reserve if is_last else 0)) * FIT_MARGIN)
+        page, page_pt = _fill_page(page, width, room, pt)
+        slide, top = _start_slide(prs, layout, title if i == 0 else cont_title)
+        draw_stack(slide, K.CONTENT_X, top, width, page, page_pt, badge_seed=badge_seed + i)
+        finish(slide, takeaway=is_last)
+
+    if diagrams:
+        return slides, "diagram"
+    kinds = {b["type"] for b in text_blocks}
+    kind = "table" if "table" in kinds else "code" if "code" in kinds else "plain"
+    return slides, kind
+
+
+# ---------------------------------------------------------------------------
+# Packed flow -- a run of topics (everything between two cover slides)
+# rendered as one continuous flow at a fixed 18pt body size (tables and
+# code blocks 14pt):
+#
+# - a topic that starts at the top of a slide gives the slide its title; one
+#   that starts mid-slide gets a bold red subheading instead, so topics share
+#   slides rather than each leaving the bottom of its own slide empty;
+# - a slide that opens mid-topic is titled "<topic> (cont.)";
+# - a diagram floats at the right of its own topic's text, which wraps in
+#   the column beside it;
+# - lists of short items run in two columns;
+# - a topic's key takeaway is a full-width card at the end of the topic.
+#
+# Nothing is dropped: every block of every source record is drawn (only
+# exact duplicate blocks within a topic are collapsed, as before), and each
+# slide's speaker notes hold the notes of every topic that starts on it.
+# ---------------------------------------------------------------------------
+FLOW_PT = K.MIN_PT
+FLOW_FIT = 1.0
+FLOAT_W = int(Inches(5.80))
+FLOAT_GAP = int(Inches(0.20))
+NARROW_W = int(K.CONTENT_W) - FLOAT_W - FLOAT_GAP
+TWO_COL_GAP = int(Inches(0.30))
+TWO_COL_MAX_CHARS = 50
+SUBHEAD_GAP_BEFORE = int(Inches(0.06))
+SUBHEAD_H = int(Inches(FLOW_PT / 72 * 1.25)) + int(Inches(0.04))
+KEEP_WHOLE_ROOM = 0.15  # keep a code block / table whole only when less than this much of a slide is left
+
+
+def _flow_items(group: dict, repo_root: Path) -> list[dict]:
+    """topic marker, then per source part: its diagram (as a float) and its
+    blocks; the topic's takeaway last."""
+    title = strip_markdown_title(scrub_brand((group.get("heading") or "").strip())) or "Untitled"
+    items: list[dict] = []
+    body: list[dict] = []
+    notes: list[str] = []
+    for part in group.get("_parts") or [group]:
+        body_raw = scrub_brand(part.get("body_markdown") or "")
+        col_text, was_split = extract_col_text(body_raw)
+        diagram_rel = part.get("diagram_png")
+        diagram_path = (Path(repo_root) / diagram_rel) if diagram_rel else None
+        has_diagram = bool(diagram_path and diagram_path.exists())
+        if has_diagram:
+            body.append({"type": "float", "path": diagram_path})
+        body.extend(parse_blocks(col_text if (was_split or has_diagram) else body_raw))
+        n = scrub_brand(part.get("notes"))
+        if n and n.strip() and n.strip() not in notes:
+            notes.append(n.strip())
+    body = _dedupe_repeated_blocks(body)
+    body = _rejoin_code_chunks(body)
+    body, keymsg = pop_keymsg(body)
+    items.append({"type": "topic", "title": title, "notes": "\n\n".join(notes) or None})
+    items.extend(body)
+    if keymsg:
+        items.append({"type": "takeaway", "text": keymsg})
+    return items
+
+
+CODE_CHUNK_MIN_LINES = 25  # merge_rich_content cuts code samples over 32 lines into consecutive chunks
+
+
+def _rejoin_code_chunks(blocks: list[dict]) -> list[dict]:
+    """Put a long code sample that the source build cut into consecutive
+    chunks back together, so it can be laid out (in two columns if need be)
+    on one slide."""
+    out: list[dict] = []
+    for b in blocks:
+        prev = out[-1] if out else None
+        if (b["type"] == "code" and prev is not None and prev["type"] == "code"
+                and prev["text"].count("\n") + 1 >= CODE_CHUNK_MIN_LINES):
+            joined = {**prev, "text": prev["text"].rstrip("\n") + "\n" + b["text"]}
+            if _fits_one_slide(joined):
+                out[-1] = joined
+                continue
+        out.append(b)
+    return out
+
+
+def _fits_one_slide(b: dict) -> bool:
+    """Would this code block fit on one (cont.) slide, in one column or two?"""
+    W = int(K.CONTENT_W)
+    cap = int(K.CONTENT_BOTTOM) - _content_top("X" + CONT_SUFFIX)
+    if _flow_height(b, W) <= cap:
+        return True
+    halves = _code_halves(b)
+    half_w = (W - TWO_COL_GAP) // 2
+    return bool(halves) and all(_code_fits_width(h, half_w) for h in halves) \
+        and max(_flow_height(h, half_w) for h in halves) <= cap
+
+
+def _two_col_ok(b: dict) -> bool:
+    if b["type"] != "bullets" or detect_callout_block(b):
+        return False
+    items = b["items"]
+    return len(items) >= 4 and all(
+        lvl == 0 and kind in ("bullet", "number") and len(strip_markdown_title(t)) <= TWO_COL_MAX_CHARS
+        for lvl, kind, _m, t in items)
+
+
+def _two_col_split(items):
+    half = -(-len(items) // 2)
+    return items[:half], items[half:]
+
+
+def _code_fits_width(b: dict, width) -> bool:
+    # Consolas advance width is 0.55em (0.00764 in/pt); a little slack on top.
+    cpl = int((int(width) - int(Inches(0.28))) / 914400 / (0.0078 * CODE_PT))
+    return all(len(line) <= cpl for line in b["text"].split("\n"))
+
+
+def _narrow_ok(b: dict) -> bool:
+    """Can this block sit in the text column beside a floating diagram?"""
+    if b["type"] in ("table", "takeaway", "float"):
+        return False
+    if b["type"] == "code":
+        # Long samples go below the diagram, at full width, where they can
+        # run in two columns rather than being split across slides.
+        return _code_fits_width(b, NARROW_W) and b["text"].count("\n") + 1 <= NARROW_CODE_MAX_LINES
+    return True
+
+
+NARROW_CODE_MAX_LINES = 12
+
+
+def _flow_height(b: dict, width, *, two_col: bool = False) -> int:
+    if b["type"] == "topic":
+        # A long subheading in the narrow column beside a diagram wraps.
+        lines = _wrapped_lines(f"**{b['title']}**", _chars_per_line(width, FLOW_PT))
+        return SUBHEAD_H + (lines - 1) * int(Inches(FLOW_PT / 72 * 1.25))
+    if b["type"] == "takeaway":
+        return K.takeaway_height(b["text"])
+    if two_col:
+        left, right = _two_col_split(b["items"])
+        col_w = (int(width) - TWO_COL_GAP) // 2
+        return max(estimate_bullets_height(left, col_w, FLOW_PT),
+                   estimate_bullets_height(right, col_w, FLOW_PT))
+    return block_height(b, width, FLOW_PT)
+
+
+def _float_size(path: Path) -> tuple[int, int]:
+    return FLOAT_W, int(FLOAT_W / max(0.2, _aspect(path)))
+
+
+FLOAT_MIN_W = int(Inches(4.20))
+
+
+def _float_fit(path: Path, room: int):
+    """Largest float (FLOAT_W down to FLOAT_MIN_W wide) whose height fits in
+    room; (None, None) when even the smallest doesn't."""
+    aspect = max(0.2, _aspect(path))
+    fw = min(FLOAT_W, int(room * aspect))
+    if fw < FLOAT_MIN_W:
+        return None, None
+    return fw, int(fw / aspect)
+
+
+def _split_sentences(b: dict, width, room: int):
+    """Split a list whose *first* item alone is too tall, between sentences
+    of that item; the rest of the item continues (unmarked) on the next slide."""
+    if b["type"] != "bullets" or detect_callout_block(b):
+        return None, b
+    lvl, kind, marker, text = b["items"][0]
+    sents = re.split(r"(?<=[.!?:;])\s+(?=[A-Z`*(\[])", text)
+    if len(sents) < 2:
+        return None, b
+    k = _largest_prefix(len(sents) - 1, lambda k: estimate_bullets_height(
+        [(lvl, kind, marker, " ".join(sents[:k]))], width, FLOW_PT) <= room)
+    if k == 0:
+        return None, b
+    head = {"type": "bullets", "items": [(lvl, kind, marker, " ".join(sents[:k]))]}
+    tail = {"type": "bullets", "items": [(lvl, "para", "", " ".join(sents[k:]))] + b["items"][1:]}
+    return head, tail
+
+
+def _flow_first_unit(b: dict, width) -> int:
+    if b["type"] == "float":
+        return int(FLOAT_MIN_W / max(0.2, _aspect(b["path"])))
+    if b["type"] in ("topic", "takeaway"):
+        return _flow_height(b, width)
+    return _first_unit_height(b, width, FLOW_PT)
+
+
+def _code_card_w(b: dict, col_w) -> int:
+    """Code card width: its longest line (at the same per-character width
+    K.estimate_code_height wraps at, so nothing wraps) plus padding, never
+    wider than the column."""
+    longest = max((len(line) for line in b["text"].split("\n")), default=1)
+    need = int(Inches(longest * 0.0083 * CODE_PT + 0.28 + 0.12))
+    return max(int(Inches(1.6)), min(int(col_w), need))
+
+
+COMPACT_MIN_LINES = 8
+
+
+def _compactable(b: dict) -> bool:
+    """A code sample long enough, with short enough lines, to run in two columns."""
+    if b["type"] != "code" or b["text"].count("\n") + 1 < COMPACT_MIN_LINES:
+        return False
+    halves = _code_halves(b)
+    if not halves:
+        return False
+    half_w = (int(K.CONTENT_W) - TWO_COL_GAP) // 2
+    cpl = int((half_w - int(Inches(0.28))) / 914400 / (0.0078 * CODE_PT))
+    lens = [len(line) for h in halves for line in h["text"].split("\n")]
+    # A line or two may wrap, as long as none runs far past the column.
+    return sum(n > cpl for n in lens) <= 2 and max(lens) <= cpl * 1.3
+
+
+def _lead_in_fits_with(lead: dict, nxt: dict, cap: int) -> bool:
+    """Would a lead-in line and the block it introduces share one slide?"""
+    W = int(K.CONTENT_W)
+    if nxt["type"] in ("topic", "float", "takeaway"):
+        return False
+    h = _flow_height(nxt, W, two_col=_two_col_ok(nxt))
+    if nxt["type"] == "code" and h > cap - SUBHEAD_H and _compactable(nxt):
+        half_w = (W - TWO_COL_GAP) // 2
+        h = max(_flow_height(hb, half_w) for hb in _code_halves(nxt))
+    if h > cap:  # a block taller than a slide is split anyway; its start will do
+        h = _flow_first_unit(nxt, W)
+    return _flow_height(lead, W) + GAP + h <= cap
+
+
+def _topic_fits_one_slide(topic: dict, queue: list[dict]) -> bool:
+    """Would this topic (its items up to the next topic marker) fit on one
+    slide of its own?"""
+    items = [topic]
+    for it in queue:
+        if it["type"] == "topic":
+            break
+        items.append(it)
+    return len(paginate_flow(items)) <= 1
+
+
+def _code_halves(b: dict):
+    """Split a code block's lines in two, at a blank line near the middle
+    when there is one."""
+    lines = b["text"].split("\n")
+    if len(lines) < 6:
+        return None
+    mid = len(lines) // 2
+    for off in range(0, 6):
+        for j in (mid - off, mid + off):
+            if 2 <= j < len(lines) - 2 and not lines[j].strip():
+                return ({**b, "text": "\n".join(lines[:j]).rstrip("\n")},
+                        {**b, "text": "\n".join(lines[j + 1:]).lstrip("\n")})
+    return ({**b, "text": "\n".join(lines[:mid])}, {**b, "text": "\n".join(lines[mid:])})
+
+
+def paginate_flow(items: list[dict]) -> list[dict]:
+    """Lay the flow out onto slides. Returns one dict per slide:
+    {"title", "notes": [..], "placed": [(item, x, y, w, h, mode)], "topic"}
+    with y relative to the slide's content top."""
+    W = int(K.CONTENT_W)
+    X = int(K.CONTENT_X)
+    pages: list[dict] = []
+    queue = list(items)
+    current_topic = ""
+
+    page = None
+    y = 0
+    cap = 0
+    float_bottom = None
+    # A diagram that didn't fit where it came in the flow waits here and
+    # opens the next slide, still beside its own topic's text.
+    pending = None
+
+    def open_page():
+        nonlocal page, y, cap, float_bottom, pending
+        # A topic at the very top of a slide becomes its title.
+        if pending is not None:
+            title = pending[1] if pending[1].lower().endswith(CONT_SUFFIX.strip())                 else pending[1] + CONT_SUFFIX
+            notes, topic = [], pending[1]
+        elif queue and queue[0]["type"] == "topic":
+            t = queue.pop(0)
+            title, notes = t["title"], [t["notes"]] if t["notes"] else []
+            topic = t["title"]
         else:
-            kind = "plain"
+            title = current_topic if current_topic.lower().endswith(CONT_SUFFIX.strip()) \
+                else current_topic + CONT_SUFFIX
+            notes, topic = [], current_topic
+        page = {"title": title, "notes": notes, "placed": [], "topic": topic}
+        pages.append(page)
+        y = 0
+        cap = int((int(K.CONTENT_BOTTOM) - _content_top(title)) * FLOW_FIT)
+        float_bottom = None
+        if pending is not None:
+            fb = pending[0]
+            fw, fh = _float_fit(fb["path"], cap)
+            if fw is None:
+                fw, fh = _float_size(fb["path"])
+                fh = min(fh, cap)
+            page["placed"].append((fb, X + W - fw, 0, fw, fh, "float"))
+            float_bottom = fh
+            pending = None
+        return topic
 
-    if keymsg_text:
-        K.add_key_takeaway(slide, keymsg_text)
+    current_topic = open_page()
 
-    K.add_rail_and_footer(slide, page_num)
-    K.set_notes(slide, record.get("notes"))
-    return slide, kind
+    # Keep-together: a topic that starts mid-slide is laid out on trial. If
+    # any of it would spill onto another slide, everything is rolled back
+    # and the topic starts at the top of a fresh slide instead (where it
+    # gets the slide title). Only a topic longer than a whole slide ever
+    # continues on "(cont.)" slides.
+    trial = None
+
+    def checkpoint():
+        return {"pages": len(pages), "page": {**page, "notes": list(page["notes"]),
+                                                "placed": list(page["placed"])},
+                "y": y, "cap": cap, "float_bottom": float_bottom, "pending": pending,
+                "current_topic": current_topic, "queue": list(queue)}
+
+    def rollback():
+        nonlocal page, y, cap, float_bottom, pending, current_topic, trial
+        t = trial
+        trial = None
+        del pages[t["pages"]:]
+        page = t["page"]
+        pages[-1] = page
+        y, cap, float_bottom = t["y"], t["cap"], t["float_bottom"]
+        pending, current_topic = t["pending"], t["current_topic"]
+        queue[:] = t["queue"]
+        end = next((k for k in range(1, len(queue)) if queue[k]["type"] == "topic"), len(queue))
+        if not queue[0].get("_compact") and any(_compactable(it) for it in queue[1:end]):
+            # Second try, right here: its long code samples in two columns.
+            queue[0] = {**queue[0], "_compact": True}
+            for k in range(1, end):
+                if _compactable(queue[k]):
+                    queue[k] = {**queue[k], "compact": True}
+            return
+        # Start the topic on a new slide instead (code back to one column).
+        queue[0] = {**queue[0], "_fresh": True}
+        for k in range(1, end):
+            queue[k] = {kk: v for kk, v in queue[k].items() if kk != "compact"}
+        current_topic = open_page()
+
+    def new_page():
+        nonlocal current_topic, pending
+        if trial is not None:
+            rollback()
+            return
+        # Never end a slide on a lead-in line ("Example validator:") --
+        # it goes over with the block it introduces.
+        # (Only when the two fit on a slide together; a block that needs a
+        # whole slide of its own leaves the lead-in where it is.)
+        while len(page["placed"]) > 1 and page["placed"][-1][5] == "block" \
+                and _is_lead_in(page["placed"][-1][0]) and queue \
+                and _lead_in_fits_with(page["placed"][-1][0], queue[0], cap):
+            queue.insert(0, page["placed"].pop()[0])
+        # Never leave a subheading stranded at the bottom of a slide:
+        # move it (and its waiting diagram) to open the next one.
+        if page["placed"] and page["placed"][-1][5] == "topic":
+            t = page["placed"].pop()[0]
+            if t["notes"] and t["notes"] in page["notes"]:
+                page["notes"].remove(t["notes"])
+            if pending is not None and pending[1] == t["title"]:
+                queue.insert(0, pending[0])
+                pending = None
+            queue.insert(0, t)
+        current_topic = open_page()
+
+    while True:
+        while queue:
+            b = queue.pop(0)
+            if float_bottom is not None and y >= float_bottom:
+                float_bottom = None
+            beside = float_bottom is not None
+            col_w = NARROW_W if beside else W
+            empty = not page["placed"]
+
+            if beside and not _narrow_ok(b) and b["type"] != "float":
+                y = float_bottom
+                float_bottom, beside, col_w = None, False, W
+            gap = 0 if empty else GAP
+            room = cap - y - gap
+
+            if b["type"] == "topic":
+                if trial is not None:
+                    if pending is not None:  # its diagram didn't make it onto the slide
+                        queue.insert(0, b)
+                        new_page()
+                        continue
+                    trial = None  # the previous topic fitted where it started
+                if pending is not None:  # the previous topic's diagram goes first
+                    queue.insert(0, b)
+                    new_page()
+                    continue
+                if not empty and b.get("_fresh"):
+                    queue.insert(0, b)
+                    new_page()
+                    continue
+                extra = 0 if empty else SUBHEAD_GAP_BEFORE
+                sh = _flow_height(b, col_w)
+                nxt = queue[0] if queue else None
+                need = extra + sh + (GAP + _flow_first_unit(nxt, col_w) if nxt else 0)
+                if need > room:
+                    queue.insert(0, b)
+                    new_page()
+                    continue
+                # A topic longer than a slide continues onto a (cont.) slide
+                # wherever it starts, so it may start here, mid-slide, under
+                # its subheading; only a topic that fits one slide is tried
+                # (and, if it spills, moved to a fresh slide) as a whole.
+                if not empty and _topic_fits_one_slide(b, queue):
+                    queue.insert(0, b)
+                    trial = checkpoint()
+                    queue.pop(0)
+                page["placed"].append((b, X, y + gap + extra, col_w, sh, "topic"))
+                y += gap + extra + sh
+                if b["notes"]:
+                    page["notes"].append(b["notes"])
+                current_topic = b["title"]
+                page["topic"] = page["topic"] or b["title"]
+                continue
+
+            if b["type"] == "float":
+                # A second diagram stacks under the one already floating; the
+                # text column beside them carries on where it is.
+                fy = max(y + gap, float_bottom + GAP) if float_bottom is not None else y + gap
+                fw, fh = _float_fit(b["path"], cap - fy)
+                if fw is None:
+                    if not empty and pending is None and trial is None:
+                        pending = (b, current_topic)
+                        continue
+                    if not empty:
+                        queue.insert(0, b)
+                        new_page()
+                        continue
+                    fw, fh = _float_size(b["path"])
+                    fh = min(fh, cap)
+                    fy = y + gap
+                page["placed"].append((b, X + W - fw, fy, fw, fh, "float"))
+                float_bottom = fy + fh
+                if fy == y + gap:
+                    y += gap
+                continue
+
+            if b["type"] == "takeaway":
+                h = _flow_height(b, W)
+                if h > room and not empty:
+                    queue.insert(0, b)
+                    new_page()
+                    continue
+                page["placed"].append((b, X, y + gap, W, h, "takeaway"))
+                y += gap + h
+                continue
+
+            # Keep a lead-in line with the start of what it introduces.
+            # (A diagram in between can wait for the next slide, so look past it.)
+            nxt_real = next((it for it in queue if it["type"] != "float"), None)
+            if not empty and nxt_real is not None and _is_lead_in(b, nxt_real):
+                h = _flow_height(b, col_w)
+                nxt = nxt_real
+                nxt_w = col_w if (not beside or _narrow_ok(nxt)) else W
+                # The block it introduces moves over whole when it fits on a
+                # slide, so the lead-in needs room for all of it, not a start.
+                nxt_full = _flow_height(nxt, nxt_w, two_col=not beside and _two_col_ok(nxt)) \
+                    if nxt["type"] not in ("topic", "float", "takeaway") else None
+                if nxt["type"] == "code" and nxt_full is not None and not beside and (
+                        nxt.get("compact") or (nxt_full > cap and _fits_one_slide(nxt))
+                        or (nxt_full > room - h - GAP and _compactable(nxt))):
+                    # it will run in two columns
+                    half_w = (W - TWO_COL_GAP) // 2
+                    nxt_full = max(_flow_height(hb, half_w) for hb in _code_halves(nxt))
+                need_next = nxt_full if nxt_full is not None and nxt_full <= cap \
+                    else _flow_first_unit(nxt, nxt_w)
+                if h + GAP + need_next > room:
+                    queue.insert(0, b)
+                    new_page()
+                    continue
+
+            # On a topic's second try, its long code runs in two columns.
+            # Also whenever that is what lets a long sample fit where it is.
+            if b["type"] == "code" and not beside and (b.get("compact") or (
+                    _flow_height(b, W) > room and _compactable(b))):
+                halves = _code_halves(b)
+                half_w = (W - TWO_COL_GAP) // 2
+                h2 = max(_flow_height(hb, half_w) for hb in halves)
+                if h2 <= room:
+                    page["placed"].append(({**b, "halves": halves}, X, y + gap, W, h2, "code2"))
+                    y += gap + h2
+                    continue
+
+            # A code block taller than a slide, with short lines, runs in two
+            # side-by-side columns so it still stays on one slide.
+            if b["type"] == "code" and not beside and _flow_height(b, W) > cap:
+                halves = _code_halves(b)
+                half_w = (W - TWO_COL_GAP) // 2
+                if halves and all(_code_fits_width(hb, half_w) for hb in halves):
+                    h2 = max(_flow_height(hb, half_w) for hb in halves)
+                    if h2 <= cap:
+                        if h2 > room and not empty:
+                            queue.insert(0, b)
+                            new_page()
+                            continue
+                        page["placed"].append(({**b, "halves": halves}, X, y + gap, W, h2, "code2"))
+                        y += gap + h2
+                        continue
+
+            two_col = not beside and _two_col_ok(b)
+            h = _flow_height(b, col_w, two_col=two_col)
+            if h <= room:
+                page["placed"].append((b, X, y + gap, col_w, h, "two_col" if two_col else "block"))
+                y += gap + h
+                continue
+            # Inside a long topic, a block that fits on a slide of its own
+            # (code, table, list, paragraph) moves over whole rather than
+            # being cut in two; only a block taller than a slide is split.
+            if not empty and _flow_height(b, W, two_col=_two_col_ok(b)) <= cap:
+                queue.insert(0, b)
+                new_page()
+                continue
+            head, tail = split_block(b, col_w, room, empty, FLOW_PT, min_side=1)
+            if head is None and room > int(Inches(0.8)):
+                head, tail = _split_sentences(b, col_w, room)
+            if head is not None:
+                hh = _flow_height(head, col_w)
+                page["placed"].append((head, X, y + gap, col_w, hh, "block"))
+                y += gap + hh
+            if tail is not None:
+                queue.insert(0, tail)
+                new_page()
+        if pending is not None:
+            if trial is not None:
+                rollback()
+                continue
+            current_topic = open_page()
+        break
+    return pages
+
+
+def _reattach_lead_ins(items: list[dict]) -> list[dict]:
+    """The source sometimes ends one slide with "Decrease inventory:" and
+    starts the next slide with the code it introduces. Move such a trailing
+    lead-in line past the next topic's heading, directly above that code."""
+    out = list(items)
+    k = 1
+    while k < len(out):
+        if out[k]["type"] == "topic":
+            prev = out[k - 1]
+            j = k + 1
+            while j < len(out) and out[j]["type"] == "float":
+                j += 1
+            if (prev["type"] == "bullets" and len(prev["items"]) == 1
+                    and prev["items"][0][1] == "para"
+                    and strip_markdown_title(prev["items"][0][3]).rstrip().endswith(":")
+                    and j < len(out) and out[j]["type"] == "code"):
+                out.insert(j, out.pop(k - 1))
+                continue
+        k += 1
+    return out
+
+
+def render_flow(prs, layout, groups: list[dict], page_num: int, repo_root: Path) -> list:
+    """Render a run of non-cover topic groups as packed slides; returns them."""
+    items: list[dict] = []
+    for g in groups:
+        items.extend(_flow_items(g, repo_root))
+    items = _reattach_lead_ins(items)
+    slides = []
+    for i, page in enumerate(paginate_flow(items)):
+        slide, top = _start_slide(prs, layout, page["title"])
+        for b, x, y, w, h, mode in page["placed"]:
+            yy = top + y
+            if mode == "topic":
+                K.add_text(slide, x, yy, w, h, b["title"], size=FLOW_PT, bold=True, color=K.RED)
+            elif mode == "float":
+                K.add_picture_fitted(slide, b["path"], x, yy, w, h)
+            elif mode == "takeaway":
+                K.add_key_takeaway(slide, b["text"], top=yy)
+            elif mode == "code2":
+                col_w = (w - TWO_COL_GAP) // 2
+                cx = x
+                for hb in b["halves"]:
+                    cw = _code_card_w(hb, col_w)
+                    K.add_code_block(slide, cx, yy, cw, h, hb["text"], font_pt=CODE_PT)
+                    cx += cw + TWO_COL_GAP
+            elif b["type"] == "code":
+                # The card is as wide as its longest line, not the whole column.
+                K.add_code_block(slide, x, yy, _code_card_w(b, w), h, b["text"], font_pt=CODE_PT)
+            elif mode == "two_col":
+                left, right = _two_col_split(b["items"])
+                col_w = (w - TWO_COL_GAP) // 2
+                draw_bullets(slide, x, yy, col_w, left, FLOW_PT)
+                draw_bullets(slide, x + col_w + TWO_COL_GAP, yy, col_w, right, FLOW_PT)
+            else:
+                draw_stack(slide, x, yy, w, [b], FLOW_PT, badge_seed=page_num + i)
+        K.add_rail_and_footer(slide, page_num + i)
+        K.set_notes(slide, "\n\n".join(page["notes"]) or f"(Continued: {page['topic']}.)")
+        slides.append(slide)
+    return slides

@@ -68,7 +68,7 @@ Get every participant onto a working instance, then shift into document thinking
 | ~1.5–2 h | 2 | Installation and Setup | Deployment options; `mongod` / `mongosh` / Compass; connection strings; first write-and-read |
 | ~3 h | 3 | Data Modeling with MongoDB | Documents, collections, databases; schemas and access patterns; embed vs reference |
 
-**Labs:** [`Lab 1`](labs/day-01-lab-01-install-connect-verify.md) install/connect · [`Lab 2`](labs/day-01-lab-02-model-and-populate.md) model and populate.
+**Labs:** [`Lab 1`](labs/day-01/lab1/LAB-1-GUIDE.md) install/connect · [`Lab 2`](labs/day-01/lab2/LAB-2-GUIDE.md) model and populate. Exercises 1.1–3.9: [`labs/day-01/exercises/`](labs/day-01/exercises/).
 
 ### Day 2 — Working with data (~6 hours)
 
@@ -79,7 +79,7 @@ The two skills used every day: retrieve and change documents, then reshape them 
 | ~3 h (or 6–7 h full) | 4 | The MongoDB Query Language | `find` / `findOne`; comparison, logical, array, and update operators; projections; safe writes |
 | ~3 h | 5 | The Aggregation Framework | Pipeline structure; `$match`, `$group`, `$project`, `$sort`, `$limit`; multi-stage analytics |
 
-**Labs:** [`Lab 3`](labs/day-02-lab-03-complex-queries-and-updates.md) queries and updates · [`Lab 4`](labs/day-02-lab-04-aggregation-pipeline.md) aggregation pipeline. Reload `datasets/training_store/load.js` first.
+**Labs:** [`Lab 3`](labs/day-02/lab3/LAB-3-GUIDE.md) queries and updates · [`Lab 4`](labs/day-02/lab4/LAB-4-GUIDE.md) aggregation pipeline. Reload `datasets/training_store/load.js` first. Exercises 4.1–5.4: [`labs/day-02/exercises/`](labs/day-02/exercises/).
 
 ### Day 3 — Performance and production (~6 hours)
 
@@ -91,161 +91,87 @@ Make Day 2’s queries and pipelines fast, then cover how MongoDB stays availabl
 | ~2 h (or 3–3.5 h full) | 7 | Introduction to Replication and Sharding | Replica sets, elections, read/write guarantees; shards, keys, routing |
 | ~2 h (or 3–3.5 h full) | 8 | MongoDB Best Practices, Security, and Troubleshooting | Modeling, queries, indexes, security, backup/restore, monitoring, troubleshooting, production-readiness checklist |
 
-**Labs:** [`Lab 5`](labs/day-03-lab-05-index-and-explain.md) index and `explain` · [`Lab 6`](labs/day-03-lab-06-replication-and-sharding.md) replica set / shard key · [`Lab 7`](labs/day-03-lab-07-production-readiness.md) go-live. Time-box extra `slide-exercises` to Module 6 Labs 6.1–6.4 and 6.11, Module 7 Lab 7.1 plus the challenge, and Module 8 Labs 8.2, 8.3, 8.6, 8.9, and 8.11 when the afternoon is shared. Application connection: [`sample-app/`](sample-app/README.md).
+**Labs:** [`Lab 5`](labs/day-03/lab5/LAB-5-GUIDE.md) index and `explain` · [`Lab 6`](labs/day-03/lab6/LAB-6-GUIDE.md) replica set / shard key · [`Lab 7`](labs/day-03/lab7/LAB-7-GUIDE.md) production readiness. Exercises 6.1–8.3: [`labs/day-03/exercises/`](labs/day-03/exercises/). Application connection: [`sample-app/`](sample-app/README.md).
 
 ---
 
-## Recommended folder structure
+## Folder structure
 
-This course should follow the DrKaur instructor-led layout: one Marp deck, lab guides per module, and shared sample data. Scaffold from `D:\Current_work\drkaur-course-template` rather than inventing a parallel tree.
+The instructor decks follow the MD287 "new content" build: one PowerPoint per module plus a course
+introduction, each written as a slide flow with speaker notes. Hands-on material lives under
+`labs/`, sequenced exactly as it appears on the slides.
 
 ```text
 MasteringMongoDB/
 ├── README.md                              # This file
-├── Mastering_MongoDB_Course_Outline.docx  # Source outline (keep as reference)
-├── FINAL_TABLE_OF_CONTENTS.md             # Master lesson/exercise index
-├── COURSE-AUTHORING-GUIDE.md              # Copied from the course template
-├── COURSE-CHEATSHEET.md                   # Operator and concept glossary by module
 ├── course.config.yaml                     # Course name, days, module list
-├── diagram-prompt.md                      # Prompt for generating slide SVGs
+├── Mastering_MongoDB_Course_Outline.docx  # Source outline (reference)
 │
-├── labs/                                  # Day labs (outline + PPT hands-on, live dataset)
-│   ├── README.md
-│   ├── day-01-lab-01-install-connect-verify.md
-│   ├── day-01-lab-02-model-and-populate.md
-│   ├── day-02-lab-03-complex-queries-and-updates.md
-│   ├── day-02-lab-04-aggregation-pipeline.md
-│   ├── day-03-lab-05-index-and-explain.md
-│   ├── day-03-lab-06-replication-and-sharding.md
-│   └── day-03-lab-07-production-readiness.md
+├── decks/pptx_new/                        # Instructor decks (current)
+│   ├── MongoDB_Course_Introduction.pptx
+│   └── MongoDB_ModuleNN_<Title>.pptx      # Modules 1–8
 │
-├── decks/pptx/                            # Instructor PowerPoint exports
+├── labs/                                  # Hands-on, in slide order
+│   ├── README.md · EXERCISES-INDEX.md · LABS-INDEX.md
+│   ├── day-01/  exercises/ (1.1–3.9)  exercises/solution/  lab1/  lab2/
+│   ├── day-02/  exercises/ (4.1–5.4)  exercises/solution/  lab3/  lab4/
+│   ├── day-03/  exercises/ (6.1–8.3)  exercises/solution/  lab5/  lab6/  lab7/
+│   └── practice-exercises/            # answers to the in-slide practice exercises
 │
-├── slides/
-│   ├── course-complete-marp-with-notes.md     # Single monolithic deck (do not split)
-│   ├── course-complete-marp-with-notes.html   # Presenter export
-│   ├── course-complete-speaker-notes.md       # Generated notes extract
-│   └── assets/
-│       ├── module-01/                     # NoSQL vs RDBMS, store types, architecture
-│       ├── module-02/                     # Install / connect diagrams
-│       ├── module-03/                     # Embed vs reference, document model
-│       ├── module-04/                     # Query / operator visuals
-│       ├── module-05/                     # Aggregation pipeline stages
-│       ├── module-06/                     # Index selection / explain plans
-│       ├── module-07/                     # Replica sets and sharding
-│       └── module-08/                     # Ops / security checklist visuals
+├── datasets/training_store/load.js        # The one sample database used everywhere
+├── sample-app/                            # Node.js + Python connection demo
+├── kahoot/                                # One 15-question quiz per module (Excel)
 │
-├── slide-exercises/                       # In-class lab guides (lab-first)
-│   ├── module-01/
-│   │   ├── exercise-1.1-choose-the-data-model.md
-│   │   ├── exercise-1.2-rows-to-documents.md
-│   │   └── exercise-1.3-explore-a-mongodb-dataset.md
-│   ├── module-02/
-│   │   ├── exercise-2.1-select-a-deployment-option.md
-│   │   ├── exercise-2.2-interpret-a-connection-string.md
-│   │   ├── exercise-2.3-environment-readiness-checklist.md
-│   │   ├── exercise-2.4-diagnose-connection-failures.md
-│   │   └── exercise-2.5-install-connect-and-verify.md
-│   ├── module-03/
-│   │   ├── exercise-3.1-identify-document-components.md
-│   │   ├── exercise-3.2-discover-access-patterns.md
-│   │   ├── exercise-3.3-embed-or-reference.md
-│   │   ├── exercise-3.4-model-a-product-catalog.md
-│   │   ├── exercise-3.5-model-an-order-document.md
-│   │   ├── exercise-3.6-correct-schema-anti-patterns.md
-│   │   ├── exercise-3.7-select-a-schema-pattern.md
-│   │   ├── exercise-3.8-design-collection-validation.md
-│   │   ├── exercise-3.9-support-ticket-challenge.md
-│   │   ├── lab-3.1-create-the-sample-database.md
-│   │   ├── lab-3.2-populate-products.md
-│   │   ├── lab-3.3-populate-customers.md
-│   │   ├── lab-3.4-populate-orders.md
-│   │   ├── lab-3.5-query-nested-documents.md
-│   │   ├── lab-3.6-add-collection-validation.md
-│   │   └── lab-3.7-validate-the-data-model.md
-│   ├── module-04/
-│   │   └── exercise-4.1-queries-and-updates.md
-│   ├── module-05/
-│   │   └── exercise-5.1-aggregation-pipeline.md
-│   ├── module-06/
-│   │   ├── exercise-6.1-identify-candidate-indexes.md
-│   │   ├── lab-6.1-establish-a-performance-baseline.md
-│   │   └── … (12 exercises, 11 labs, practical challenge)
-│   └── module-08/
-│       ├── exercise-8.1-review-a-document-model.md
-│       ├── lab-8.1-data-model-review-and-repair.md
-│       └── … (14 exercises, 11 labs, practical challenge)
+├── scripts/new_content/                   # Deck build (current)
+│   ├── mdb_*.py                           # Shared kit: layouts, visuals, notes, glossary
+│   ├── moduleNN_flow.py · moduleNN_notes.py · glossary_moduleNN.py
+│   ├── build_moduleNN_new.py · build_course_intro_new.py
+│   ├── build_lab_indexes.py               # Regenerates the labs/ indexes
+│   └── diagrams/moduleNN/                 # Diagrams chosen for each module deck
+├── scripts/chatgpt_diagrams/diagrams/     # Full diagram library (source images)
 │
-├── datasets/                              # Shared sample application data
-│   ├── README.md                          # How to load catalogs / orders / users
-│   └── training_store/
-│       ├── README.md
-│       └── load.js
+├── archive/                               # Superseded guides (reference only)
+│   ├── slide-exercises/module-NN/
+│   └── labs/
 │
-├── sample-app/                            # Thin app used for "connect MongoDB"
-│   ├── README.md
-│   ├── connect.mjs                        # Node.js driver
-│   └── connect.py                         # Python driver
-│
-└── scripts/                               # Deck maintenance (from the template)
-    ├── themes/flat-gaia.css
-    ├── course_config.py
-    ├── exercise_meta.py                   # Register each Exercise M.N here
-    ├── inject-lab-guide-links.py
-    ├── sync-exercise-steps-to-slides.py
-    └── generate-speaker-notes.py
+├── decks/pptx/ · slides/ · scripts/*.py   # Earlier day-deck / Marp pipeline (legacy)
 ```
 
 ### Why this layout
 
 | Folder | Role |
 |--------|------|
-| `slides/` | One deck for all three days. Module openers use `<!-- _header: 'Module N — Title' -->`. |
-| `slides/assets/module-NN/` | SVGs only; referenced as `<img src="assets/module-NN/file.svg" width="720">`. |
-| `labs/` | Sequenced student labs matching the outline hands-on blocks and PPT Exercises 1–12, rewritten for live `training_store` field names. |
-| `slide-exercises/module-NN/` | In-class guides named `exercise-M.N-slug.md` or `lab-N.M-slug.md`. Each must include `## Steps from the training slides`. |
-| `datasets/` | One sample application dataset reused on Days 1–3 so modeling, queries, aggregation, and indexes stay consistent. |
-| `sample-app/` | Small Node.js + Python connection demo for the “connect MongoDB to applications” objective. URI from `MONGODB_URI` only. |
-| `decks/pptx/` | Per-module PowerPoint files generated from Marp manifests. |
-| `scripts/` | Template maintenance pipeline. Do not invent a second build system. |
-
-Module 7 includes replica-set inspection labs (Atlas URI) plus optional instructor-controlled failover and sharding labs. Module 1 now includes classification, a rows-to-document exercise, and a first `mongosh` exploration of `training_store`.
+| `decks/pptx_new/` | The current instructor decks: Course Introduction + Modules 1–8 (38–52 slides each), MD287 house style. Each module: cover, objectives, key terms, full forms, parts with diagrams and code, practice exercises, knowledge check, official exercises, the module's day lab, summary. |
+| `labs/day-0N/exercises/` | Participant worksheets for the official exercises, numbered *M.N* in slide order; answer keys in `exercises/solution/`. |
+| `labs/day-0N/labN/` | The seven day labs (`LAB-N-GUIDE.md`), each the last official slide of the module it follows; expected outputs in `labN/solution/`. |
+| `labs/practice-exercises/` | Reference answers for the unnumbered in-slide practice exercises. |
+| `datasets/` | One sample application dataset reused on Days 1–3, so modeling, queries, aggregation and indexes stay consistent. Every slide, worksheet and lab result matches a fresh `load.js`. |
+| `sample-app/` | Small Node.js + Python connection demo. URI from `MONGODB_URI` only. |
+| `kahoot/` | One Kahoot bank per module (15 questions, 30 seconds), aligned to `decks/pptx_new/`. Import the Excel file in Kahoot. See [kahoot/README.md](kahoot/README.md). |
+| `archive/` | The earlier `slide-exercises/` guides and flat day-lab files, kept for reference. Not part of the participant path. |
+| `decks/pptx/`, `slides/`, `scripts/*.py` | The earlier Marp / day-deck pipeline. Kept for reference; the current decks come from `scripts/new_content/`. |
 
 ---
 
-## Authoring order
-
-1. Design index — [`FINAL_TABLE_OF_CONTENTS.md`](FINAL_TABLE_OF_CONTENTS.md) and [`course.config.yaml`](course.config.yaml).
-2. Load `datasets/` and write lab guides in `slide-exercises/` **before** exercise slides.
-3. Author the monolithic deck in `slides/course-complete-marp-with-notes.md`.
-4. Register exercises in `scripts/exercise_meta.py`.
-5. Run maintenance scripts, then export HTML with Marp CLI.
+## Building the decks and indexes
 
 ```powershell
-python scripts/inject-lab-guide-links.py
-python scripts/sync-exercise-steps-to-slides.py
-python scripts/generate-speaker-notes.py
+# one module deck (repeat per module), or the course introduction
+python scripts/new_content/build_module01_new.py
+python scripts/new_content/build_course_intro_new.py
 
-npx @marp-team/marp-cli slides/course-complete-marp-with-notes.md `
-  --html --allow-local-files `
-  --theme-set scripts/themes/flat-gaia.css `
-  --no-stdin `
-  -o slides/course-complete-marp-with-notes.html
+# regenerate labs/README.md, labs/EXERCISES-INDEX.md and labs/LABS-INDEX.md
+python scripts/new_content/build_lab_indexes.py
+
+# regenerate the eight Kahoot Excel banks from scripts/mongodb_kahoot_questions.py
+python scripts/check_kahoot_length_tells.py
+python scripts/regenerate_kahoot_xlsx.py
 ```
 
-To bootstrap the empty tree from the template (after this README is in place, copy it back if the scaffold overwrites it):
-
-```powershell
-cd D:\Current_work\drkaur-course-template
-python scripts/scaffold_course.py `
-  --name "Mastering MongoDB" `
-  --slug "mastering-mongodb" `
-  --days 3 `
-  --modules 8 `
-  --org "Innovation In Software"
-```
-
-The current working folder is `Innovation in Software\MasteringMongoDB`. Either scaffold here by pointing the script at this directory, or scaffold under `D:\Current_work\mastering-mongodb` and move the generated files in.
+When a slide changes an exercise or lab, update the matching worksheet in `labs/` (and its
+solution) in the same change, then rerun `build_lab_indexes.py`. Expected results in the
+worksheets and solutions were worked out from `load.js`; run the key examples once in mongosh
+before teaching.
 
 ---
 
@@ -253,11 +179,12 @@ The current working folder is `Innovation in Software\MasteringMongoDB`. Either 
 
 | Item | Rule |
 |------|------|
-| Deck | Single file: `slides/course-complete-marp-with-notes.md` |
-| Theme | `flat-gaia` from `scripts/themes/flat-gaia.css` |
+| Decks | One per module plus a course introduction, built from `scripts/new_content/` into `decks/pptx_new/` |
 | Footer | `© 2026 by Innovation In Software Corporation` |
-| Lab steps | `### Step N — Title` with **Do this:** and **Expected result:** |
-| Exercise slides | Two steps per slide; link the lab guide on the first slide of each exercise |
+| Official exercises | Numbered *M.N* in slide order; worksheet in `labs/day-0N/exercises/`, answer key in `exercises/solution/` |
+| Day labs | Lab 1–7, each the last official slide of its module; guide `labs/day-0N/labN/LAB-N-GUIDE.md`, solution in `labN/solution/` |
+| Practice exercises | Unnumbered in-slide activities; answers in `labs/practice-exercises/module-0N-README.md` |
+| Sample data | Every value and result matches a fresh `datasets/training_store/load.js`; passwords only as prompts or `<password>` |
 
 ---
 

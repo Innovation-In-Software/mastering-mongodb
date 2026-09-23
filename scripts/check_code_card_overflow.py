@@ -28,9 +28,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DECKS = sorted((REPO_ROOT / "decks" / "pptx").glob("*.pptx"))
 
 SLIDE_H_IN = 7.5
-FOOTER_ZONE_IN = 7.05          # © ... copyright line starts at 7.098in
-CODE_FONT_LINE_RATIO = 1.32    # same ratio mongodb_deck_kit.estimate_code_height uses
-CODE_CARD_PAD_IN = 0.22        # same flat padding constant
+FOOTER_ZONE_IN = 7.05          # content ends at 7.02in; copyright line starts at 7.098in
+CODE_FONT_LINE_RATIO = 1.17 * 0.90  # same ratio x CODE_LINE_SPACING that mongodb_deck_kit.estimate_code_height uses
+CODE_CARD_PAD_IN = 0.24        # same flat padding constant
 TOLERANCE_IN = 0.03            # small slack for EMU rounding
 
 IGNORED_SHAPE_NAMES = {"Diagram Page Number"}  # rotated page-number lives low by design
@@ -125,7 +125,7 @@ def check_deck(path: Path) -> list[dict]:
             # the cover slide's byline (a lead/chapter slide has no footer
             # copyright line at all, so nothing to collide with there) and
             # the "KEY TAKEAWAY" bar (bottom-anchored at a fixed constant,
-            # TAKEAWAY_Y + TAKEAWAY_H = 7.12in, unrelated to code-block sizing).
+            # CONTENT_BOTTOM = 7.02in, unrelated to code-block sizing).
             if not has_footer or text.startswith("KEY TAKEAWAY"):
                 continue
             try:

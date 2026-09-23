@@ -1,5 +1,8 @@
 # Mastering MongoDB — Table of Contents
 
+> **Note (current layout):** this file indexes the earlier single Marp deck and the guides now kept in `archive/slide-exercises/`. The current decks are in `decks/pptx_new/`, and the exercises and labs they use are listed in [`labs/EXERCISES-INDEX.md`](labs/EXERCISES-INDEX.md) and [`labs/LABS-INDEX.md`](labs/LABS-INDEX.md).
+
+
 Master lesson and exercise index. Author lab guides and slides against this file. Keep [`course.config.yaml`](course.config.yaml) in sync when module titles or durations change.
 
 Day assignments follow the redistributed schedule in [`README.md`](README.md), not the source outline’s original day split.

@@ -1,7 +1,7 @@
 # Lab 5: Index and Explain
 
 **Day 3 · Module 6**  
-**PPT:** `decks/pptx/MongoDB_Module06_Indexing_and_Query_Performance.pptx` (Hands-On Indexing Lab, Exercises 1–6)  
+**PPT:** `decks/pptx/MongoDB_Day3_Tune_Scale_and_Ship.pptx` — Module 6 section (Hands-On Indexing Lab, Exercises 1–6)  
 **Time:** 40–50 min  
 **Difficulty:** Intermediate
 

@@ -1,7 +1,7 @@
 # Lab 2: Create and Populate the Sample Application
 
 **Day 1 · Module 3**  
-**PPT:** `decks/pptx/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`  
+**PPT:** `decks/pptx/MongoDB_Day1_Run_MongoDB_and_Model_Documents.pptx` — Module 3 section  
 **Time:** 50 min (load.js path) · 90 min (hand-insert path)  
 **Difficulty:** Beginner
 

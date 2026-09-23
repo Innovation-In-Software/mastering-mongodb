@@ -1,7 +1,7 @@
 # Lab 3: Complex Queries and Data Manipulations
 
 **Day 2 · Module 4**  
-**PPT:** `decks/pptx/MongoDB_Module04_The_MongoDB_Query_Language.pptx` (Hands-On Lab: Complex Queries, Exercises 1–12 + Challenge)  
+**PPT:** `decks/pptx/MongoDB_Day2_Query_and_Transform_Data.pptx` — Module 4 section (Hands-On Lab: Complex Queries, Exercises 1–12 + Challenge)  
 **Time:** 60–75 min  
 **Difficulty:** Intermediate
 

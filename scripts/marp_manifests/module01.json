@@ -32,8 +32,8 @@
     "global_index": 5,
     "marp_class": "split",
     "heading": "Document Databases",
-    "body_markdown": "Document databases store information as self-contained documents, usually in a JSON-like format.\n\nExample:\n\n```json\n{\n  \"_id\": 1001,\n  \"customer\": {\n    \"name\": \"Aman\",\n    \"email\": \"aman@example.com\"\n  },\n  \"items\": [\n    {\n      \"product\": \"Keyboard\",\n      \"quantity\": 2,\n      \"price\": 49.99\n    }\n  ],\n  \"status\": \"Shipped\"\n}\n```\n\nCommon products include MongoDB and Couchbase.",
-    "notes": "Document databases (MongoDB, Couchbase) store self-contained JSON-like documents -- one order example shown.",
+    "body_markdown": "Document databases store information as self-contained documents, usually in a JSON-like format.\n\nExample:\n\n```json\n{\n  \"_id\": \"p1001\",\n  \"sku\": \"TS-1001\",\n  \"name\": \"Trail Shoe\",\n  \"price\": 89.99,\n  \"tags\": [\"running\", \"outdoor\"],\n  \"specifications\": {\n    \"color\": \"navy\",\n    \"size\": 9,\n    \"waterproof\": true\n  }\n}\n```\n\nCommon products include MongoDB and Couchbase.",
+    "notes": "Document databases (MongoDB, Couchbase) store self-contained JSON-like documents -- one product example shown.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module01/010 - Document Databases.png"
   },
   {
@@ -47,7 +47,7 @@
     "global_index": 7,
     "marp_class": "split",
     "heading": "Key-Value Databases",
-    "body_markdown": "Key-value databases store each value under a unique key.\n\n```text\nKey:   session:78421\nValue: {\"customerId\": 1001, \"cartItems\": 4}\n```\n\nThe application provides the key, and the database returns the associated value.\n\nCommon products include Redis and Amazon DynamoDB.",
+    "body_markdown": "Key-value databases store each value under a unique key.\n\n```text\nKey:   session:abc\nValue: {\"customerId\": 1001, \"cartItems\": 4}\n```\n\nThe application provides the key, and the database returns the associated value.\n\nCommon products include Redis and Amazon DynamoDB.",
     "notes": "Key-value stores (Redis, DynamoDB) map a unique key straight to a value for very fast lookups.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module01/011 - Key-Value Databases.png"
   },
@@ -62,7 +62,7 @@
     "global_index": 9,
     "marp_class": "split",
     "heading": "Graph Databases",
-    "body_markdown": "Graph databases represent data using:\n\n- Nodes: entities such as customers or products\n- Edges: relationships between entities\n- Properties: information about nodes and relationships\n\nExample:\n\n```text\n(Customer: Asha) ──PURCHASED──> (Product: Laptop)\n(Customer: Asha) ──KNOWS──────> (Customer: Ravi)\n```\n\nCommon products include Neo4j and Amazon Neptune.",
+    "body_markdown": "Graph databases represent data using:\n\n- Nodes: entities such as customers or products\n- Edges: relationships between entities\n- Properties: information about nodes and relationships\n\nExample:\n\n```text\n(Customer: Ava) ──PURCHASED──> (Order: ORD-901)\n(Order: ORD-901) ──CONTAINS──> (Product: MongoDB Course)\n(Order: ORD-901) ──CONTAINS──> (Product: Database Guide)\n(Product: MongoDB Course) ──RELATED──> (Product: Cloud Lab)\n```\n\nCommon products include Neo4j and Amazon Neptune.",
     "notes": "Graph databases (Neo4j, Neptune) model nodes, edges, and properties -- relationships are first-class data.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module01/013 - Graph Databases.png"
   },
@@ -92,8 +92,8 @@
     "global_index": 13,
     "marp_class": "split",
     "heading": "Anatomy of a MongoDB Document",
-    "body_markdown": "Example document:\n\n```javascript\n{\n  _id: ObjectId(\"...\"),\n  name: \"Wireless Mouse\",\n  category: \"Electronics\",\n  price: 39.99,\n  stock: 120,\n  specifications: {\n    connection: \"Bluetooth\",\n    colour: \"Black\"\n  },\n  tags: [\"wireless\", \"accessory\"]\n}\n```",
-    "notes": "A full example document for a wireless mouse product, including nested specifications and a tags array.",
+    "body_markdown": "Example document:\n\n```javascript\n{\n  _id: ObjectId(\"66f1a2b3c4d5e6f7890a1234\"),\n  sku: \"TRN-101\",\n  name: \"MongoDB Essentials\",\n  price: Decimal128(\"129.99\"),\n  active: true,\n  createdAt: ISODate(\"2026-09-20T14:30:00Z\"),\n  tags: [\"database\", \"training\"],\n  specifications: {\n    level: \"Intermediate\",\n    durationHours: 16\n  }\n}\n```",
+    "notes": "A full example document for a MongoDB Essentials training product, including nested specifications and a tags array.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module01/021 - Anatomy of a MongoDB Document.png"
   },
   {
@@ -122,16 +122,16 @@
     "global_index": 17,
     "marp_class": "split",
     "heading": "Flexible Document Model",
-    "body_markdown": "Documents in the same collection do not always need identical fields.\n\n```javascript\n// Physical product\n{\n  name: \"Laptop\",\n  price: 1200,\n  weight: 1.8\n}\n\n// Digital product\n{\n  name: \"Python Course\",\n  price: 99,\n  durationHours: 30\n}\n```\n\nThis flexibility helps applications evolve without requiring constant table redesign.",
-    "notes": "Documents in the same collection don't need identical fields -- a physical and a digital product example side by side.",
+    "body_markdown": "Documents in the same collection do not always need identical fields.\n\n```javascript\n// Laptop document\n{\n  sku: \"LAP-101\",\n  name: \"Developer Laptop\",\n  category: \"electronics\",\n  price: Decimal128(\"1499.00\"),\n  specifications: {\n    cpu: \"Intel Core i7\",\n    ram: \"32 GB\"\n  },\n  active: true\n}\n\n// Book document\n{\n  sku: \"BOOK-202\",\n  name: \"MongoDB Essentials\",\n  category: \"books\",\n  price: Decimal128(\"79.00\"),\n  isbn: \"978-1-23456-789-0\",\n  pages: 420,\n  active: true\n}\n```\n\nThis flexibility helps applications evolve without requiring constant table redesign.",
+    "notes": "Documents in the same collection don't need identical fields -- a laptop and a book product example side by side.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module01/022 - Flexible Schema Within a Collection.png"
   },
   {
     "global_index": 18,
     "marp_class": "split",
     "heading": "Embedded Documents and Arrays",
-    "body_markdown": "MongoDB can store related information together:\n\n```javascript\n{\n  orderId: 5001,\n  customerId: 101,\n  items: [\n    { productId: 10, quantity: 2 },\n    { productId: 24, quantity: 1 }\n  ],\n  shippingAddress: {\n    city: \"Brampton\",\n    province: \"Ontario\"\n  }\n}\n```\n\nThis can reduce the number of joins and queries required to retrieve complete business objects.",
-    "notes": "An order document embeds its line items and shipping address, cutting the joins needed to read one business object.",
+    "body_markdown": "MongoDB can store related information together:\n\n```javascript\n{\n  _id: \"C-207\",\n  name: \"Asha Singh\",\n  email: \"asha@example.com\",\n  addresses: [\n    { type: \"home\", city: \"Brampton\", province: \"ON\" },\n    { type: \"work\", city: \"Toronto\", province: \"ON\" }\n  ]\n}\n```\n\nThis can reduce the number of joins and queries required to retrieve complete business objects.",
+    "notes": "A customer document embeds its addresses array, cutting the joins needed to read one business object.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module01/023 - Embedding vs Referencing Preview.png"
   },
   {

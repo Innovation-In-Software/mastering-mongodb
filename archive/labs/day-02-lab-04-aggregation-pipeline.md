@@ -1,7 +1,7 @@
 # Lab 4: Build a Multi-Stage Aggregation Pipeline
 
 **Day 2 · Module 5**  
-**PPT:** `decks/pptx/MongoDB_Module05_The_Aggregation_Framework.pptx` (Hands-On Analytical Challenge)  
+**PPT:** `decks/pptx/MongoDB_Day2_Query_and_Transform_Data.pptx` — Module 5 section (Hands-On Analytical Challenge)  
 **Time:** 45–60 min  
 **Difficulty:** Intermediate
 

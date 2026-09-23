@@ -1,7 +1,7 @@
 # Lab 7: Production-Readiness Close
 
 **Day 3 · Module 8**  
-**PPT:** `decks/pptx/MongoDB_Module08_MongoDB_Best_Practices_Security_and_Troubleshooting.pptx`  
+**PPT:** `decks/pptx/MongoDB_Day3_Tune_Scale_and_Ship.pptx` — Module 8 section  
 **Time:** 45–60 min (time-boxed) · up to 3 hours with the full lab block  
 **Difficulty:** Intermediate
 

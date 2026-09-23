@@ -1,7 +1,7 @@
 # Lab 6: Replication and Sharding Diagnostics
 
 **Day 3 · Module 7**  
-**PPT:** `decks/pptx/MongoDB_Module07_Introduction_to_Replication_and_Sharding.pptx` (Diagnostic Exercises 1–3)  
+**PPT:** `decks/pptx/MongoDB_Day3_Tune_Scale_and_Ship.pptx` — Module 7 section (Diagnostic Exercises 1–3)  
 **Time:** 30–40 min  
 **Difficulty:** Intermediate
 

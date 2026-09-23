@@ -390,7 +390,7 @@
     "global_index": 55,
     "marp_class": "split",
     "heading": "Upsert Operations",
-    "body_markdown": "An upsert updates a matching document or inserts a new one when no match exists.\n\n```javascript\ndb.products.updateOne(\n  { sku: \"ELEC-2000\" },\n  {\n    $set: {\n      name: \"USB-C Hub\",\n      category: \"Electronics\",\n      price: NumberDecimal(\"59.99\"),\n      stock: 25,\n      active: true\n    },\n    $setOnInsert: {\n      createdAt: new Date()\n    }\n  },\n  {\n    upsert: true\n  }\n)\n```\n\nUse upserts when the application intentionally supports “create if missing” behavior.",
+    "body_markdown": "An upsert updates a matching document or inserts a new one when no match exists.\n\n```javascript\ndb.products.updateOne(\n  { sku: \"KB-NEW\" },\n  {\n    $set: {\n      name: \"Keyboard Lite\",\n      category: \"Electronics\",\n      price: NumberDecimal(\"39.00\"),\n      stock: 25,\n      active: true\n    },\n    $setOnInsert: {\n      createdAt: new Date()\n    }\n  },\n  {\n    upsert: true\n  }\n)\n```\n\nUse upserts when the application intentionally supports “create if missing” behavior.",
     "notes": "An upsert updates a matching document or inserts a new one when no match exists.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module04/037 - Upsert Pattern.png"
   },
@@ -398,7 +398,7 @@
     "global_index": 56,
     "marp_class": "content",
     "heading": "Replacing a Document",
-    "body_markdown": "`replaceOne()` replaces the entire matching document except its immutable `_id`.\n\n```javascript\ndb.products.replaceOne(\n  { sku: \"ELEC-2000\" },\n  {\n    sku: \"ELEC-2000\",\n    name: \"Seven-Port USB-C Hub\",\n    category: \"Electronics\",\n    price: NumberDecimal(\"69.99\"),\n    stock: 20,\n    active: true\n  }\n)\n```\n\nAny old fields that are not included in the replacement disappear.\n\nUse update operators when only selected fields should change.",
+    "body_markdown": "`replaceOne()` replaces the entire matching document except its immutable `_id`.\n\n```javascript\ndb.products.replaceOne(\n  { sku: \"KB-NEW\" },\n  {\n    sku: \"KB-NEW\",\n    name: \"Keyboard Lite Wireless\",\n    category: \"Electronics\",\n    price: NumberDecimal(\"49.00\"),\n    stock: 20,\n    active: true\n  }\n)\n```\n\nAny old fields that are not included in the replacement disappear.\n\nUse update operators when only selected fields should change.",
     "notes": "`replaceOne()` replaces the entire matching document except its immutable `_id`."
   },
   {
@@ -1443,8 +1443,8 @@
     "global_index": 205,
     "marp_class": "split",
     "heading": "Day 2 Review — Query Fluency",
-    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- Translate a business question into a filter\n- Return only required fields\n- Safely modify application data\n- Work with embedded documents and arrays\n- Verify and troubleshoot results\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-04/003-business-requirement-to-query.svg\" alt=\"Filter project update verify path into Module 5\" width=\"720\">\n\n</div>\n</div>",
-    "notes": "This slide includes a diagram — Day 2 Review — Query Fluency.\n\nThe slide title is: Day 2 Review — Query Fluency.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Translate a business question into a filter.\n\nBullet 2 on the slide: Return only required fields.\n\nBullet 3 on the slide: Safely modify application data.\n\nBullet 4 on the slide: Work with embedded documents and arrays.\n\nBullet 5 on the slide: Verify and troubleshoot results.\n\nThe figure on this slide is titled: Filter project update verify path into Module 5.",
+    "body_markdown": "<div class=\"cols\">\n<div class=\"col-text\">\n\n- Translate a business question into a filter\n- Return only required fields\n- Safely modify application data\n- Work with embedded documents and arrays\n- Verify and troubleshoot results\n\n</div>\n<div class=\"col-visual\">\n\n<img src=\"assets/module-04/003-business-requirement-to-query.svg\" alt=\"Filter, projection, sort and limit query path\" width=\"720\">\n\n</div>\n</div>",
+    "notes": "This slide includes a diagram — Day 2 Review — Query Fluency.\n\nThe slide title is: Day 2 Review — Query Fluency.\n\nThe slide says: <div class=\"cols\">.\n\nThe slide says: <div class=\"col-text\">.\n\nThe slide says: </div>.\n\nThe slide says: <div class=\"col-visual\">.\n\nBullet 1 on the slide: Translate a business question into a filter.\n\nBullet 2 on the slide: Return only required fields.\n\nBullet 3 on the slide: Safely modify application data.\n\nBullet 4 on the slide: Work with embedded documents and arrays.\n\nBullet 5 on the slide: Verify and troubleshoot results.\n\nThe figure on this slide is titled: Filter, projection, sort and limit query path.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module04/048 - Day 2 Review — Query Fluency.png"
   },
   {

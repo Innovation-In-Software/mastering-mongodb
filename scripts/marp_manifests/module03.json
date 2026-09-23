@@ -211,7 +211,7 @@
     "global_index": 30,
     "marp_class": "split",
     "heading": "Modeling Orders: A Hybrid Approach",
-    "body_markdown": "Orders demonstrate that embedding and referencing can be used together.\n\n```javascript\n{\n  _id: ObjectId(\"...\"),\n  orderNumber: \"ORD-2026-1001\",\n  customerId: ObjectId(\"66a100000000000000000001\"),\n\n  items: [\n    {\n      productId: ObjectId(\"65a100000000000000000001\"),\n      sku: \"ELEC-1001\",\n      productName: \"Wireless Mouse\",\n      unitPrice: NumberDecimal(\"39.99\"),\n      quantity: 2\n    }\n  ],\n\n  shippingAddress: {\n    street: \"100 Main Street\",\n    city: \"Brampton\",\n    province: \"ON\",\n    postalCode: \"L6X 1A1\"\n  },\n\n  status: \"Shipped\",\n  total: NumberDecimal(\"79.98\"),\n  orderedAt: ISODate(\"2026-09-22T10:00:00Z\")\n}\n```",
+    "body_markdown": "Orders demonstrate that embedding and referencing can be used together.\n\n```javascript\n{\n  _id: \"O501\",\n  customerId: \"C102\",\n  status: \"PAID\",\n  orderedAt: ISODate(\"2024-03-10T14:32:00Z\"),\n\n  shippingAddress: {\n    city: \"Seattle\",\n    postalCode: \"98101\"\n  },\n\n  items: [\n    {\n      productId: \"P204\",\n      name: \"MongoDB Basics\",\n      qty: 1,\n      unitPrice: NumberDecimal(\"49.00\")\n    },\n    {\n      productId: \"P310\",\n      name: \"Compass Lab\",\n      qty: 2,\n      unitPrice: NumberDecimal(\"19.00\")\n    }\n  ],\n\n  totals: {\n    subtotal: NumberDecimal(\"87.00\"),\n    tax: NumberDecimal(\"11.31\"),\n    grandTotal: NumberDecimal(\"98.31\")\n  }\n}\n```",
     "notes": "Orders demonstrate that embedding and referencing can be used together.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module03/059 - Modeling Orders.png"
   },
@@ -240,7 +240,7 @@
     "global_index": 34,
     "marp_class": "split",
     "heading": "Embedding an unbounded array",
-    "body_markdown": "Avoid a product document containing every review:\n\n```javascript\n{\n  name: \"Wireless Mouse\",\n  reviews: [\n    // Could eventually contain millions of elements\n  ]\n}\n```\n\nStore reviews in a separate collection instead.",
+    "body_markdown": "Avoid a product document containing every review:\n\n```javascript\n{\n  _id: \"P204\",\n  name: \"MongoDB Basics\",\n  reviews: [\n    // Could eventually contain millions of elements\n  ]\n}\n```\n\nStore reviews in a separate collection instead.",
     "notes": "Avoid a product document containing every review:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module03/064 - Bounded vs Unbounded Arrays.png"
   },
@@ -255,7 +255,7 @@
     "global_index": 36,
     "marp_class": "split",
     "heading": "Using inconsistent data types",
-    "body_markdown": "Avoid:\n\n```javascript\n{ price: 39.99 }\n{ price: \"39.99\" }\n{ price: { amount: 39.99 } }\n```\n\nChoose one structure and apply it consistently.",
+    "body_markdown": "Avoid:\n\n```javascript\n{ price: 29.99 }\n{ price: \"29.99\" }\n{ price: { amount: 29.99 } }\n```\n\nChoose one structure and apply it consistently.",
     "notes": "Avoid:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module03/009 - Understanding BSON Data Types.png"
   },

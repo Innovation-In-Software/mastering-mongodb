@@ -79,9 +79,9 @@ def _strip_source_noise(text: str) -> str:
     return "\n".join(out_lines)
 
 
-_CODE_MAX_LINES = 32  # a single code card can't stay readable much beyond this
-                       # even at the renderer's smallest font step (9pt) -- see
-                       # CODE_PT_STEPS in mongodb_slide_render.py.
+_CODE_MAX_LINES = 32  # keeps source code chunks manageable; the renderer draws
+                       # code at a fixed 20pt and continues longer blocks on
+                       # "(cont.)" slides -- see paginate in mongodb_slide_render.py.
 
 
 def _split_oversized_code_chunk(chunk: str) -> list[str]:

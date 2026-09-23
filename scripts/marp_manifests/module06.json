@@ -46,7 +46,7 @@
     "global_index": 7,
     "marp_class": "split",
     "heading": "Default `_id` Index",
-    "body_markdown": "Every standard MongoDB collection automatically receives a unique index on `_id`:\n\n```javascript\n{\n  _id: 1\n}\n```\n\nTherefore, this query is indexed automatically:\n\n```javascript\ndb.products.find({\n  _id: ObjectId(\"65a100000000000000000001\")\n})\n```\n\nThe `_id` index:\n\n- Uniquely identifies documents\n- Prevents duplicate `_id` values\n- Cannot normally be removed\n- Supports efficient lookup by document identifier",
+    "body_markdown": "Every standard MongoDB collection automatically receives a unique index on `_id`:\n\n```javascript\n{\n  _id: 1\n}\n```\n\nTherefore, this query is indexed automatically:\n\n```javascript\ndb.products.find({\n  _id: ObjectId(\"64f000000000000000000a12\")\n})\n```\n\nThe `_id` index:\n\n- Uniquely identifies documents\n- Prevents duplicate `_id` values\n- Cannot normally be removed\n- Supports efficient lookup by document identifier",
     "notes": "Every standard MongoDB collection automatically receives a unique index on `_id`:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/010 - The Default _id Index.png"
   },
@@ -54,7 +54,7 @@
     "global_index": 8,
     "marp_class": "split",
     "heading": "Creating a Single-Field Index",
-    "body_markdown": "Create an ascending index:\n\n```javascript\ndb.products.createIndex({\n  category: 1\n})\n```\n\nCreate a descending index:\n\n```javascript\ndb.orders.createIndex({\n  orderedAt: -1\n})\n```\n\nFor simple equality matching, ascending and descending single-field indexes generally provide equivalent lookup capability. Direction matters more when supporting sorts in compound indexes.",
+    "body_markdown": "Create an ascending index:\n\n```javascript\ndb.products.createIndex({\n  sku: 1\n})\n```\n\nCreate a descending index:\n\n```javascript\ndb.orders.createIndex({\n  orderedAt: -1\n})\n```\n\nFor simple equality matching, ascending and descending single-field indexes generally provide equivalent lookup capability. Direction matters more when supporting sorts in compound indexes.",
     "notes": "Create an ascending index:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/012 - Creating an Index.png"
   },
@@ -76,7 +76,7 @@
     "global_index": 11,
     "marp_class": "split",
     "heading": "Viewing Existing Indexes",
-    "body_markdown": "List a collection’s indexes:\n\n```javascript\ndb.products.getIndexes()\n```\n\nA result may resemble:\n\n```javascript\n[\n  {\n    key: { _id: 1 },\n    name: \"_id_\"\n  },\n  {\n    key: { sku: 1 },\n    name: \"uq_products_sku\",\n    unique: true\n  },\n  {\n    key: { category: 1, price: 1 },\n    name: \"idx_products_category_price\"\n  }\n]\n```\n\nDisplay only index names:",
+    "body_markdown": "List a collection’s indexes:\n\n```javascript\ndb.products.getIndexes()\n```\n\nFor indexes created without a custom `name`, a result may resemble:\n\n```javascript\n[\n  {\n    key: { _id: 1 },\n    name: \"_id_\"\n  },\n  {\n    key: { sku: 1 },\n    name: \"sku_1\",\n    unique: true\n  },\n  {\n    key: { category: 1, price: 1 },\n    name: \"category_1_price_1\"\n  }\n]\n```\n\nDisplay only index names:",
     "notes": "List a collection’s indexes:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/011 - Listing Existing Indexes.png"
   },
@@ -91,7 +91,7 @@
     "global_index": 13,
     "marp_class": "split",
     "heading": "Remove one index by name",
-    "body_markdown": "```javascript\ndb.products.dropIndex(\n  \"idx_products_category\"\n)\n```",
+    "body_markdown": "```javascript\ndb.products.dropIndex(\n  \"sku_1\"\n)\n```",
     "notes": "Covers Remove one index by name.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/013 - Removing an Index.png"
   },
@@ -134,7 +134,7 @@
     "global_index": 19,
     "marp_class": "split",
     "heading": "With a compound index",
-    "body_markdown": "```javascript\ndb.products.createIndex({\n  category: 1,\n  price: 1\n})\n```\n\nMongoDB may perform:\n\n```text\nIXSCAN → FETCH\n```\n\n- `IXSCAN` searches the index.\n- `FETCH` retrieves qualifying documents.\n- The query avoids examining unrelated collection documents.",
+    "body_markdown": "```javascript\ndb.products.createIndex({\n  category: 1,\n  price: -1\n})\n```\n\nMongoDB may perform:\n\n```text\nIXSCAN → FETCH\n```\n\n- `IXSCAN` searches the index.\n- `FETCH` retrieves qualifying documents.\n- The query avoids examining unrelated collection documents.",
     "notes": "MongoDB may perform:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/017 - Compound Indexes.png"
   },
@@ -205,7 +205,7 @@
     "global_index": 29,
     "marp_class": "split",
     "heading": "Index-prefix rule",
-    "body_markdown": "For:\n\n```javascript\n{\n  category: 1,\n  price: 1,\n  stock: 1\n}\n```\n\nUseful prefixes include:\n\n```javascript\n{ category: 1 }\n\n{ category: 1, price: 1 }\n\n{ category: 1, price: 1, stock: 1 }\n```\n\nA query using only `price` normally cannot use this index as effectively as a query beginning with `category`.\n\nThis does not mean every query must include every indexed field. It means field order controls which leading portions of the index are directly useful.",
+    "body_markdown": "For:\n\n```javascript\n{\n  customerId: 1,\n  status: 1,\n  createdAt: -1\n}\n```\n\nUseful prefixes include:\n\n```javascript\n{ customerId: 1 }\n\n{ customerId: 1, status: 1 }\n\n{ customerId: 1, status: 1, createdAt: -1 }\n```\n\nA query using only `status` normally cannot use this index as effectively as a query beginning with `customerId`.\n\nThis does not mean every query must include every indexed field. It means field order controls which leading portions of the index are directly useful.",
     "notes": "For:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/019 - Compound-Index Prefixes.png"
   },
@@ -213,7 +213,7 @@
     "global_index": 30,
     "marp_class": "split",
     "heading": "Equality, Sort and Range Guideline",
-    "body_markdown": "A practical compound-index design guideline is ESR:\n\n1. **Equality**\n2. **Sort**\n3. **Range**\n\nSuppose the query is:\n\n```javascript\ndb.orders.find({\n  customerId: customerId,\n  status: \"Completed\",\n  total: {\n    $gte: NumberDecimal(\"100.00\")\n  }\n}).sort({\n  orderedAt: -1\n})\n```\n\nPossible index:\n\n```javascript\ndb.orders.createIndex({\n  customerId: 1,\n  status: 1,\n  orderedAt: -1,\n  total: 1\n})\n```",
+    "body_markdown": "A practical compound-index design guideline is ESR:\n\n1. **Equality**\n2. **Sort**\n3. **Range**\n\nSuppose the query is:\n\n```javascript\ndb.orders.find({\n  region: \"East\",\n  total: {\n    $gte: NumberDecimal(\"100.00\")\n  }\n}).sort({\n  createdAt: -1\n})\n```\n\nPossible index:\n\n```javascript\ndb.orders.createIndex({\n  region: 1,\n  createdAt: -1,\n  total: 1\n})\n```",
     "notes": "A practical compound-index design guideline is ESR:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/020 - Equality–Sort–Range Guideline.png"
   },
@@ -249,7 +249,7 @@
     "global_index": 35,
     "marp_class": "split",
     "heading": "Unique Indexes",
-    "body_markdown": "A unique index prevents duplicate indexed values.\n\n```javascript\ndb.products.createIndex(\n  {\n    sku: 1\n  },\n  {\n    unique: true,\n    name: \"uq_products_sku\"\n  }\n)\n```\n\nAttempting to insert another product with the same SKU causes a duplicate-key error.",
+    "body_markdown": "A unique index prevents duplicate indexed values.\n\n```javascript\ndb.customers.createIndex(\n  {\n    email: 1\n  },\n  {\n    unique: true,\n    name: \"uq_customers_email\"\n  }\n)\n```\n\nAttempting to insert another customer with the same email causes a duplicate-key error.",
     "notes": "A unique index prevents duplicate indexed values.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/026 - Unique Indexes.png"
   },
@@ -278,7 +278,7 @@
     "global_index": 39,
     "marp_class": "split",
     "heading": "Multikey Indexes for Arrays",
-    "body_markdown": "When an index is created on an array field, MongoDB creates a multikey index.\n\n```javascript\ndb.products.createIndex({\n  tags: 1\n})\n```\n\nIt supports queries such as:\n\n```javascript\ndb.products.find({\n  tags: \"wireless\"\n})\n```\n\nMongoDB’s multikey indexes collect and sort values stored in arrays.",
+    "body_markdown": "When an index is created on an array field, MongoDB creates a multikey index.\n\n```javascript\ndb.products.createIndex({\n  tags: 1\n})\n```\n\nIt supports queries such as:\n\n```javascript\ndb.products.find({\n  tags: \"outdoor\"\n})\n```\n\nMongoDB’s multikey indexes collect and sort values stored in arrays.",
     "notes": "When an index is created on an array field, MongoDB creates a multikey index.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/024 - Multikey Indexes.png"
   },
@@ -300,7 +300,7 @@
     "global_index": 42,
     "marp_class": "split",
     "heading": "Partial Indexes",
-    "body_markdown": "A partial index includes only documents matching a filter.\n\nSuppose most product queries retrieve active products:\n\n```javascript\ndb.products.createIndex(\n  {\n    category: 1,\n    price: 1\n  },\n  {\n    name: \"idx_active_products_category_price\",\n    partialFilterExpression: {\n      active: true\n    }\n  }\n)\n```\n\nThe index includes only active products.\n\nThis can:\n\n- Reduce index size\n- Reduce index maintenance\n- Improve queries that match the partial condition",
+    "body_markdown": "A partial index includes only documents matching a filter.\n\nSuppose most order queries retrieve non-archived orders:\n\n```javascript\ndb.orders.createIndex(\n  {\n    status: 1\n  },\n  {\n    name: \"idx_unarchived_orders_status\",\n    partialFilterExpression: {\n      archived: false\n    }\n  }\n)\n```\n\nThe index includes only non-archived orders.\n\nThis can:\n\n- Reduce index size\n- Reduce index maintenance\n- Improve queries that match the partial condition",
     "notes": "A partial index includes only documents matching a filter.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/027 - Partial Indexes.png"
   },
@@ -315,7 +315,7 @@
     "global_index": 44,
     "marp_class": "split",
     "heading": "Sparse Indexes",
-    "body_markdown": "A sparse index includes documents that contain the indexed field.\n\n```javascript\ndb.customers.createIndex(\n  {\n    loyaltyNumber: 1\n  },\n  {\n    sparse: true,\n    name: \"idx_customers_loyalty_sparse\"\n  }\n)\n```\n\nSparse indexes can be useful for optional fields, but partial indexes offer more precise control and are often preferred.\n\nBe especially careful with unique sparse indexes because uniqueness applies only to indexed documents.",
+    "body_markdown": "A sparse index includes documents that contain the indexed field.\n\n```javascript\ndb.customers.createIndex(\n  {\n    phone: 1\n  },\n  {\n    sparse: true,\n    name: \"idx_customers_phone_sparse\"\n  }\n)\n```\n\nSparse indexes can be useful for optional fields, but partial indexes offer more precise control and are often preferred.\n\nBe especially careful with unique sparse indexes because uniqueness applies only to indexed documents.",
     "notes": "A sparse index includes documents that contain the indexed field.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/028 - Sparse Indexes.png"
   },
@@ -323,7 +323,7 @@
     "global_index": 45,
     "marp_class": "split",
     "heading": "TTL Indexes",
-    "body_markdown": "A TTL, or time-to-live, index automatically removes expired documents.\n\nExample session document:\n\n```javascript\n{\n  sessionId: \"S-1001\",\n  customerId: customerId,\n  expiresAt: ISODate(\"2026-09-22T20:00:00Z\")\n}\n```\n\nCreate a TTL index:\n\n```javascript\ndb.sessions.createIndex(\n  {\n    expiresAt: 1\n  },\n  {\n    expireAfterSeconds: 0,\n    name: \"ttl_sessions_expiresAt\"\n  }\n)\n```",
+    "body_markdown": "A TTL, or time-to-live, index automatically removes expired documents.\n\nExample order document:\n\n```javascript\n{\n  orderId: 5001,\n  status: \"PENDING\",\n  expiresAt: ISODate(\"2026-09-22T12:00:00Z\")\n}\n```\n\nCreate a TTL index:\n\n```javascript\ndb.orders.createIndex(\n  {\n    expiresAt: 1\n  },\n  {\n    expireAfterSeconds: 0,\n    name: \"ttl_orders_expiresAt\"\n  }\n)\n```",
     "notes": "A TTL, or time-to-live, index automatically removes expired documents.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/030 - TTL Indexes.png"
   },
@@ -401,7 +401,7 @@
     "global_index": 56,
     "marp_class": "split",
     "heading": "Covered Queries",
-    "body_markdown": "A covered query can be answered entirely from the index without retrieving the full collection documents.\n\nCreate:\n\n```javascript\ndb.products.createIndex({\n  category: 1,\n  name: 1,\n  price: 1\n})\n```\n\nQuery only indexed fields:\n\n```javascript\ndb.products.find(\n  {\n    category: \"Electronics\"\n  },\n  {\n    _id: 0,\n    category: 1,\n    name: 1,\n    price: 1\n  }\n)\n```",
+    "body_markdown": "A covered query can be answered entirely from the index without retrieving the full collection documents.\n\nCreate:\n\n```javascript\ndb.products.createIndex({\n  category: 1,\n  name: 1,\n  price: 1\n})\n```\n\nQuery only indexed fields:\n\n```javascript\ndb.products.find(\n  {\n    category: \"Books\"\n  },\n  {\n    _id: 0,\n    category: 1,\n    name: 1,\n    price: 1\n  }\n)\n```",
     "notes": "A covered query can be answered entirely from the index without retrieving the full collection documents.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/035 - Covered Queries.png"
   },
@@ -416,7 +416,7 @@
     "global_index": 58,
     "marp_class": "split",
     "heading": "Index Selectivity",
-    "body_markdown": "A selective condition matches a relatively small portion of a collection.\n\nHighly selective:\n\n```javascript\n{\n  sku: \"ELEC-1001\"\n}\n```\n\nPotentially low selectivity:\n\n```javascript\n{\n  active: true\n}\n```\n\nIf nearly every product is active, an index on `active` alone may provide little value.",
+    "body_markdown": "A selective condition matches a relatively small portion of a collection.\n\nHighly selective:\n\n```javascript\n{\n  sku: \"SKU-1042\"\n}\n```\n\nPotentially low selectivity:\n\n```javascript\n{\n  active: true\n}\n```\n\nIf nearly every product is active, an index on `active` alone may provide little value.",
     "notes": "A selective condition matches a relatively small portion of a collection.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module06/037 - Index Selectivity.png"
   },

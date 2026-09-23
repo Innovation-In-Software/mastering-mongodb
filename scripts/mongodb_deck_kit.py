@@ -34,20 +34,27 @@ RAIL_W = Inches(0.208)
 RAIL_SPLIT_Y = Inches(1.5)
 
 CONTENT_X = Inches(0.50)
-CONTENT_W = Inches(12.30)
+CONTENT_W = Inches(12.05)  # stops clear of the rotated page number
 TITLE_X = Inches(0.60)
 TITLE_W = Inches(12.00)
+
+# Minimum on-slide font size. The copyright footer (FOOTER_FONT_SIZE) is the
+# only text allowed below it.
+MIN_PT = 18.0  # body text size
 
 FOOTER_FONT_SIZE = 14
 FOOTER_BOX = (Inches(0.667), Inches(7.098), Inches(5.00), Inches(0.31))
 NUMBER_BOX = (Inches(12.492), Inches(6.807), Inches(0.72), Inches(0.50))
-TAKEAWAY_Y = Inches(6.50)
-TAKEAWAY_H = Inches(0.62)
+# Everything above the copyright line (body content and the takeaway bar)
+# ends here.
+CONTENT_BOTTOM = Inches(7.02)
+TAKEAWAY_H = Inches(0.56)
+TAKEAWAY_Y = Inches(7.02 - 0.56)  # top of a one-line takeaway bar
 
 SUBTITLE_Y = Inches(0.82)
 SUBTITLE_W = Inches(12.30)
-SUBTITLE_LINE_H = Inches(0.26)
-CONTENT_TOP_MIN = Inches(1.28)
+SUBTITLE_LINE_H = Inches(0.34)
+CONTENT_TOP_MIN = Inches(0.66)
 CONTENT_TOP_MAX = Inches(1.46)
 
 # ---------------------------------------------------------------------------
@@ -191,7 +198,7 @@ def add_rail_and_footer(slide, page_num: int | None = None) -> None:
         footer.text_frame.word_wrap = False
 
         number_text = str(page_num)
-        number_size = 23 if len(number_text) <= 2 else 17
+        number_size = 23 if len(number_text) <= 2 else MIN_PT
         number = add_text(
             slide, *NUMBER_BOX, number_text, size=number_size, color=RED, bold=True,
             align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE,
@@ -205,15 +212,15 @@ def add_rail_and_footer(slide, page_num: int | None = None) -> None:
 # Title block with auto-shrink -- ported verbatim
 # ---------------------------------------------------------------------------
 def subtitle_line_count(subtitle: str | None) -> int:
-    """Lines a 17pt italic subtitle wraps to across SUBTITLE_W."""
+    """Lines a 20pt italic subtitle wraps to across SUBTITLE_W."""
     if not subtitle:
         return 0
-    chars_per_line = max(20, int(int(SUBTITLE_W) / 914400 / 0.124))
+    chars_per_line = max(20, int(int(SUBTITLE_W) / 914400 / 0.146))
     return max(1, -(-len(subtitle) // chars_per_line))
 
 
 TITLE_CHAR_W = 0.0095
-TITLE_SIZES = (28, 25, 22, 20, 18, 17)
+TITLE_SIZES = (24, 22, 20)  # never below MIN_PT; a long title may take 3 lines at 20pt
 MAX_TITLE_LINES = 2
 
 
@@ -226,7 +233,7 @@ def title_line_count(header: str, size: float) -> int:
 
 
 def title_font_size(header: str) -> float:
-    """Largest size that keeps the title within MAX_TITLE_LINES; floor 17pt."""
+    """Largest size that keeps the title within MAX_TITLE_LINES; floor MIN_PT."""
     for size in TITLE_SIZES:
         if title_line_count(header, size) <= MAX_TITLE_LINES:
             return size
@@ -250,11 +257,11 @@ def content_top_for(subtitle: str | None, title: str | None = None) -> int:
     if lines:
         top = max(top, int(SUBTITLE_Y) + lines * int(SUBTITLE_LINE_H) + int(Inches(0.08)))
     else:
-        top = max(top, title_bottom(title) + int(Inches(0.10)))
+        top = max(top, title_bottom(title) + int(Inches(0.12)))
     return top
 
 
-def add_title_block(slide, *, title, subtitle=None, part_label=None):
+def add_title_block(slide, *, title, subtitle=None):
     header = (title or "").upper()
     size = title_font_size(header)
     add_text(
@@ -266,12 +273,7 @@ def add_title_block(slide, *, title, subtitle=None, part_label=None):
         add_text(
             slide, TITLE_X, SUBTITLE_Y, SUBTITLE_W,
             max(int(Inches(0.42)), lines * int(SUBTITLE_LINE_H)), subtitle,
-            size=17, italic=True, color=MUTED,
-        )
-    if part_label:
-        add_text(
-            slide, Inches(10.4), Inches(0.14), Inches(2.4), Inches(0.30),
-            part_label, size=11, bold=True, color=MUTED, align=PP_ALIGN.RIGHT,
+            size=MIN_PT, italic=True, color=MUTED,
         )
     return content_top_for(subtitle, title)
 
@@ -279,27 +281,32 @@ def add_title_block(slide, *, title, subtitle=None, part_label=None):
 # ---------------------------------------------------------------------------
 # Key takeaway bar -- ported verbatim
 # ---------------------------------------------------------------------------
+TAKEAWAY_PT = MIN_PT
+
+
 def takeaway_height(text: str) -> int:
     """Bar height for this takeaway -- grows so long text is never clipped."""
-    chars_per_line = max(40, int(int(Inches(11.60)) / 914400 / 0.088))
+    chars_per_line = max(30, int((int(CONTENT_W) - int(Inches(0.44))) / 914400 / (0.0072 * TAKEAWAY_PT)))
     lines = max(1, -(-(len(text or "") + 16) // chars_per_line))
-    return max(int(TAKEAWAY_H), int(Inches(0.24)) * lines + int(Inches(0.22)))
+    line_h = int(Inches(TAKEAWAY_PT / 72 * 1.25))
+    return max(int(TAKEAWAY_H), line_h * lines + int(Inches(0.22)))
 
 
 def add_key_takeaway(slide, text: str, top=None) -> int:
-    """Cream rounded-rect bar bottom-anchored near the slide bottom; grows upward."""
+    """Cream rounded-rect bar bottom-anchored at CONTENT_BOTTOM; grows upward."""
     h = takeaway_height(text)
-    y = int(TAKEAWAY_Y if top is None else top) - (h - int(TAKEAWAY_H))
-    bar = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, CONTENT_X, y, Inches(12.00), h)
+    y = int(CONTENT_BOTTOM) - h if top is None else int(top)
+    bar = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, CONTENT_X, y, CONTENT_W, h)
     set_fill(bar, TAKEAWAY_BG)
     try:
         bar.adjustments[0] = 0.08
     except Exception:
         pass
-    box = add_textbox(slide, Inches(0.72), y, Inches(11.60), h, anchor=MSO_ANCHOR.MIDDLE)
+    box = add_textbox(slide, int(CONTENT_X) + int(Inches(0.22)), y,
+                      int(CONTENT_W) - int(Inches(0.44)), h, anchor=MSO_ANCHOR.MIDDLE)
     p = box.text_frame.paragraphs[0]
-    add_run(p, "KEY TAKEAWAY   ", size=13, bold=True, color=RED)
-    add_run(p, text, size=13, color=INK)
+    add_run(p, "KEY TAKEAWAY   ", size=TAKEAWAY_PT, bold=True, color=RED)
+    add_run(p, text, size=TAKEAWAY_PT, color=INK)
     return h
 
 
@@ -311,7 +318,7 @@ def icon_badge(slide, left, top, d, icon, bg, scale: float = 1.0):
     set_fill(oval, bg)
     if icon:
         add_text(
-            slide, left, top, d, d, icon, size=12 * scale, bold=True, color=WHITE,
+            slide, left, top, d, d, icon, size=max(MIN_PT, 12 * scale), bold=True, color=WHITE,
             align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, font=None,
         )
 
@@ -322,7 +329,7 @@ def icon_badge(slide, left, top, d, icon, bg, scale: float = 1.0):
 # theme's add_panel_bullets icon-badge pattern, ported here for the plain
 # content-slide bullet panels that don't otherwise carry a heading.
 # ---------------------------------------------------------------------------
-PANEL_HEADING_H = int(Inches(0.30))
+PANEL_HEADING_H = int(Inches(0.42))
 PANEL_HEADING_GAP = int(Inches(0.14))
 
 
@@ -334,13 +341,13 @@ def add_panel_heading(slide, x, y, width, label, *, badge_color=None, icon: str 
     system emoji font instead of coercing it into Nirmala UI (which has no
     color-emoji glyphs and would otherwise show a tofu box or nothing)."""
     badge_color = badge_color or RED
-    d = int(Inches(0.26))
+    d = int(Inches(0.40))
     dot_y = int(y) + (PANEL_HEADING_H - d) // 2
     icon_badge(slide, x, dot_y, d, icon, badge_color)
     text_x = int(x) + d + int(Inches(0.10))
     add_text(
         slide, text_x, y, max(int(Inches(1.0)), int(width) - d - int(Inches(0.10))),
-        PANEL_HEADING_H, label, size=13, bold=True, color=RED, anchor=MSO_ANCHOR.MIDDLE,
+        PANEL_HEADING_H, label, size=MIN_PT, bold=True, color=RED, anchor=MSO_ANCHOR.MIDDLE,
     )
     return PANEL_HEADING_H
 
@@ -360,30 +367,31 @@ def _tint(color: RGBColor, amount: float = 0.80) -> RGBColor:
 
 
 CALLOUT_PAD = int(Inches(0.12))
-CALLOUT_LABEL_PT = 12.0
+CALLOUT_LABEL_PT = MIN_PT
 # Callout-card value text is body text like any bullet/paragraph, so it
 # shares the new 20pt default (was a fixed 13pt) -- CALLOUT_CHAR_W_PER_PT
 # below is the same "0.082 in/char at 13pt" constant this used to hardcode,
 # just re-expressed per-point so chars_per_line still scales correctly now
 # that the font size can change.
-CALLOUT_BODY_PT = 20.0
+CALLOUT_BODY_PT = MIN_PT
 CALLOUT_CHAR_W_PER_PT = 0.082 / 13.0
 
 
-def estimate_callout_text_height(width, label: str, plain_len: int) -> int:
+def estimate_callout_text_height(width, label: str, plain_len: int, pt: float = CALLOUT_BODY_PT) -> int:
     inner_w = max(int(Inches(1.0)), int(width) - 2 * CALLOUT_PAD)
-    chars_per_line = max(12, int(inner_w / 914400 / (CALLOUT_CHAR_W_PER_PT * CALLOUT_BODY_PT)))
-    total_len = len(label) + 4 + plain_len
+    chars_per_line = max(12, int(inner_w / 914400 / (CALLOUT_CHAR_W_PER_PT * pt)))
+    total_len = int(len(label) * 1.15) + 4 + plain_len  # label is bold caps
     lines = max(1, -(-total_len // chars_per_line))
-    line_h = int(Inches(CALLOUT_BODY_PT / 72 * 1.32))
+    line_h = int(Inches(pt / 72 * 1.22))
     return max(int(Inches(0.42)), lines * line_h + 2 * CALLOUT_PAD)
 
 
-def add_callout_text_card(slide, x, y, width, label: str, segments, *, accent=None) -> int:
+def add_callout_text_card(slide, x, y, width, label: str, segments, *, accent=None,
+                          pt: float = CALLOUT_BODY_PT) -> int:
     """Card with an inline "LABEL   value" run (value as pre-split rich segments)."""
     accent = accent or RED
     plain_len = sum(len(t) for t, _ in segments)
-    h = estimate_callout_text_height(width, label, plain_len)
+    h = estimate_callout_text_height(width, label, plain_len, pt)
     card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, width, h)
     set_fill(card, CARD_BG, line_color=CARD_LINE, line_w=0.75)
     try:
@@ -393,19 +401,20 @@ def add_callout_text_card(slide, x, y, width, label: str, segments, *, accent=No
     box = add_textbox(slide, int(x) + CALLOUT_PAD, y, int(width) - 2 * CALLOUT_PAD, h,
                        anchor=MSO_ANCHOR.MIDDLE)
     p = box.text_frame.paragraphs[0]
-    add_run(p, f"{label.upper()}   ", size=CALLOUT_LABEL_PT, bold=True, color=accent)
-    add_rich_run(p, segments, size=CALLOUT_BODY_PT, color=INK)
+    add_run(p, f"{label.upper()}   ", size=pt, bold=True, color=accent)
+    add_rich_run(p, segments, size=pt, color=INK)
     return h
 
 
-CHIP_H = int(Inches(0.30))
-CHIP_GAP_X = int(Inches(0.10))
-CHIP_GAP_Y = int(Inches(0.09))
-CHIP_PT = 11.0
+CHIP_H = int(Inches(0.46))
+CHIP_GAP_X = int(Inches(0.12))
+CHIP_GAP_Y = int(Inches(0.10))
+CHIP_PT = MIN_PT
+CALLOUT_LABEL_H = int(Inches(0.36))
 
 
 def _chip_width(text: str) -> int:
-    return int(Inches(0.055 * len(text) + 0.36))
+    return int(Inches(0.0072 * CHIP_PT * len(text) + 0.40))
 
 
 def _chip_rows(inner_w: int, chips: list[str]) -> list[list[tuple[str, int]]]:
@@ -413,7 +422,7 @@ def _chip_rows(inner_w: int, chips: list[str]) -> list[list[tuple[str, int]]]:
     cur: list[tuple[str, int]] = []
     cur_w = 0
     for c in chips:
-        w = _chip_width(c)
+        w = min(_chip_width(c), inner_w)
         add_w = w + (CHIP_GAP_X if cur else 0)
         if cur and cur_w + add_w > inner_w:
             rows.append(cur)
@@ -429,7 +438,7 @@ def _chip_rows(inner_w: int, chips: list[str]) -> list[list[tuple[str, int]]]:
 def estimate_callout_chip_height(width, label: str, chips: list[str]) -> int:
     inner_w = max(int(Inches(1.0)), int(width) - 2 * CALLOUT_PAD)
     rows = _chip_rows(inner_w, chips)
-    label_h = int(Inches(0.24))
+    label_h = CALLOUT_LABEL_H
     chip_block_h = len(rows) * CHIP_H + max(0, len(rows) - 1) * CHIP_GAP_Y
     return 2 * CALLOUT_PAD + label_h + int(Inches(0.06)) + chip_block_h
 
@@ -447,12 +456,12 @@ def add_callout_chip_card(slide, x, y, width, label: str, chips: list[str], *,
         pass
     add_text(
         slide, int(x) + CALLOUT_PAD, int(y) + int(Inches(0.05)),
-        int(width) - 2 * CALLOUT_PAD, int(Inches(0.24)),
+        int(width) - 2 * CALLOUT_PAD, CALLOUT_LABEL_H,
         label.upper(), size=CALLOUT_LABEL_PT, bold=True, color=accent,
     )
     inner_w = int(width) - 2 * CALLOUT_PAD
     rows = _chip_rows(inner_w, chips)
-    ry = int(y) + CALLOUT_PAD + int(Inches(0.24)) + int(Inches(0.06))
+    ry = int(y) + CALLOUT_PAD + CALLOUT_LABEL_H + int(Inches(0.06))
     for row in rows:
         rx = int(x) + CALLOUT_PAD
         for i, (text, w) in enumerate(row):
@@ -592,7 +601,9 @@ def estimate_table_height(headers, rows, width, scale: float = 1.0) -> int:
 
 
 TABLE_PT = 12.0
-TABLE_MAX_SCALE = 1.5  # caps sparse-table growth at 12 * 1.5 = 18pt
+# Table geometry is expressed at 12pt and scaled; MIN_TABLE_SCALE puts cell
+# text at MIN_PT.
+MIN_TABLE_SCALE = MIN_PT / TABLE_PT
 
 
 def add_table(slide, left, top, width, headers, rows, *, scale: float = 1.0, table_pt: float | None = None):
@@ -643,17 +654,21 @@ def add_table(slide, left, top, width, headers, rows, *, scale: float = 1.0, tab
 # ---------------------------------------------------------------------------
 # Code block rendering -- Consolas card using CARD_BG/CARD_LINE
 # ---------------------------------------------------------------------------
+CODE_LINE_SPACING = 0.90  # PowerPoint line-spacing multiple for code cards
+
+
 def estimate_code_height(code_text: str, width: int, font_pt: float) -> int:
     lines = (code_text or "").split("\n") or [""]
-    chars_per_line = max(20, int(int(width) / 914400 / (0.0092 * font_pt)))
+    usable = max(1, int(width) - int(Inches(0.28)))
+    chars_per_line = max(12, int(usable / 914400 / (0.0083 * font_pt)))
     wrapped = 0
     for line in lines:
         wrapped += max(1, -(-max(len(line), 1) // chars_per_line))
-    line_h = int(Inches(font_pt / 72 * 1.32))
-    return wrapped * line_h + int(Inches(0.22))
+    line_h = int(Inches(font_pt / 72 * 1.17 * CODE_LINE_SPACING))
+    return wrapped * line_h + int(Inches(0.24))
 
 
-def add_code_block(slide, left, top, width, height, code_text: str, *, font_pt: float = 13.0):
+def add_code_block(slide, left, top, width, height, code_text: str, *, font_pt: float = MIN_PT):
     card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
     set_fill(card, CARD_BG, line_color=CARD_LINE, line_w=0.75)
     try:
@@ -669,6 +684,7 @@ def add_code_block(slide, left, top, width, height, code_text: str, *, font_pt: 
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.space_after = Pt(0)
         p.space_before = Pt(0)
+        p.line_spacing = CODE_LINE_SPACING
         add_run(p, line if line else " ", size=font_pt, color=INK, font=CODE_FONT)
     return box
 
@@ -736,8 +752,8 @@ def add_picture_fitted(slide, path: Path, box_x, box_y, box_w, box_h, *, border=
 # ---------------------------------------------------------------------------
 CHIP_ROW_W = int(Inches(2.34))
 CHIP_ROW_GAP = int(Inches(0.15))
-CHIP_ROW_H = int(Inches(0.90))
-CHIP_ROW_PT_STEPS = (15.0, 13.0, 11.0)
+CHIP_ROW_H = int(Inches(1.05))
+CHIP_ROW_PT_STEPS = (MIN_PT,)
 
 
 def _chip_row_font_size(label: str, width: int) -> float:
@@ -782,7 +798,7 @@ def add_topic_chip_row(slide, chips: list[str], y) -> int:
 # Chapter / cover slide -- white background, ported verbatim from
 # md287_deck_kit._chapter_slide (module-divider / course-title layout).
 # ---------------------------------------------------------------------------
-def chapter_slide(prs, layout, *, tag, title, subtitle=None, module_label=None,
+def chapter_slide(prs, layout, *, title, subtitle=None,
                    quote=None, icons=None, chips=None, notes: str | None = None):
     slide = new_slide(prs, layout)
     add_rail_and_footer(slide, page_num=None)
@@ -790,20 +806,16 @@ def chapter_slide(prs, layout, *, tag, title, subtitle=None, module_label=None,
     if quote:
         add_text(
             slide, Inches(8.14), Inches(0.12), Inches(3.90), Inches(0.40), quote,
-            size=14, italic=True, color=MUTED, align=PP_ALIGN.RIGHT, anchor=MSO_ANCHOR.MIDDLE,
+            size=MIN_PT, italic=True, color=MUTED, align=PP_ALIGN.RIGHT, anchor=MSO_ANCHOR.MIDDLE,
         )
-    add_text(
-        slide, CONTENT_X, Inches(0.42), Inches(11.30), Inches(0.60), tag,
-        size=23, color=NAVY, font=TITLE_FONT, anchor=MSO_ANCHOR.MIDDLE,
-    )
     add_text(
         slide, CONTENT_X, Inches(2.15), Inches(12.30), Inches(1.90), title,
         size=40, bold=True, color=RED, font=TITLE_FONT,
     )
     if subtitle:
         add_text(
-            slide, CONTENT_X, Inches(4.25), Inches(11.00), Inches(0.85), subtitle,
-            size=18, color=NAVY,
+            slide, CONTENT_X, Inches(4.10), Inches(12.30), Inches(0.90), subtitle,
+            size=MIN_PT, color=NAVY,
         )
     # Chips (module topic strip) and icons (small decorative glyphs) share
     # the band between the subtitle (bottom ~5.10in) and the footer
@@ -825,18 +837,13 @@ def chapter_slide(prs, layout, *, tag, title, subtitle=None, module_label=None,
             if glyph:
                 add_text(
                     slide, cx, band_y, icon_d, icon_d, glyph,
-                    size=22 if not chips else 16, bold=True, color=WHITE, align=PP_ALIGN.CENTER,
+                    size=22 if not chips else MIN_PT, bold=True, color=WHITE, align=PP_ALIGN.CENTER,
                     anchor=MSO_ANCHOR.MIDDLE, font=None,
                 )
         if chips:
             band_y = band_y + icon_d + Inches(0.12)
     if chips:
         add_topic_chip_row(slide, chips, band_y)
-    add_text(
-        slide, CONTENT_X, Inches(6.75), Inches(8.23), Inches(0.40),
-        f"{COURSE_NAME}  •  {module_label or tag}",
-        size=14, color=MUTED, anchor=MSO_ANCHOR.MIDDLE,
-    )
     if notes:
         set_notes(slide, notes)
     return slide

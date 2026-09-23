@@ -130,7 +130,7 @@
     "global_index": 18,
     "marp_class": "split",
     "heading": "Replica Set Elections",
-    "body_markdown": "If the primary becomes unreachable, eligible voting members hold an election.\n\n```text\nBefore failure\nPrimary A\nSecondary B\nSecondary C\n\nPrimary A fails\n\nElection occurs\n\nAfter election\nUnavailable A\nPrimary B\nSecondary C\n```\n\nFor an election to succeed, a candidate must obtain support from a majority of voting members.\n\nA three-voter replica set can tolerate the loss of one voting member and still retain a majority:\n\n```text\nTotal voters: 3\nMajority:     2\n```",
+    "body_markdown": "If the primary becomes unreachable, eligible voting members hold an election.\n\n```text\nBefore failure\nPrimary\nSecondary A\nSecondary B\n\nPrimary fails\n\nElection occurs\n\nAfter election\nUnavailable former primary\nPrimary A\nSecondary B\n```\n\nFor an election to succeed, a candidate must obtain support from a majority of voting members.\n\nA three-voter replica set can tolerate the loss of one voting member and still retain a majority:\n\n```text\nTotal voters: 3\nMajority:     2\n```",
     "notes": "If the primary becomes unreachable, eligible voting members hold an election.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/016 - Replica-Set Elections.png"
   },
@@ -216,7 +216,7 @@
     "global_index": 30,
     "marp_class": "split",
     "heading": "Majority write concern",
-    "body_markdown": "```javascript\ndb.orders.insertOne(\n  {\n    orderNumber: \"ORD-2026-2003\",\n    status: \"Processing\"\n  },\n  {\n    writeConcern: {\n      w: \"majority\"\n    }\n  }\n)\n```\n\nThis requests acknowledgment after the write has reached the calculated majority commit requirements.\n\n#### Tradeoff\n\nStronger acknowledgment can provide better durability guarantees but may add latency.\n\nWrite concern should reflect the importance of the operation:",
+    "body_markdown": "```javascript\ndb.orders.insertOne(\n  {\n    orderNumber: \"ORD-2026-2003\",\n    status: \"Processing\"\n  },\n  {\n    writeConcern: {\n      w: \"majority\",\n      j: true\n    }\n  }\n)\n```\n\nThis requests acknowledgment after the write has reached the calculated majority commit requirements.\n\n#### Tradeoff\n\nStronger acknowledgment can provide better durability guarantees but may add latency.\n\nWrite concern should reflect the importance of the operation:",
     "notes": "This requests acknowledgment after the write has reached the calculated majority commit requirements.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/027 - Write Concern.png"
   },
@@ -291,7 +291,7 @@
     "global_index": 40,
     "marp_class": "split",
     "heading": "What Is Sharding?",
-    "body_markdown": "Sharding distributes documents from a collection across multiple shards.\n\nSuppose `orders` contains hundreds of millions of documents. Instead of storing all orders on one replica set:\n\n```text\nAll orders → One replica set\n```\n\nMongoDB can distribute them:\n\n```text\nOrders with key range A → Shard 1\nOrders with key range B → Shard 2\nOrders with key range C → Shard 3\n```\n\nThe shard key determines how documents are distributed.",
+    "body_markdown": "Sharding distributes documents from a collection across multiple shards.\n\nSuppose `orders` contains hundreds of millions of documents. Instead of storing all orders on one replica set:\n\n```text\nAll orders → One replica set\n```\n\nMongoDB can distribute them:\n\n```text\nOrders with customerId A–H → Shard A\nOrders with customerId I–P → Shard B\nOrders with customerId Q–Z → Shard C\n```\n\nThe shard key determines how documents are distributed.",
     "notes": "Sharding distributes documents from a collection across multiple shards.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/037 - What Is Sharding-.png"
   },
@@ -321,7 +321,7 @@
     "global_index": 44,
     "marp_class": "split",
     "heading": "Shards",
-    "body_markdown": "A shard stores part of the sharded data.\n\nIn production, each shard is normally deployed as a replica set:\n\n```text\nShard 1 replica set\n├── Primary\n├── Secondary\n└── Secondary\n```\n\nThis means:\n\n- Sharding distributes data between shards.\n- Replication provides availability within each shard.\n\nIf a shard were a single unreplicated server, that server would become a single point of failure for its assigned data.",
+    "body_markdown": "A shard stores part of the sharded data.\n\nIn production, each shard is normally deployed as a replica set:\n\n```text\nShard A replica set\n├── Primary\n├── Secondary\n└── Secondary\n```\n\nThis means:\n\n- Sharding distributes data between shards.\n- Replication provides availability within each shard.\n\nIf a shard were a single unreplicated server, that server would become a single point of failure for its assigned data.",
     "notes": "A shard stores part of the sharded data.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/040 - Shards.png"
   },
@@ -359,7 +359,7 @@
     "global_index": 49,
     "marp_class": "split",
     "heading": "Ranged Sharding",
-    "body_markdown": "Ranged sharding distributes documents according to ranges of shard-key values.\n\nFor:\n\n```javascript\n{\n  orderedAt: 1\n}\n```\n\nthe conceptual distribution might be:\n\n```text\nShard 1: Before January 2026\nShard 2: January–June 2026\nShard 3: After June 2026\n```",
+    "body_markdown": "Ranged sharding distributes documents according to ranges of shard-key values.\n\nFor:\n\n```javascript\n{\n  customerId: 1\n}\n```\n\nthe conceptual distribution might be:\n\n```text\nShard A: C0000–C3999\nShard B: C4000–C6999\nShard C: C7000–C9999\n```",
     "notes": "Ranged sharding distributes documents according to ranges of shard-key values.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/050 - Ranged Sharding.png"
   },
@@ -381,7 +381,7 @@
     "global_index": 52,
     "marp_class": "split",
     "heading": "Hashed Sharding",
-    "body_markdown": "Hashed sharding calculates a hash of the shard-key value and distributes hash ranges.\n\nExample:\n\n```javascript\n{\n  customerId: \"hashed\"\n}\n```\n\nConceptually:\n\n```text\ncustomerId\n    │\n    ▼\nHash function\n    │\n    ▼\nDistributed hash value\n    │\n    ├── Shard 1\n    ├── Shard 2\n    └── Shard 3\n```",
+    "body_markdown": "Hashed sharding calculates a hash of the shard-key value and distributes hash ranges.\n\nExample:\n\n```javascript\n{\n  customerId: \"hashed\"\n}\n```\n\nConceptually:\n\n```text\ncustomerId\n    │\n    ▼\nHash function\n    │\n    ▼\nDistributed hash value\n    │\n    ├── Shard A\n    ├── Shard B\n    └── Shard C\n```",
     "notes": "Hashed sharding calculates a hash of the shard-key value and distributes hash ranges.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/051 - Hashed Sharding.png"
   },
@@ -403,7 +403,7 @@
     "global_index": 55,
     "marp_class": "split",
     "heading": "Targeted query",
-    "body_markdown": "A query containing an appropriate shard-key value can be routed to a specific shard or subset of shards:\n\n```javascript\ndb.orders.find({\n  customerId: customerId\n})\n```\n\nIf `customerId` is the shard key, `mongos` can determine where the customer’s data resides.\n\n```text\nmongos → Shard 2\n```",
+    "body_markdown": "A query containing an appropriate shard-key value can be routed to a specific shard or subset of shards:\n\n```javascript\ndb.orders.find({\n  customerId: 1042\n})\n```\n\nIf `customerId` is the shard key, `mongos` can determine where the customer’s data resides.\n\n```text\nmongos → Shard B\n```",
     "notes": "A query containing an appropriate shard-key value can be routed to a specific shard or subset of shards:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/059 - Targeted Queries.png"
   },
@@ -411,7 +411,7 @@
     "global_index": 56,
     "marp_class": "split",
     "heading": "Scatter-gather query",
-    "body_markdown": "A query that does not contain the shard key may need to be sent to every shard:\n\n```javascript\ndb.orders.find({\n  status: \"Processing\"\n})\n```\n\n```text\n             ┌→ Shard 1\nmongos ──────┼→ Shard 2\n             └→ Shard 3\n```\n\nThe router gathers and merges the responses.\n\nMongoDB notes that the fastest sharded queries are generally those routed to one shard using shard-key information.",
+    "body_markdown": "A query that does not contain the shard key may need to be sent to every shard:\n\n```javascript\ndb.products.find({\n  category: \"Books\"\n})\n```\n\n```text\n             ┌→ Shard A\nmongos ──────┼→ Shard B\n             └→ Shard C\n```\n\nThe router gathers and merges the responses.\n\nMongoDB notes that the fastest sharded queries are generally those routed to one shard using shard-key information.",
     "notes": "A query that does not contain the shard key may need to be sent to every shard:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/060 - Scatter-Gather Queries.png"
   },
@@ -434,7 +434,7 @@
     "global_index": 59,
     "marp_class": "split",
     "heading": "Low cardinality",
-    "body_markdown": "Cardinality means the number of distinct shard-key values.\n\n```javascript\n{\n  status: \"Processing\"\n}\n```\n\nAn order status may have only a few possible values:\n\n```text\nProcessing\nShipped\nDelivered\nCancelled\n```\n\nThis provides too few values to distribute a very large collection effectively.",
+    "body_markdown": "Cardinality means the number of distinct shard-key values.\n\n```javascript\n{\n  status: \"NEW\"\n}\n```\n\nAn order status may have only a few possible values:\n\n```text\nNEW\nPAID\nSHIPPED\n```\n\nThis provides too few values to distribute a very large collection effectively.",
     "notes": "An order status may have only a few possible values:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/046 - Cardinality.png"
   },
@@ -464,7 +464,7 @@
     "global_index": 63,
     "marp_class": "split",
     "heading": "Monotonically Changing Values",
-    "body_markdown": "A monotonically increasing value continually grows:\n\n- Timestamp\n- Sequential order number\n- Auto-incrementing identifier\n\nExample:\n\n```text\n100001\n100002\n100003\n100004\n```\n\nWith ranged sharding, new inserts can concentrate at the high end of the range.\n\nA hashed key can distribute such values more evenly, but this may reduce efficient range targeting.",
+    "body_markdown": "A monotonically increasing value continually grows:\n\n- Timestamp\n- Sequential order number\n- Auto-incrementing identifier\n\nExample:\n\n```text\n10:01\n10:02\n10:03\n10:04\n```\n\nWith ranged sharding, new inserts can concentrate at the high end of the range.\n\nA hashed key can distribute such values more evenly, but this may reduce efficient range targeting.",
     "notes": "A monotonically increasing value continually grows:",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/048 - Monotonic Shard Keys.png"
   },
@@ -508,7 +508,7 @@
     "global_index": 69,
     "marp_class": "split",
     "heading": "Chunks and Data Distribution",
-    "body_markdown": "MongoDB divides shard-key space into logical ranges commonly discussed as chunks.\n\nConceptually:\n\n```text\nChunk A: Key range 0–999       → Shard 1\nChunk B: Key range 1000–1999   → Shard 2\nChunk C: Key range 2000–2999   → Shard 3\n```\n\nAs the dataset changes, MongoDB manages distribution across shards.\n\nThe balancing process moves ranges between shards to improve distribution:",
+    "body_markdown": "MongoDB divides shard-key space into logical ranges commonly discussed as chunks.\n\nConceptually:\n\n```text\nChunk 1: customerId C000–C199 → Shard A\nChunk 2: customerId C200–C399 → Shard B\nChunk 3: customerId C400–C599 → Shard C\nChunk 4: customerId C600–C799 → Shard A\nChunk 5: customerId C800–C899 → Shard B\nChunk 6: customerId C900–C999 → Shard C\n```\n\nAs the dataset changes, MongoDB manages distribution across shards.\n\nThe balancing process moves ranges between shards to improve distribution:",
     "notes": "MongoDB divides shard-key space into logical ranges commonly discussed as chunks.",
     "diagram_png": "scripts/chatgpt_diagrams/diagrams/module07/055 - Chunks and Data Distribution.png"
   },

@@ -186,7 +186,7 @@ Ask who has only used a single mongod. Atlas users already have a replica set ev
                 "Evaluate shard keys and query routing",
                 "Decide when to replicate, shard, or both",
             ],
-            "01-module-map.svg",
+            "007-deployment-decision-tree.svg",
             "Replication, guarantees, and scale map",
             "Read outcomes. The through-line is copy for failover, partition for growth, then measure before you shard.",
         )
@@ -223,7 +223,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Meet durability and latency objectives",
                 "Start from business requirements, not hardware",
             ],
-            "02-requirements.svg",
+            "008-requirements-map.svg",
             "Business needs mapped to availability and scale",
             "Collect their actual pains: weekend outages, catalog growth, regional users. Architecture follows the need.",
         )
@@ -239,7 +239,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "MongoDB mechanism: **sharding**",
                 "Need both: **sharded replica sets**",
             ],
-            "03-ha-vs-scale.svg",
+            "002-ha-vs-horizontal-scale.svg",
             "Replica sets for HA, sharding for scale",
             "Redundancy is not extra capacity. Three copies of 500 GB is still 500 GB of data, plus overhead.",
         )
@@ -270,7 +270,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Broader growth, more operational complexity",
                 "Indexing and schema work come before sharding",
             ],
-            "04-vertical-horizontal.svg",
+            "003-vertical-vs-horizontal.svg",
             "Bigger box versus more boxes",
             "Remind them of Module 6: a missing index is not a sharding problem. Buy a bigger box or add indexes before you invent a shard key.",
         )
@@ -286,7 +286,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Sharded cluster: multiple shards, distributed traffic",
                 "Production shards are normally replica sets",
             ],
-            "05-replication-vs-sharding.svg",
+            "004-replication-vs-sharding.svg",
             "Copy versus partition",
             "Say it twice: sharding does not replace backups. Replication does not replace backups either.",
         )
@@ -302,7 +302,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Config servers hold cluster metadata",
                 "Distributed data, distributed work, local redundancy",
             ],
-            "06-distributed-overview.svg",
+            "001-distributed-architecture.svg",
             "App, mongos, three sharded replica sets",
             "This is the north-star picture. The rest of the module zooms into replica sets first, then the router and keys.",
         )
@@ -315,7 +315,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
             "Replication or Sharding?",
             "10 min",
             "Choose replication, sharding, both, or neither yet for six requirements.",
-            "59-ex-choice.svg",
+            "239-ex-7-1-replication-or-sharding.svg",
             "Four choice buckets",
             "Ten minutes. Reveal answers: survive failure and elect = replication; capacity and write spread = sharding; local dev = neither yet; production availability and scale = both.",
         )
@@ -330,9 +330,38 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Odd number of voting members where practical",
                 "Provides redundancy, election, failover, maintenance windows",
             ],
-            "07-replica-set.svg",
+            "009-replica-set-overview.svg",
             "Primary and two secondaries",
             "Atlas free tier is already a replica set. Students who only used Compass on Atlas have been talking to a primary the whole course.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Three-Member Replica Set",
+            [
+                "Primary, Secondary 1, Secondary 2",
+                "Replication copies data from the primary",
+                "Heartbeats keep members informed of health",
+                "Any two voting members form a majority",
+            ],
+            "010-three-member-replica-set.svg",
+            "Primary and two secondaries with replication and heartbeats",
+            "This is the classroom default. Draw the triangle: writes to primary, copies to secondaries, heartbeats on every edge.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Replica-Set Connection String",
+            [
+                "Connect to the **set**, not one fixed host",
+                "Driver discovers members and follows the primary",
+                "A one-host URI is an anti-pattern in production",
+            ],
+            "016-replica-set-connection-string.svg",
+            "Application connecting through several replica-set hosts",
+            "Their Atlas URI already lists replicaSet=. Point at it. Demo 7.1 can show db.hello() topology.",
         )
     )
 
@@ -345,7 +374,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Not every member must serve application reads",
                 "Roles are configuration, not personality",
             ],
-            "08-members.svg",
+            "012-member-roles.svg",
             "Member roles table",
             "Hidden and delayed still consume hardware. They are not free insurance.",
         )
@@ -361,7 +390,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Serves reads under `primary` read preference",
                 "Only one primary at a time in the set",
             ],
-            "09-primary.svg",
+            "013-primary-responsibilities.svg",
             "Primary write and oplog path",
             "If two primaries ever accepted conflicting writes, you have a split-brain story. Majority voting exists to prevent that.",
         )
@@ -377,7 +406,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "May serve reads when read preference allows",
                 "An active participant, not a tape backup",
             ],
-            "10-secondary.svg",
+            "014-secondary-responsibilities.svg",
             "Copy, apply, maybe elect",
             "Secondaries apply the same operations, not rsync of random files. Order matters.",
         )
@@ -392,9 +421,37 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Secondaries copy entries and apply them",
                 "The oplog window must cover how long a member can be down",
             ],
-            "11-oplog.svg",
+            "019-the-oplog.svg",
             "Write, oplog, copy, apply",
             "If a member is down longer than the oplog window, it may need an initial sync. Size the oplog for real maintenance, not for a coffee break.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Oplog Window",
+            [
+                "Oldest available oplog entry through the newest",
+                "A secondary down longer than the window cannot catch up incrementally",
+                "Then: initial sync, not oplog replay",
+            ],
+            "026-oplog-window.svg",
+            "Oldest through newest oplog entries",
+            "Ask how long their longest planned maintenance is. That is the oplog-sizing question.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Data Replication vs. Heartbeats",
+            [
+                "Oplog copies application changes",
+                "Heartbeats carry health and state",
+                "Do not draw them as one arrow",
+            ],
+            "029-data-vs-heartbeats.svg",
+            "Oplog traffic distinguished from health monitoring",
+            "Exercise 7.2 fails if they merge these flows.",
         )
     )
 
@@ -407,7 +464,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Secondaries retrieve and apply",
                 "Client acknowledgment follows **write concern**",
             ],
-            "12-replication-flow.svg",
+            "020-replicated-write-flow.svg",
             "Driver, primary, secondaries, ack",
             "Walk this with a finger. Pause on ack: w:1 can return before secondaries have the write.",
         )
@@ -420,7 +477,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
             "Label a Replica-Set Architecture",
             "10 min",
             "Label application, driver, members, oplog, heartbeats, and read/write paths.",
-            "07-replica-set.svg",
+            "240-ex-7-2-label-replica-set.svg",
             "Replica-set diagram to label",
             "Watch for people drawing writes to a secondary. Heartbeats are not oplog.",
         )
@@ -433,7 +490,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
             "Trace a Replicated Write",
             "15 min",
             "Sequence a write from the client through oplog apply and write-concern ack.",
-            "12-replication-flow.svg",
+            "241-ex-7-3-trace-write.svg",
             "Write path to sequence",
             "If they put acknowledgment before secondary apply, ask which write concern they assumed.",
         )
@@ -448,7 +505,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Whether an election may be required",
                 "Heartbeats do **not** copy application data",
             ],
-            "13-heartbeats.svg",
+            "030-heartbeats.svg",
             "Health checks among members",
             "Separate the control plane (heartbeats) from the data plane (oplog). People mix them.",
         )
@@ -463,7 +520,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "A better eligible candidate (priority)",
                 "Eligible voting members choose a new primary",
             ],
-            "14-elections.svg",
+            "033-election-flow.svg",
             "Election triggers",
             "Elections are normal. Panic is optional. Applications must tolerate a short write pause.",
         )
@@ -478,7 +535,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Some reads may be affected",
                 "Drivers rediscover topology; retries help",
             ],
-            "15-failover.svg",
+            "034-failover-timeline.svg",
             "Failover sequence",
             "Demo 7.3 will show this. Set expectations: a few seconds of errors is success, not a broken database.",
         )
@@ -494,7 +551,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Do not pin forever to one hostname",
                 "Make critical writes idempotent",
             ],
-            "16-app-failover.svg",
+            "036-app-behavior-during-failover.svg",
             "Application requirements during failover",
             "Database HA does not cancel application design. A script that connects to localhost:27017 only will miss the new primary.",
         )
@@ -509,9 +566,37 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "One isolated member cannot elect itself",
                 "Partitions follow the majority side — avoids two primaries",
             ],
-            "17-majority.svg",
+            "039-three-member-majority.svg",
             "Two of three form a majority",
             "Draw a network split. The lonely primary steps down. That is a feature.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Network Partition and Majority Protection",
+            [
+                "Majority side can elect or keep a primary",
+                "Minority side cannot accept writes",
+                "This prevents two writable primaries",
+            ],
+            "041-network-partition-majority.svg",
+            "Majority side writable; minority cannot elect",
+            "Essential diagram. HA does not mean writable during a split.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Split-Brain Prevention",
+            [
+                "Two writable primaries would fork the dataset",
+                "Voting rules allow only one majority primary",
+                "Consistency over “always writable”",
+            ],
+            "042-split-brain-prevention.svg",
+            "Voting rules preventing two writable primaries",
+            "Tie back to majority write concern for what the client was promised.",
         )
     )
 
@@ -524,7 +609,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Keep a reporting node from becoming primary",
                 "Not a performance router for ordinary reads",
             ],
-            "18-priority.svg",
+            "047-member-priority.svg",
             "Priority versus priority 0",
             "Priority 0 means cannot be primary. Hidden reporting nodes often use this. Reads still need read preference, not priority.",
         )
@@ -539,7 +624,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Use only after understanding durability and security tradeoffs",
                 "A data-bearing voter is usually more valuable",
             ],
-            "19-arbiter.svg",
+            "054-arbiter-role.svg",
             "Arbiter cannot store data",
             "PSA (primary-secondary-arbiter) is a common cost shortcut with majority-write pain. Do not sell it as three copies.",
         )
@@ -554,7 +639,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Can be blocked from becoming primary",
                 "Hidden ≠ disconnected or unprotected",
             ],
-            "20-hidden.svg",
+            "049-hidden-secondary.svg",
             "Hidden member still has data",
             "Drivers with default read preference will not send app reads there. You still back it up and patch it.",
         )
@@ -569,7 +654,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "Not a substitute for backups; intentionally stale",
                 "Needs oplog history; must not become primary by accident",
             ],
-            "21-delayed.svg",
+            "051-delayed-secondary.svg",
             "Delayed apply behind the primary",
             "A delayed member that becomes primary is a disaster. Priority 0 and votes carefully. Still take backups.",
         )
@@ -582,7 +667,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
             "Sequence a Failover",
             "15 min",
             "Arrange detection, election, driver discovery, and application retry.",
-            "15-failover.svg",
+            "242-ex-7-4-sequence-failover.svg",
             "Failover sequence to order",
             "If they put retry before election, the write has nowhere to go yet.",
         )
@@ -597,7 +682,7 @@ Failover and sharding commands run only on instructor-controlled disposable infr
                 "`rs.conf()` — votes and priorities",
                 "Identify primary and secondaries together",
             ],
-            "61-demo-rs.svg",
+            "092-rs-status-concept-map.svg",
             "rs.status and rs.conf",
             "Project the live output. Circle setName, members[].stateStr, health, optimeDate. Then open rs.conf for votes.",
             fit="fit-md",
@@ -605,37 +690,36 @@ Failover and sharding commands run only on instructor-controlled disposable infr
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.2 — Observe Replication",
-            """**15 min** · disposable training infrastructure
-
-1. Insert a document on the primary
-2. Confirm the write
-3. Inspect a secondary **safely** (instructor method)
-4. Confirm the document after replication
-5. Discuss staleness if you read too soon
-
-Do not send the class to `rs.slaveOk()` folklore. Use a documented read preference or an instructor secondary shell.""",
-            "One insert is enough. The point is the copy, not load testing.",
-            fit="fit-sm",
+            [
+                "**15 min** · disposable training infrastructure",
+                "Insert on the primary; confirm the write",
+                "Inspect a secondary **safely**",
+                "Confirm the document after replication",
+                "Discuss staleness if you read too soon",
+            ],
+            "252-lab-7-2-replication-verification.svg",
+            "Insert, oplog, secondary copy, verify",
+            "One insert is enough. Use a documented read preference or an instructor secondary shell.",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.3 — Simulate Primary Failover",
-            """**20 min** · **disposable** replica set only
-
-1. Record the current primary
-2. Controlled `rs.stepDown()` or stop the process
-3. Watch the election
-4. Identify the new primary
-5. Note application reconnect / retry
-6. Restore the former member as a secondary
-
-Never step down a shared classroom Atlas cluster unless you declared it disposable.""",
-            "Narrate the error window as expected. Then show hello() flipping. Restore before the break.",
-            fit="fit-sm",
+            [
+                "**20 min** · **disposable** replica set only",
+                "Record primary → `rs.stepDown()`",
+                "Watch the election; identify the new primary",
+                "Note application retry; restore as secondary",
+                "Never step down a shared classroom Atlas cluster",
+            ],
+            "253-lab-7-3-failover-observation.svg",
+            "Step-down, election, new primary",
+            "Narrate the error window as expected. Restore before the break.",
+            fit="fit-md",
         )
     )
 
@@ -648,46 +732,43 @@ Never step down a shared classroom Atlas cluster unless you declared it disposab
                 "Affects availability, latency, freshness, load",
                 "Does not replace read concern",
             ],
-            "22-read-pref.svg",
+            "057-read-preference-overview.svg",
             "Read preference modes",
             "Default for most drivers is primary. Changing this is an application decision, not a server-wide magic switch.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Primary Read Preference",
-            """`primary` sends reads to the current primary.
-
-**Advantages**
-
-- Sees the primary’s current state
-- Simplest consistency story
-- Default for many workloads
-
-**Tradeoff**
-
-- Reads share primary resources with writes
-- Reads can pause briefly during elections""",
+            [
+                "`primary` sends reads to the current primary",
+                "Sees the primary’s current state — simplest consistency story",
+                "Default for many workloads",
+                "Reads share primary resources with writes",
+                "Reads can pause briefly during elections",
+            ],
+            "058-primary-read-preference.svg",
+            "Reads routed to the current primary",
             "Order-status right after pay: stay on primary unless they can explain stale as acceptable.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Secondary Read Preferences",
-            """Secondary reads may help reporting, geo-local reads, or shedding some primary read load.
-
-**Tradeoffs**
-
-- Data may be behind the primary
-- Stale results can be wrong for the business
-- Secondary capacity is not free
-
-Sending reads to secondaries does **not** automatically make the whole system faster.""",
-            "If analytics saturates a secondary, lag grows and failover readiness drops. Module 6 lesson: extra work still costs hardware.",
-            fit="fit-sm",
+            [
+                "May help reporting, geo-local reads, or shedding primary read load",
+                "Data may be behind the primary",
+                "Stale results can be wrong for the business",
+                "Secondary capacity is not free",
+                "Not an automatic system-wide speedup",
+            ],
+            "063-primary-vs-secondary-reads.svg",
+            "Fresher primary state versus potentially stale secondary",
+            "If analytics saturates a secondary, lag grows and failover readiness drops.",
+            fit="fit-md",
         )
     )
 
@@ -700,42 +781,59 @@ Sending reads to secondaries does **not** automatically make the whole system fa
                 "Controls durability confidence vs latency",
                 "Not the same question as read preference",
             ],
-            "23-write-concern.svg",
+            "069-write-concern-overview.svg",
             "Primary, majority, numeric w",
             "Write concern is the client’s success definition. Show wtimeout so they do not hang forever.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Common Write-Concern Levels",
-            """**Primary acknowledgment (`w: 1`)**  
-Lower latency, less replica-set confirmation.
-
-**Majority**  
-A majority of voting data-bearing members have acknowledged per configured semantics.
-
-**Custom numeric `w`**  
-Wait for N members.
-
-Stronger acknowledgment usually increases durability confidence and can increase latency. Do not present `w: 0` / `w: 1` as a universal performance solution.""",
-            "For payments, majority is the teaching default. Custom w=3 on a 3-node set can be stricter than majority depending on config — keep it conceptual.",
-            fit="fit-sm",
+            [
+                "**`w: 1`:** primary ack — faster, less confirmation",
+                "**majority:** voting data-bearing majority",
+                "**`w: N`:** wait for N members",
+                "Stronger ack usually costs latency",
+                "Do not treat `w: 1` as a universal performance solution",
+            ],
+            "074-write-concern-latency.svg",
+            "Faster acknowledgment versus stronger confirmation",
+            "For payments, majority is the teaching default.",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
+            "Majority Write Concern",
+            [
+                "Acknowledged after the required voting majority confirms",
+                "Teaching default for payments and other durable records",
+                "Protects against rollback if the original primary never returns",
+                "Costs more latency than `w: 1`",
+            ],
+            "076-payment-majority-write.svg",
+            "Payment flowing through primary and replicas before success",
+            "Walk the payment: client waits until majority of data-bearing voters have the write. That is the durability story.",
+            fit="fit-md",
+        )
+    )
+
+    s.append(
+        split_slide(
             "Read Concern",
-            """Influences visibility and isolation of reads.
-
-Common levels: `local` · `available` · `majority` · `linearizable` · `snapshot`
-
-Choose based on transactions, staleness tolerance, performance, deployment, and application semantics.
-
-This module teaches the **idea**. Exact guarantees depend on version and topology — confirm in docs for production.""",
-            "Do not pretend to finish causal consistency in five minutes. Pair with write concern majority for 'I need to read what I just majority-wrote' stories.",
-            fit="fit-sm",
+            [
+                "Visibility and isolation of the read",
+                "`local` · `available` · `majority` · `linearizable` · `snapshot`",
+                "Not the same knob as read preference",
+                "Pair majority reads with majority writes when “read what I just wrote” matters",
+                "Exact guarantees depend on version and topology",
+            ],
+            "066-read-concern-overview.svg",
+            "Read-concern visibility models",
+            "Teach the idea. Confirm docs for production.",
+            fit="fit-md",
         )
     )
 
@@ -748,7 +846,7 @@ This module teaches the **idea**. Exact guarantees depend on version and topolog
                 "**Write concern:** what acknowledgment for a write?",
                 "Three knobs. Not interchangeable.",
             ],
-            "24-three-settings.svg",
+            "077-three-settings.svg",
             "Three settings, three questions",
             "Quiz them live: secondary + local read is a freshness choice. Majority write is a durability choice. Mixing the words is the most common muddle.",
         )
@@ -761,39 +859,41 @@ This module teaches the **idea**. Exact guarantees depend on version and topolog
             "Select Read and Write Settings",
             "20 min",
             "Choose settings for payment, catalog, reporting, and reconciliation; justify staleness and durability.",
-            "24-three-settings.svg",
+            "243-ex-7-5-select-settings.svg",
             "Three settings for business ops",
             "Push back if payment confirmation is secondaryPreferred. Analytics may be stale on purpose.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.4 — Compare Write Concerns",
-            """**15 min** · controlled environment
-
-Write the same insert with different acknowledgment requirements.
-
-Discuss latency, confirmation, failure/`wtimeout` behavior, and durability.
-
-Avoid “just use `w: 1` to go faster” as architecture advice.""",
+            [
+                "**15 min** · controlled environment",
+                "Same insert, different acknowledgment requirements",
+                "Discuss latency, confirmation, `wtimeout`, durability",
+                "Avoid “just use `w: 1` to go faster”",
+            ],
+            "254-lab-7-4-read-write-policy.svg",
+            "Write-concern comparison",
             "If times are similar on an idle three-node Atlas set, say so. The lesson is the contract, not a benchmark.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.5 — Compare Read Preferences",
-            """**15 min**
-
-Compare `primary`, `primaryPreferred`, `secondaryPreferred`, `nearest`.
-
-Observe which member is selected. Discuss freshness.
-
-`nearest` is latency, not “the secondary in Europe that has yesterday’s data I wanted.”""",
+            [
+                "**15 min**",
+                "Compare `primary`, `primaryPreferred`, `secondaryPreferred`, `nearest`",
+                "Observe which member is selected; discuss freshness",
+                "`nearest` is latency, not a geographic data guarantee",
+            ],
+            "057-read-preference-overview.svg",
+            "Read preference options",
             "Show db.hello() / connection handshake. nearest can still be the primary if it is closest.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
@@ -806,24 +906,26 @@ Observe which member is selected. Discuss freshness.
                 "Affects failover readiness",
                 "Affects recovery and oplog-window planning",
             ],
-            "25-lag.svg",
+            "078-replication-lag-overview.svg",
             "Primary T0 versus secondary T0 plus lag",
             "A few seconds idle is normal. Growing lag is an incident. Zero lag is not a promise under load.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Causes of Replication Lag",
-            """- Slow disks, network latency, insufficient CPU
-- Heavy write volume or large operations
-- Index differences and resource contention
-- Maintenance and secondary-specific workloads
-- Oplog window too small for an interrupted member
-
-Lag is a **symptom**. Collect disk, CPU, network, currentOps, and oplog window before you rebuild a node.""",
-            "Tie to Exercise 7.6. Reporting on a secondary is a classic self-inflicted lag.",
-            fit="fit-sm",
+            [
+                "Slow disks, network, insufficient CPU",
+                "Heavy writes or large operations",
+                "Secondary-specific reporting load",
+                "Oplog window too small for downtime",
+                "Lag is a symptom — collect evidence before rebuild",
+            ],
+            "080-causes-of-lag.svg",
+            "Disk, CPU, network, writes, and reporting load",
+            "Reporting on a secondary is a classic self-inflicted lag.",
+            fit="fit-md",
         )
     )
 
@@ -836,9 +938,38 @@ Lag is a **symptom**. Collect disk, CPU, network, currentOps, and oplog window b
                 "Reduce risk: majority writes, stable networks, correct drivers",
                 "Rollback is not “the database randomly deletes orders for fun”",
             ],
-            "26-rollback.svg",
+            "086-rollback-concept.svg",
             "Former primary versus current history",
             "w:1 + failover is the story. Majority writes that completed are the ones you designed to keep.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Replication Is Not Backup",
+            [
+                "A drop or bad update replicates to every member",
+                "Availability copies are not a restore point",
+                "Delayed members help only some accidents",
+                "Keep independent backups",
+            ],
+            "089-replication-is-not-backup.svg",
+            "Accidental deletion copied to every replica",
+            "Essential diagram. If they remember one ops sentence: replica set plus backups.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Replica Set Plus Backup Strategy",
+            [
+                "Replica set: stay up when a node dies",
+                "Backup: restore yesterday’s data",
+                "You need both in production",
+            ],
+            "090-replica-set-plus-backup.svg",
+            "Availability copies combined with independent backups",
+            "Sharding does not replace this picture either.",
         )
     )
 
@@ -851,24 +982,26 @@ Lag is a **symptom**. Collect disk, CPU, network, currentOps, and oplog window b
                 "`rs.printSecondaryReplicationInfo()` — lag",
                 "Presentation depends on environment and privileges",
             ],
-            "27-rs-status.svg",
+            "092-rs-status-concept-map.svg",
             "Status commands",
             "Lab 7.1 is this slide in the shell. Atlas UI is allowed as a complement, not a replacement for rs.status().",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Replica-Set Operational Practices",
-            """- Odd number of voting members where practical
-- Independent failure domains
-- Monitor lag and oplog window
-- Replica-set connection strings
-- Test failover; keep backups
-- Appropriate read and write concerns
-- Consistent member config; secure member and client traffic""",
+            [
+                "Odd number of voting members where practical",
+                "Independent failure domains",
+                "Monitor lag and oplog window",
+                "Replica-set URIs, failover tests, backups",
+                "Secure member and client traffic",
+            ],
+            "100-replica-set-ops-checklist.svg",
+            "Topology, health, lag, oplog, backups, failover tests",
             "Backups still required. Replication is HA, not a backup product.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
@@ -881,7 +1014,7 @@ Lag is a **symptom**. Collect disk, CPU, network, currentOps, and oplog window b
                 "**Majority unavailable:** no writable primary — consistency wins",
                 "Administrator intervention may be required in the last case",
             ],
-            "28-failure-scenarios.svg",
+            "094-one-secondary-failure.svg",
             "Three failure outcomes",
             "Losing majority is designed to stop writes. That surprises people who wanted HA to mean 'always writable even if the network is in pieces.'",
         )
@@ -894,22 +1027,25 @@ Lag is a **symptom**. Collect disk, CPU, network, currentOps, and oplog window b
             "Diagnose Replication Lag",
             "15 min",
             "Match lag symptoms to cause, impact, evidence, and first action.",
-            "25-lag.svg",
+            "244-ex-7-6-diagnose-lag.svg",
             "Lag diagnosis",
             "If every answer is 'restart MongoDB,' send them back to metrics.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.6 — Inspect Replication Lag",
-            """**10 min**
-
-Compare member replication times. Discuss normal small delay vs growing lag.
-
-Tie to disk, network, write bursts, and secondary workloads.""",
+            [
+                "**10 min**",
+                "Compare member replication times",
+                "Normal small delay vs continuously growing lag",
+                "Tie to disk, network, write bursts, secondary load",
+            ],
+            "078-replication-lag-overview.svg",
+            "Primary timestamp versus secondary apply times",
             "Show printSecondaryReplicationInfo. If lag is zero, still describe what 45 seconds would mean for secondary reads.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
@@ -920,7 +1056,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
             "Verify Replica-Set Health",
             "20 min",
             "Inspect name, states, votes, and timestamps; write a health report.",
-            "62-lab-health.svg",
+            "251-lab-7-1-health-inspection.svg",
             "Health inspection flow",
             "Required lab on Atlas. Walk the room for standalone users and switch their URI.",
         )
@@ -933,7 +1069,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
             "Write and Verify Replication",
             "20 min",
             "Insert through the replica-set URI, confirm ack, observe replication, delete the probe.",
-            "12-replication-flow.svg",
+            "252-lab-7-2-replication-verification.svg",
             "Insert and replicate",
             "Optional if time is short. Must use replica-set URI. Delete the lab documents.",
         )
@@ -946,7 +1082,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
             "Observe Election and Failover",
             "25 min",
             "Watch a controlled step-down on a disposable set; document old/new primary and app behavior.",
-            "15-failover.svg",
+            "253-lab-7-3-failover-observation.svg",
             "Election lab",
             "Instructor-led. Students observe and record. Do not let twelve people stepDown one Atlas cluster.",
         )
@@ -959,7 +1095,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
             "Test Read Preference and Write Concern",
             "25 min",
             "Compare serving members and assigned write concerns; map them to business operations.",
-            "24-three-settings.svg",
+            "254-lab-7-4-read-write-policy.svg",
             "Read and write concern lab",
             "Optional / extra block. SecondaryPreferred needs instructor permission on shared clusters.",
         )
@@ -972,7 +1108,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
             "Investigate Replication Lag",
             "20 min",
             "Compare optimes and oplog window; propose ordered corrective actions.",
-            "25-lag.svg",
+            "255-lab-7-5-lag-investigation.svg",
             "Lag investigation lab",
             "Even with zero lag, they must write a production checklist.",
         )
@@ -987,26 +1123,26 @@ Tie to disk, network, write bursts, and secondary workloads.""",
                 "Supports storage, query, and write scale",
                 "Adds significant operational complexity",
             ],
-            "29-what-is-sharding.svg",
+            "103-logical-vs-physical.svg",
             "Three shards holding ranges",
             "Sharding is not the default for training_store. Seventeen orders do not need three shards.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Why Applications Need Sharding",
-            """Consider sharding when:
-
-- Dataset exceeds one replica set’s practical capacity
-- Read or write demand exceeds one replica set
-- Working set no longer fits effectively
-- Geographic placement is required
-- Vertical scaling is no longer sustainable
-
-**Warning:** shard to a measured need, not a slide from a conference.""",
-            "Ask what evidence they have: disk forecasts, CPU, working set, write latency. No evidence, no shard key.",
-            fit="fit-sm",
+            [
+                "Dataset or throughput beyond one replica set",
+                "Working set no longer fits",
+                "Geographic placement required",
+                "Vertical scaling no longer sustainable",
+                "Shard to a measured need, not a conference slide",
+            ],
+            "208-capacity-growth-timeline.svg",
+            "Development to replica set to sharded production",
+            "Ask what evidence they have: disk, CPU, working set, write latency.",
+            fit="fit-md",
         )
     )
 
@@ -1019,7 +1155,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
                 "One or more `mongos` routers",
                 "Client applications and drivers",
             ],
-            "30-cluster-components.svg",
+            "101-sharded-cluster-overview.svg",
             "mongos, shards, config RS",
             "Three moving parts to health-check. Losing CSRS is not 'just metadata.'",
         )
@@ -1034,7 +1170,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
                 "Partitioned data plus redundancy inside the partition",
                 "Independent failover for that shard’s members",
             ],
-            "31-shards.svg",
+            "108-shard-responsibilities.svg",
             "Shard as replica set",
             "A shard primary election only blocks operations that need that shard.",
         )
@@ -1048,7 +1184,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
                 "Critical infrastructure — availability and backups matter",
                 "Not where `orders` documents live",
             ],
-            "32-csrs.svg",
+            "113-config-server-replica-set.svg",
             "Config metadata kinds",
             "Treat CSRS like the map of the city. Without the map, routers cannot route new metadata operations.",
         )
@@ -1063,7 +1199,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
                 "Does **not** store application collection data",
                 "Deploy more than one router for applications",
             ],
-            "33-mongos.svg",
+            "118-mongos-query-router.svg",
             "mongos routing steps",
             "Applications connect to mongos (or a load-balanced mongos pool), not to a shard as the only entry.",
         )
@@ -1078,7 +1214,7 @@ Tie to disk, network, write bursts, and secondary workloads.""",
                 "Relevant shard or shards execute",
                 "Merge if required, then reply",
             ],
-            "34-request-flow.svg",
+            "119-sharded-read-flow.svg",
             "Request flow through mongos",
             "Targeted is cheap. Scatter-gather is a broadcast. They will see this in explain.",
         )
@@ -1091,26 +1227,25 @@ Tie to disk, network, write bursts, and secondary workloads.""",
             "Label a Sharded Cluster",
             "10 min",
             "Label mongos, config servers, shards as replica sets, metadata, and query flow.",
-            "30-cluster-components.svg",
+            "245-ex-7-7-label-cluster.svg",
             "Cluster diagram to label",
             "Catch anyone putting orders on the config servers.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.7 — Inspect a Sharded Cluster",
-            """**15 min** · instructor `mongos`
-
-```javascript
-sh.status()
-```
-
-Identify shards, config database, sharded collections, shard keys, ranges, distribution.
-
-If the room has no mongos, project yours. Atlas M0 will not substitute.""",
+            [
+                "**15 min** · instructor `mongos`",
+                "`sh.status()` — shards, keys, ranges, balancer",
+                "Identify CSRS, sharded collections, distribution",
+                "Atlas M0 will not substitute; project yours if needed",
+            ],
+            "198-sh-status-concept-map.svg",
+            "sh.status concept map",
             "Read the output slowly. Shard ids, then collections, then chunks. Do not skip CSRS.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
@@ -1124,25 +1259,25 @@ If the room has no mongos, project yours. Atlas M0 will not substitute.""",
                 '`{ customerId: "hashed" }`',
                 "One of the most important sharding decisions",
             ],
-            "35-shard-key.svg",
+            "124-what-is-a-shard-key.svg",
             "Example shard keys",
             "Immutable enough, present on every document, aligned with queries. Changing later is resharding, not a rename.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Shard-Key Characteristics",
-            """Evaluate:
-
-- Cardinality and frequency distribution
-- Write distribution and query targeting
-- Growth pattern and divisibility
-- Locality and long-term application behavior
-
-There is **no** universally ideal shard key.""",
-            "Score keys; do not hunt for a perfect field. Training_store paymentStatus fails almost every column.",
-            fit="fit-sm",
+            [
+                "Cardinality and frequency",
+                "Write distribution and query targeting",
+                "Growth, divisibility, locality",
+                "No universally ideal shard key",
+            ],
+            "125-shard-key-selection-framework.svg",
+            "Cardinality, distribution, writes, targeting, growth",
+            "Score keys; do not hunt for a perfect field. training_store paymentStatus fails almost every column.",
+            fit="fit-md",
         )
     )
 
@@ -1155,7 +1290,7 @@ There is **no** universally ideal shard key.""",
                 "Higher cardinality enables finer distribution",
                 "Still check frequency — one celebrity customer",
             ],
-            "36-cardinality.svg",
+            "127-shard-key-cardinality.svg",
             "Low versus high cardinality",
             "Status as shard key is the canonical bad example. Use it in Exercise 7.8.",
         )
@@ -1170,7 +1305,7 @@ There is **no** universally ideal shard key.""",
                 "Uneven storage and request load",
                 "Use real workload patterns, not unique-count only",
             ],
-            "37-frequency.svg",
+            "131-skewed-tenant.svg",
             "Skewed tenant traffic",
             "Enterprise tenants in the challenge are this slide. Compound keys and isolation are mitigations, not magic.",
         )
@@ -1185,7 +1320,7 @@ There is **no** universally ideal shard key.""",
                 "Creates a write hotspot on one chunk/shard",
                 "Mitigate: hashed, compound, other distribution, careful zones",
             ],
-            "38-monotonic.svg",
+            "132-monotonic-shard-key.svg",
             "Writes piling on the max range",
             "createdAt as a ranged key is the second canonical failure. Hashed createdAt is rarely what they wanted for date-range reports either.",
         )
@@ -1199,7 +1334,7 @@ There is **no** universally ideal shard key.""",
                 '`find({ customerId: "C101" })` if customerId is the key',
                 "Without a usable key predicate, the query goes broadly",
             ],
-            "39-query-isolation.svg",
+            "134-query-isolation.svg",
             "Targeted versus untargeted find",
             "This is why modeling access patterns in Module 3 still matters. You shard for the queries you actually run.",
         )
@@ -1213,7 +1348,7 @@ There is **no** universally ideal shard key.""",
                 "Efficient range targeting and locality",
                 "Risks: uneven values, monotonic write hotspots",
             ],
-            "40-ranged.svg",
+            "138-ranged-sharding.svg",
             "Alphabet ranges on three shards",
             "Great for customerId prefixes and date ranges **inside** a customer. Poor for global increasing dates.",
         )
@@ -1228,7 +1363,7 @@ There is **no** universally ideal shard key.""",
                 "Reduces monotonic concentration",
                 "Range queries often hit many shards; locality lost",
             ],
-            "41-hashed.svg",
+            "143-hashed-sharding.svg",
             "Value to hash to shard",
             "Hashed is not 'better sharding.' It is a distribution strategy with a range-query tax.",
         )
@@ -1243,7 +1378,7 @@ There is **no** universally ideal shard key.""",
                 "Canada ranges → Canada zone; Europe → Europe zone",
                 "Requires careful operational planning",
             ],
-            "42-zoned.svg",
+            "148-zoned-sharding.svg",
             "Canada and Europe zones",
             "Zones do not fix a 90% Canada user base. They put 90% of the work on the Canada shards — which may be correct for law, not for load.",
         )
@@ -1257,7 +1392,7 @@ There is **no** universally ideal shard key.""",
                 "Hashed: even spread, sequential-write relief, scatter ranges",
                 "Pick from the query mix, not from fashion",
             ],
-            "43-ranged-vs-hashed.svg",
+            "147-ranged-vs-hashed.svg",
             "Ranged versus hashed comparison",
             "Exercise 7.10 is this table applied to two workloads.",
         )
@@ -1272,7 +1407,7 @@ There is **no** universally ideal shard key.""",
                 "Queries missing the leading field target poorly",
                 "Leading field must match the important filter",
             ],
-            "44-compound.svg",
+            "135-compound-shard-key.svg",
             "Compound tenant and orderId",
             "Same ESR intuition as indexes: the prefix you query is the prefix you shard.",
         )
@@ -1285,29 +1420,25 @@ There is **no** universally ideal shard key.""",
             "Evaluate Shard-Key Candidates",
             "20 min",
             "Score six order-key candidates; recommend one and name remaining risks.",
-            "35-shard-key.svg",
+            "246-ex-7-8-evaluate-keys.svg",
             "Shard-key candidates",
             "Required exercise. Reject status. Flag createdAt. Make them pick and live with a risk.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.10 — Evaluate Shard-Key Candidates",
-            """**20 min** · discussion at the whiteboard
-
-Compare for `orders`:
-
-- `status` / `paymentStatus`
-- `createdAt`
-- `customerId`
-- hashed `customerId`
-- `{ tenantId, orderId }`
-- `{ customerId, createdAt }`
-
-Score cardinality, distribution, targeting, monotonic behavior, tenant concentration.""",
+            [
+                "**20 min** · whiteboard discussion for `orders`",
+                "`status` · `createdAt` · `customerId` · hashed `customerId`",
+                "`{ tenantId, orderId }` · `{ customerId, createdAt }`",
+                "Score cardinality, distribution, targeting, hotspot risk",
+            ],
+            "246-ex-7-8-evaluate-keys.svg",
+            "Shard-key candidate scorecard",
             "Can merge with Exercise 7.8 if time is tight. Use training_store field names they already know.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
@@ -1318,7 +1449,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
             "Compare Ranged and Hashed Sharding",
             "15 min",
             "Evaluate both strategies for equality, ranges, sequential writes, locality, and complexity.",
-            "43-ranged-vs-hashed.svg",
+            "248-ex-7-10-ranged-or-hashed.svg",
             "Ranged versus hashed",
             "Two workloads, two answers. UUID equality vs customer history.",
         )
@@ -1331,7 +1462,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
             "Diagnose Hotspot Risks",
             "15 min",
             "Review five hotspot patterns and propose a mitigation for each.",
-            "51-hotspots.svg",
+            "249-ex-7-11-find-the-hotspot.svg",
             "Hot shard among three",
             "Celebrity product is often a cache problem, not a new shard key.",
         )
@@ -1345,7 +1476,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
                 "Ranges live on shards; the app sees one collection",
                 "Balance is about ranges and data size, not 'feel'",
             ],
-            "45-chunks.svg",
+            "153-logical-data-ranges.svg",
             "Ranges on three shards",
             "Chunk is the teaching word. Newer versions talk ranges — same idea: a movable piece of key space.",
         )
@@ -1359,7 +1490,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
                 "Split point selected → Range A + Range B",
                 "Smaller units migrate independently",
             ],
-            "46-split.svg",
+            "156-range-splitting.svg",
             "One range splitting into two",
             "Splits enable movement. They are not themselves a rebalance.",
         )
@@ -1374,7 +1505,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
                 "Consumes resources — monitor it",
                 "Can be a surprise I/O storm if ignored",
             ],
-            "47-balancer.svg",
+            "158-the-balancer.svg",
             "Balancer moving ranges",
             "Do not turn the balancer off forever as a performance hack without a plan.",
         )
@@ -1388,7 +1519,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
                 "Then clean up the donor",
                 "Applications keep using `mongos` during the move",
             ],
-            "48-migration.svg",
+            "161-chunk-migration-flow.svg",
             "Migration steps",
             "Migrations are online. They are not free. Jumbo chunks that cannot split/move are an ops ticket.",
         )
@@ -1402,7 +1533,7 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
                 "Example: customerId + orderNumber when customerId leads the key",
                 "Usually less network, less merge, lower latency",
             ],
-            "49-targeted.svg",
+            "166-targeted-query.svg",
             "mongos contacting one shard",
             "This is the OLTP happy path. Design the key so the happy path exists.",
         )
@@ -1416,27 +1547,39 @@ Score cardinality, distribution, targeting, monotonic behavior, tenant concentra
                 "More network, latency, shard CPU, merge work",
                 "Not always avoidable — keep them off the hot path",
             ],
-            "50-scatter-gather.svg",
+            "168-scatter-gather.svg",
             "Query fanning out to all shards",
             "Monthly global revenue is the honest example. Do not pretend a clever shard key makes every report single-shard.",
         )
     )
 
     s.append(
-        content_slide(
-            "Shard-Key Queries",
-            """| Query includes | Routing behavior |
-| --- | --- |
-| Full shard key | Usually targeted |
-| Leading fields of a compound ranged key | May target selected ranges |
-| Non-shard-key fields only | Often scatter-gather |
-| Broad shard-key range | May hit multiple shards |
-| Hashed key equality | Targeted |
-| Hashed key range | Usually broadly distributed |
+        split_slide(
+            "Targeted vs. Scatter-Gather",
+            [
+                "Targeted: shard-key condition picks shard(s)",
+                "Scatter-gather: no useful key — broadcast then merge",
+                "Keep scatter-gather off the hot path",
+            ],
+            "169-targeted-vs-scatter-gather.svg",
+            "One-shard request compared with distributed merge",
+            "Essential diagram. Monthly global revenue is honest scatter-gather.",
+        )
+    )
 
-Exact routing depends on metadata and predicates.""",
-            "Exercise 7.9 uses this table. Partial compound keys that skip the prefix are the trick question.",
-            fit="fit-sm",
+    s.append(
+        split_slide(
+            "Shard-Key Queries",
+            [
+                "Full shard key → usually targeted",
+                "Leading compound fields → may target selected ranges",
+                "Non-key fields only → often scatter-gather",
+                "Hashed equality → targeted; hashed range → broad",
+            ],
+            "170-query-routing-decision.svg",
+            "Contains shard key? Target or broadcast",
+            "Exercise 7.9 uses this. Partial compound keys that skip the prefix are the trick question.",
+            fit="fit-md",
         )
     )
 
@@ -1447,37 +1590,41 @@ Exact routing depends on metadata and predicates.""",
             "Targeted or Scatter-Gather?",
             "15 min",
             "Classify queries as targeted, multi-shard, scatter-gather, or insufficient information.",
-            "50-scatter-gather.svg",
+            "247-ex-7-9-targeted-or-scatter.svg",
             "Scatter-gather versus targeted",
             "Required. paymentStatus-only is scatter-gather. Full customerId prefix is targeted.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.8 — Route Targeted and Scatter-Gather Queries",
-            """**20 min**
-
-`explain` a query **with** the shard key and one **without**.
-
-Compare targeted shards, work, merge, potential latency.
-
-This demo is the evidence behind Exercise 7.9.""",
+            [
+                "**20 min**",
+                "`explain` a query **with** the shard key and one **without**",
+                "Compare targeted shards, work, merge, latency",
+                "Evidence behind Exercise 7.9",
+            ],
+            "169-targeted-vs-scatter-gather.svg",
+            "One-shard request compared with broadcast merge",
             "Required demo if a mongos exists. Otherwise walk a printed explain. Do not fake targeting on an unsharded collection.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Demo 7.9 — Observe Shard Distribution",
-            """**15 min**
-
-Inspect document counts or data size per shard, range counts, balancer activity, zones if configured.
-
-Tiny training data may sit on one shard. Say that out loud so nobody 'fixes' it with random inserts without a plan.""",
-            "Optional. Combine with Lab 7.9 if you run the extra lab block.",
-            fit="fit-sm",
+            [
+                "**15 min**",
+                "Counts or data size per shard; range counts; balancer",
+                "Zones if configured",
+                "Tiny training data may sit on one shard — say that out loud",
+            ],
+            "159-balanced-cluster.svg",
+            "Ranges distributed across shards",
+            "Optional. Combine with Lab 7.9 if you run the extra lab block. Nobody 'fixes' uneven tiny data with random inserts.",
+            fit="fit-md",
         )
     )
 
@@ -1488,7 +1635,7 @@ Tiny training data may sit on one shard. Say that out loud so nobody 'fixes' it 
                 "One shard takes disproportionate writes, reads, growth, CPU, or network",
                 "Causes: monotonic keys, dominant tenants, skew, bad routing, zones, recent-data concentration",
             ],
-            "51-hotspots.svg",
+            "179-hot-shard-overview.svg",
             "One hot shard",
             "Adding shards does not help if 80% of writes still hash or range to the same place.",
         )
@@ -1503,95 +1650,106 @@ Tiny training data may sit on one shard. Say that out loud so nobody 'fixes' it 
                 "Ack follows write concern",
                 "Sharding and replication share the write path",
             ],
-            "52-distributed-writes.svg",
+            "186-distributed-write-path.svg",
             "Write path through mongos and shard RS",
             "A sharded write can still roll back on that shard if write concern is weak. Two mechanisms, one client ack.",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Unique Constraints in Sharded Collections",
-            """Unique indexes on sharded collections need the uniqueness pattern to be compatible with the shard key.
-
-Design business identifiers **together** with the shard key when global uniqueness is required.
-
-Confirm version- and deployment-specific rules before a production unique index. Do not assume `orderNumber` unique works the same as on a replica set.""",
-            "This is a foot-gun slide. Point at docs; do not invent a unique-index recipe for every version.",
-            fit="fit-sm",
+            [
+                "Uniqueness must be compatible with the shard key",
+                "Design business identifiers together with the key",
+                "Do not assume `orderNumber` unique works like on a replica set",
+                "Confirm version-specific rules",
+            ],
+            "192-unique-in-sharded.svg",
+            "Uniqueness aligned with shard-key design",
+            "Foot-gun slide. Point at docs; do not invent a unique-index recipe for every version.",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Transactions in Sharded Clusters",
-            """Multi-document transactions can span shards. Cost:
-
-- Extra network and coordination
-- Higher latency and failure complexity
-- More resource use
-
-Good modeling and shard keys reduce **unnecessary** cross-shard transactions. Prefer single-document or single-shard updates when the domain allows.""",
-            "Tie to Module 3 order aggregate: one order document often avoids a cross-shard transaction for line items.",
-            fit="fit-sm",
+            [
+                "Can span shards — extra network and coordination",
+                "Higher latency and failure complexity",
+                "Prefer single-document or single-shard updates",
+                "Good modeling reduces cross-shard transactions",
+            ],
+            "190-single-vs-distributed-txn.svg",
+            "Local coordination compared with multi-shard coordination",
+            "Tie to Module 3 order aggregate: one order document often avoids a cross-shard transaction.",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Resharding Concepts",
-            """Workloads evolve. A key that once distributed well may hotspot or scatter later.
-
-Resharding changes distribution to a new key. It is a major operational activity: capacity, compatibility, monitoring, performance tests, failure and rollback planning.
-
-Choosing carefully the first time is cheaper than resharding under pressure.""",
-            "Do not demo live resharding in a 3.5 hour intro unless you have a dedicated extra lab. Concept only.",
-            fit="fit-sm",
+            [
+                "Workloads evolve; a key can hotspot later",
+                "Resharding redistributes to a new key",
+                "Major ops: capacity, monitoring, rollback planning",
+                "Choosing carefully the first time is cheaper",
+            ],
+            "194-resharding-concept.svg",
+            "Old key through redistribution to a new key",
+            "Concept only in this intro. Do not demo live resharding in 3.5 hours.",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Sharded-Cluster Status",
-            """Useful views: shards, sharded DBs/collections, keys, distribution, balancer, zones.
-
-```javascript
-sh.status()
-```
-
-Availability depends on privileges and whether you are actually on `mongos`.""",
+            [
+                "Shards, sharded DBs/collections, keys, ranges",
+                "Balancer and zones",
+                "`sh.status()` on `mongos`",
+                "Wrong topology is a teaching moment",
+            ],
+            "198-sh-status-concept-map.svg",
+            "sh.status concept map",
             "Lab 7.6. If someone runs this on a replica set, use the error as a teaching moment.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Sharding Operational Practices",
-            """- Choose keys from measured workload
-- Replica sets for shards; redundant `mongos`
-- Protect config servers
-- Monitor routing, distribution, balancer
-- Test shard failure
-- Avoid uncontrolled scatter-gather on the hot path
-- Back up the **distributed** deployment""",
+            [
+                "Choose keys from measured workload",
+                "Replica-set shards; redundant `mongos`",
+                "Protect config servers",
+                "Monitor routing, distribution, balancer",
+                "Back up the distributed deployment",
+            ],
+            "205-sharded-ops-checklist.svg",
+            "Router, shard, metadata, distribution, targeting, backup",
             "Backups of one shard are not a cluster backup story.",
-            fit="fit-sm",
+            fit="fit-md",
         )
     )
 
     s.append(
-        content_slide(
+        split_slide(
             "Sharded-Cluster Failure Scenarios",
-            """**One shard member fails** — the shard replica set may stay available if it keeps a primary.
-
-**Shard loses primary** — operations that need that shard wait on election.
-
-**One `mongos` fails** — clients use another router if configured.
-
-**Config-server problems** — metadata and management suffer; this is serious.""",
-            "Contrast with replica-set-only failure. Partial availability is possible: other shards still work.",
-            fit="fit-sm",
+            [
+                "One shard member: shard RS may stay available",
+                "Shard primary down: ops for that shard wait on election",
+                "One `mongos` down: use another router",
+                "CSRS problems: metadata / DDL suffer — serious",
+            ],
+            "238-cluster-failure-isolation.svg",
+            "Router, shard, member, and config-service blast radius",
+            "Partial availability is possible: other shards still work.",
+            fit="fit-md",
         )
     )
 
@@ -1602,7 +1760,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Inspect Sharded-Cluster Components",
             "20 min",
             "Identify mongos, shards, CSRS, sharded collections, and keys.",
-            "30-cluster-components.svg",
+            "256-lab-7-6-cluster-inspection.svg",
             "Inspect cluster components",
             "Extra block unless you have mongos for everyone. Sample output is an acceptable substitute.",
         )
@@ -1615,7 +1773,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Shard a Training Collection",
             "25 min",
             "On a disposable cluster, index, shard, insert, and confirm the key.",
-            "35-shard-key.svg",
+            "257-lab-7-7-shard-training-collection.svg",
             "Shard a training collection",
             "Instructor-only cluster. Commands vary by version — you dictate the exact sequence.",
         )
@@ -1628,7 +1786,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Analyze Query Routing",
             "25 min",
             "Explain targeted versus scatter-gather plans for key and non-key queries.",
-            "49-targeted.svg",
+            "258-lab-7-8-query-routing-analysis.svg",
             "Explain routing lab",
             "Pairs with Demo 7.8. Skip if no mongos.",
         )
@@ -1641,7 +1799,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Review Chunk Distribution",
             "20 min",
             "Assess range distribution, balancer, zones, and hotspot indicators.",
-            "45-chunks.svg",
+            "259-lab-7-9-distribution-review.svg",
             "Chunk distribution lab",
             "Tiny data looks uneven. Grade the interpretation, not perfect balance.",
         )
@@ -1656,7 +1814,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
                 "Each shard handles part of the data",
                 "Each replica set protects its shard",
             ],
-            "53-together.svg",
+            "005-replication-and-sharding-together.svg",
             "mongos over three replica-set shards",
             "This is the production picture they should remember on the exit ticket.",
         )
@@ -1671,7 +1829,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
                 "**Sharded cluster:** measured horizontal scale",
                 "**Sharded replica sets:** availability and scale together",
             ],
-            "54-decision.svg",
+            "006-standalone-rs-sharded.svg",
             "Standalone, replica set, shard choices",
             "training_store on one mongod was correct for Days 1–2. Production orders are not a standalone.",
         )
@@ -1687,7 +1845,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
                 "Shard orders with a customer/tenant-oriented key when needed",
                 "Products may wait; analytics isolated; reports costed",
             ],
-            "55-ecommerce.svg",
+            "212-collection-by-collection.svg",
             "Per-collection distribution ideas",
             "Different collections, different strategies. That is the key message.",
         )
@@ -1703,9 +1861,24 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
                 "Arbiter as a 'copy'; single-host URIs; ignoring write concern",
                 "Adding shards before fixing schema and indexes",
             ],
-            "56-mistakes.svg",
+            "218-replication-is-not-sharding.svg",
             "Common mistakes",
             "Read this as a checklist. Module 6 belongs here: shard last among performance tools.",
+        )
+    )
+
+    s.append(
+        split_slide(
+            "Premature Sharding",
+            [
+                "Do not shard to hide schema, query, or index problems",
+                "Fix the working set, indexes, and hot queries first",
+                "Sharding adds routers, metadata, and operational cost",
+                "Evidence first: disk, CPU, working set, write latency",
+            ],
+            "226-premature-sharding.svg",
+            "Schema and indexes before adding shards",
+            "Conference-slide sharding is the anti-pattern. Module 6 tools come first.",
         )
     )
 
@@ -1717,7 +1890,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
                 "**Cluster:** mongos? shards? CSRS? targeted? balancer? hotspot?",
                 "Start with topology health, then the query shape",
             ],
-            "57-troubleshoot.svg",
+            "228-distributed-troubleshooting-flow.svg",
             "Replica set versus cluster checks",
             "Do not tune a shard key while the replica set has no primary.",
         )
@@ -1730,7 +1903,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Design a Scalable Deployment",
             "25 min",
             "Design 24/7 availability, order growth, lookups, reports, and residency.",
-            "54-decision.svg",
+            "250-ex-7-12-design-deployment.svg",
             "Deployment design",
             "If time remains. Residency must be explicit. Otherwise assign as homework before the challenge.",
         )
@@ -1743,7 +1916,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Integrated Availability and Scaling Challenge",
             "40–45 min",
             "End-to-end design: topology, key, routing, settings, failover, monitoring.",
-            "60-challenge.svg",
+            "260-lab-7-10-integrated-challenge.svg",
             "Integrated challenge",
             "Overlaps the practical challenge. Run one, not both, live.",
         )
@@ -1760,7 +1933,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
                 "Targeted queries beat frequent scatter-gather",
                 "Production shards are replica sets",
             ],
-            "58-concept-map.svg",
+            "217-complete-production-architecture.svg",
             "Copy, elect, partition",
             "Restate the opener. Then knowledge check.",
         )
@@ -1792,7 +1965,7 @@ Availability depends on privileges and whether you are actually on `mongos`.""",
             "Scale the E-Commerce Order Platform",
             "30–45 min",
             "Availability design, sharding decision, key comparison, routing analysis, and ops plan — starting from one standalone server.",
-            "60-challenge.svg",
+            "261-practical-challenge-order-platform.svg",
             "Practical challenge",
             "Capstone. Rubric: replica set first, evidence before sharding, reject status/monotonic-only keys, cost global reports, backups plus HA.",
         )
