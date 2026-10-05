@@ -2,7 +2,7 @@
 
 Instructor-led course, 3 days. Innovation In Software Corporation.
 
-This repository is the class copy: the slide PDFs and the hands-on guides. Start with the lab index, not this file.
+This repository is the class copy: the slide PDFs, the hands-on guides, and the sample dataset. Start with the lab index, not this file.
 
 | | |
 | --- | --- |
@@ -50,7 +50,7 @@ One PDF per module, in teaching order.
 
 ## Labs
 
-Full sequence, worksheets, and answer-key locations: [labs/README.md](labs/README.md). Indexes: [exercises](labs/EXERCISES-INDEX.md) · [labs](labs/LABS-INDEX.md).
+Full sequence and worksheets: [labs/README.md](labs/README.md). Indexes: [exercises](labs/EXERCISES-INDEX.md) · [labs](labs/LABS-INDEX.md). Answer keys are not in this repository.
 
 | Day | Lab | Where it runs |
 | --- | --- | --- |
@@ -62,7 +62,7 @@ Full sequence, worksheets, and answer-key locations: [labs/README.md](labs/READM
 | 3 | [Lab 6 — Replication and sharding](labs/day-03/lab6/LAB-6-GUIDE.md) | Steps 1–3 on paper or the laptop. Steps 4–7 on the class replica set. |
 | 3 | [Lab 7 — Production readiness](labs/day-03/lab7/LAB-7-GUIDE.md) | Participant laptop |
 
-The sample loader, `datasets/training_store/load.js`, comes in the course folder the instructor distributes. It is not in this repository. From that folder, reload before a lab that needs a fresh `training_store`:
+Reload the sample data from this repository before a lab that needs a fresh `training_store`:
 
 ```powershell
 mongosh "mongodb://localhost:27017" .\datasets\training_store\load.js
@@ -70,7 +70,7 @@ mongosh "mongodb://localhost:27017" .\datasets\training_store\load.js
 
 A fresh load prints 6 customers, 13 products, 17 orders, 6 reviews, and 13 paid orders.
 
-Solution folders (`exercises/solution/`, `labN/solution/`) are for the instructor. Participant machines get the guides and the loader.
+Instructor answer keys are not published here. This copy has the lab guides and `datasets/training_store/load.js`.
 
 ---
 

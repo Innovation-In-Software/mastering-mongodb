@@ -6,10 +6,9 @@ Everything learners do hands-on, in the order it happens in the module decks (`d
 
 ```text
 labs/
-  day-01/  exercises/ (1.x-3.x)  exercises/solution/  lab1/  lab2/
-  day-02/  exercises/ (4.x-5.x)  exercises/solution/  lab3/  lab4/
-  day-03/  exercises/ (6.x-8.x)  exercises/solution/  lab5/  lab6/  lab7/
-  practice-exercises/            module-01-README.md ... module-08-README.md
+  day-01/  exercises/ (1.x-3.x)  lab1/  lab2/
+  day-02/  exercises/ (4.x-5.x)  lab3/  lab4/
+  day-03/  exercises/ (6.x-8.x)  lab5/  lab6/  lab7/
 ```
 
 ## Sequence by day
@@ -48,7 +47,6 @@ labs/
 
 ## Conventions
 
-- **Participant worksheets** (`exercises/exercise-M.N-*.md`) state the scenario, tasks, time and deliverable — no answers.
-- **Answer keys** (`exercises/solution/`) and **lab solutions** (`labN/solution/`) are for instructors; keep them out of the participant hand-out.
+- **Participant worksheets** (`exercises/exercise-M.N-*.md`) state the scenario, tasks, time and deliverable — no answers. Answer keys are not in this repository.
 - Every command, value and expected result matches `datasets/training_store/load.js` on a fresh load. Expected outputs were worked out from the dataset; run the key examples once in mongosh before class.
 - Never type a real password into a slide, worksheet, URI or chat: let `mongosh` prompt, or use `<password>` placeholders.
