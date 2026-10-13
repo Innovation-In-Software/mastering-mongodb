@@ -235,7 +235,9 @@ Time the restore and write it down — that is your measured RTO for this data s
 
 **No Database Tools?** Skip the commands and write the orders restore proof from [Exercise 8.3](../exercises/exercise-8.3-define-rpo-and-rto.md), Task 3, instead.
 
-**Expected result:** the restore database has 13 products (and 17 orders). **Class `training_store` still has 13 products.** You never pointed `mongorestore` at `training_store`.
+**Expected result:** the restore database has 13 products and 17 orders. **Class `training_store` still has 13 products.** O5001 is `PENDING` with `total` `Decimal128("1514.17")`. `orders` indexes are `_id_` and `orderNumber_unique`. You never pointed `mongorestore` at `training_store`.
+
+On a laptop that already finished Labs 1–5, the dump also contains `environment_check`, `developer_checks`, `validated_products` and `sessions` (`load.js` drops only the four loader collections). This run restored **50** documents and finished in about a second. A database that holds only the loader collections restores **42**. Either count is correct; compare products and orders, not the grand total.
 
 ---
 
@@ -297,6 +299,7 @@ Then list the **conditions** that would have to be met before go-live.
 | Step 4: `mongodump` not recognized | Database Tools not installed or not on `PATH` | Use the Exercise 8.3 written alternative |
 | Step 4: warning that `--db` with a directory is deprecated | Newer `mongorestore` versions | The command still works; the alternative is `--nsFrom="training_store.*" --nsTo="training_store_restore.*"` with the dump folder |
 | Step 4: restore database has 0 documents | Path points at the dump root, not the `training_store` subfolder | End the path with `\training_store` |
+| Step 4: success line says 50 documents, not 42 | Labs 1–5 left `environment_check`, `developer_checks`, `validated_products` and `sessions` in `training_store` | Expected. Confirm 13 products and 17 orders in both databases |
 | Connection refused | `mongod` isn't running or the port is wrong | Start `mongod`; check `localhost:27017`. Never "fix" it by binding to every interface (`bindIp: 0.0.0.0`) |
 | Authentication failed | Your instance has access control on | Connect with your own user and `passwordPrompt()`; check `authSource` |
 

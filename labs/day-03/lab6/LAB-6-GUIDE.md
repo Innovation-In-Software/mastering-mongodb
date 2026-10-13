@@ -52,7 +52,7 @@ Loaded by `datasets/training_store/load.js`:
 | Task | How |
 | --- | --- |
 | Steps 1–3 | Paper or a notes file. No database needed; the optional checks run on any `training_store`. |
-| Steps 4–7 | `mongosh` connected with the **instructor's replica-set or Atlas URI** (`mongodb+srv://…`). A local standalone `mongod` on `localhost` is **not** a replica set. |
+| Steps 4–7 | Step 4 also runs on the class laptop (`mongodb://localhost:27017`) and is expected to report a standalone server. Steps 5–7 need the **instructor's replica-set or Atlas URI** (`mongodb+srv://…`), or their screen. A local `mongod` is **not** a replica set. |
 | Terminal | PowerShell in VS Code or Cursor (``Ctrl+` ``). |
 | Credentials | The instructor gives you the URI and a lab user. Type the password only at the `mongosh` prompt; never put a real password in notes, slides or chat. |
 | Data | `training_store` loaded with `load.js` (the instructor has loaded it on the shared cluster). Do **not** update or delete shared data. |
@@ -69,7 +69,7 @@ mongosh "mongodb+srv://<cluster-host>/training_store" --username <lab-user>
 use training_store
 ```
 
-No replica-set URI available? Do Steps 1–3, then follow Steps 4–7 on the instructor's screen and write the report from their output.
+No replica-set URI available? Run Step 4 on `localhost` and record the standalone error below. Follow Steps 5–7 on the instructor's screen and write the report from their output. Continue to Lab 7 on `localhost` either way.
 
 ---
 
@@ -157,16 +157,22 @@ You may run them on the replica set to see the results. A replica set keeps all 
 
 ### Step 4 — Confirm you are on a replica set
 
-**Do this:** Connected with the replica-set URI, run:
+**Do this:** Run these on the connection you have. On the class Windows VM that is the `mongosh` session already connected to `mongodb://localhost:27017`. If the instructor gave you a replica-set or Atlas URI, connect with that URI and run the same commands there.
 
 ```javascript
 db.hello()
 rs.status()
 ```
 
-**Expected:** `db.hello()` shows a `setName`, a `hosts` list, the `primary`, and `isWritablePrimary: true` (you are on the primary) or `secondary: true`. `rs.status()` shows the set name, exactly **one** `PRIMARY`, one or more `SECONDARY` members, and `health: 1` on each reachable member.
+**Expected on the class laptop:** this server is standalone. `db.hello()` returns `isWritablePrimary: true` and `ok: 1`, and it has no `setName`, no `hosts` list and no `primary`. `rs.status()` fails with:
 
-If you see *"not running with --replSet"*, you are on a standalone server: stop and switch to the instructor's URI.
+```text
+MongoServerError[NoReplicationEnabled]: not running with --replSet
+```
+
+Record that pair of results. They are the correct reading for this install. Do not add `--replSet` to the local MongoDB service. Steps 5–7 cannot be measured on this laptop: copy them from the instructor's screen, or from their URI if one was handed out. Then continue with Lab 7 on `localhost`.
+
+**Expected on a replica-set URI:** `db.hello()` shows a `setName`, a `hosts` list, the `primary`, and `isWritablePrimary: true` (you are on the primary) or `secondary: true`. `rs.status()` shows the set name, exactly **one** `PRIMARY`, one or more `SECONDARY` members, and `health: 1` on each reachable member.
 
 ---
 
@@ -229,9 +235,9 @@ On an **instructor-controlled, disposable** replica set or sharded cluster, the 
 - [ ] Backup — not replication — recovers last week's deleted order
 - [ ] `fulfillmentStatus` is rejected as a shard key; ranged `createdAt` is flagged as a write hotspot
 - [ ] The customer-history query is targeted for the compound key; the status-only and `_id`-only queries are scatter-gather
-- [ ] The primary is identified and the voting configuration is recorded
-- [ ] Lag is measured, not guessed
-- [ ] The health report lists concerns even if the set is healthy
+- [ ] Class laptop: `not running with --replSet` is recorded. Replica-set URI: the primary is identified and the voting configuration is recorded
+- [ ] On a replica set, lag is measured, not guessed; on the class laptop, lag is taken from the instructor's screen
+- [ ] The health report lists concerns even if the set is healthy (from the replica set you can see, or from the instructor's output)
 
 ---
 
@@ -239,7 +245,7 @@ On an **instructor-controlled, disposable** replica set or sharded cluster, the 
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| `rs.status()`: *not running with --replSet* | Connected to a local standalone `mongod` | Reconnect with the instructor's replica-set / Atlas URI. |
+| `rs.status()`: *not running with --replSet* | Connected to the class laptop's standalone `mongod` | Expected on `localhost`. Record the error. Complete Steps 5–7 from the instructor's screen, then continue with Lab 7. |
 | `not authorized … replSetGetStatus` or `replSetGetConfig` | The lab user lacks monitoring privileges, or the tier restricts the command | Use `db.hello()` for Steps 4–5 and take `rs.status()` / `rs.conf()` output from the instructor's screen. |
 | `db.hello()` shows `secondary: true` | The shell reached a secondary (for example a `readPreference` in the URI) | Fine for reading status. Note it in the report; don't try to write. |
 | `Authentication failed` | Wrong user or password | Re-enter the password at the prompt. Never paste real credentials into notes or chat. |
