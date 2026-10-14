@@ -1,5 +1,7 @@
 # Exercise 3.1 — Identify Document Components
 
+**Answer key:** [solution](solution/exercise-3.1-identify-document-components.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint A**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 42  
 **Time:** 10 min · **Type:** discussion (pairs) · **MongoDB needed:** no

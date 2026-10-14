@@ -1,5 +1,7 @@
 # Exercise 2.3 — Diagnose Connection Failures
 
+**Answer key:** [solution](solution/exercise-2.3-diagnose-connection-failures.md)
+
 **Module 2** (Installation and Setup) · Day 1 · **Checkpoint C**  
 **Time:** 15 min (12 min work + 3 min debrief) · **Type:** troubleshooting analysis · **Difficulty:** Beginner
 

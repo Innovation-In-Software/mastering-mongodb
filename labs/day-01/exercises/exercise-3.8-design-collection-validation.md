@@ -1,5 +1,7 @@
 # Exercise 3.8 — Design Collection Validation
 
+**Answer key:** [solution](solution/exercise-3.8-design-collection-validation.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint H**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 49  
 **Time:** 15 min · **Type:** design (pairs) · **MongoDB needed:** no — type the validator in a scratch `.js` file

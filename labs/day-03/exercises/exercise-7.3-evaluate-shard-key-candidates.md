@@ -1,5 +1,7 @@
 # Exercise 7.3 — Evaluate Shard-Key Candidates
 
+**Answer key:** [solution](solution/exercise-7.3-evaluate-shard-key-candidates.md)
+
 **Module 7** (Introduction to Replication and Sharding) · Day 3 · **Checkpoint C**  
 **Time:** 20 min · **Type:** design discussion · **Difficulty:** Intermediate
 

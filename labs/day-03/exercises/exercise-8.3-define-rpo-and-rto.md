@@ -1,5 +1,7 @@
 # Exercise 8.3 — Define RPO and RTO
 
+**Answer key:** [solution](solution/exercise-8.3-define-rpo-and-rto.md)
+
 **Module 8** (MongoDB Best Practices, Security, and Troubleshooting) · Day 3 · **Checkpoint C**  
 **Time:** 15 min · **Type:** design · **Difficulty:** Beginner
 

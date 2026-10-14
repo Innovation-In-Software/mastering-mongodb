@@ -1,5 +1,7 @@
 # Exercise 7.1 — Replication or Sharding?
 
+**Answer key:** [solution](solution/exercise-7.1-replication-or-sharding.md)
+
 **Module 7** (Introduction to Replication and Sharding) · Day 3 · **Checkpoint A**  
 **Time:** 10 min (7 min pair work + 3 min debrief) · **Type:** design discussion · **Difficulty:** Beginner
 

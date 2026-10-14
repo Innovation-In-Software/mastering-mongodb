@@ -1,5 +1,7 @@
 # Exercise 5.3 — Join Related Collections
 
+**Answer key:** [solution](solution/exercise-5.3-join-related-collections.md)
+
 **Module 5** (The Aggregation Framework) · Day 2 · **Checkpoint C**  
 **Time:** 20 min · **Type:** hands-on in `mongosh`  
 **Deck:** `decks/pptx_new/MongoDB_Module05_The_Aggregation_Framework.pptx`, slide 49

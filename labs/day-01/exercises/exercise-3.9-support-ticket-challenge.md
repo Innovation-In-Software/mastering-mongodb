@@ -1,5 +1,7 @@
 # Exercise 3.9 — Design a Support-Ticket Data Model
 
+**Answer key:** [solution](solution/exercise-3.9-support-ticket-challenge.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint I**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 50  
 **Time:** 25 min · **Type:** design challenge (pairs) · **MongoDB needed:** no — design only, do not create indexes

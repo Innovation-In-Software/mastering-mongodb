@@ -1,5 +1,7 @@
 # Exercise 6.3 — E-Commerce Index Review
 
+**Answer key:** [solution](solution/exercise-6.3-e-commerce-index-review.md)
+
 **Module 6** (Indexing and Query Performance) · Day 3 · **Checkpoint C** (practical challenge)  
 **Time:** 30–45 min · **Type:** design review · **Difficulty:** Intermediate
 

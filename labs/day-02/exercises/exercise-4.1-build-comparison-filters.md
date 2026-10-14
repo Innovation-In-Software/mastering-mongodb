@@ -1,5 +1,7 @@
 # Exercise 4.1 — Build Comparison Filters
 
+**Answer key:** [solution](solution/exercise-4.1-build-comparison-filters.md)
+
 **Module 4** (The MongoDB Query Language) · Day 2 · **Checkpoint A**  
 **Time:** 15 min · **Type:** hands-on in `mongosh` · **Difficulty:** Beginner
 

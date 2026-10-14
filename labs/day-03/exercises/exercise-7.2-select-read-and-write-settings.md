@@ -1,5 +1,7 @@
 # Exercise 7.2 — Select Read and Write Settings
 
+**Answer key:** [solution](solution/exercise-7.2-select-read-and-write-settings.md)
+
 **Module 7** (Introduction to Replication and Sharding) · Day 3 · **Checkpoint B**  
 **Time:** 20 min · **Type:** design discussion · **Difficulty:** Intermediate
 

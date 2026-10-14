@@ -1,5 +1,7 @@
 # Exercise 3.7 — Select a Schema Design Pattern
 
+**Answer key:** [solution](solution/exercise-3.7-select-a-schema-pattern.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint G**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 48  
 **Time:** 15 min · **Type:** discussion (pairs) · **MongoDB needed:** no

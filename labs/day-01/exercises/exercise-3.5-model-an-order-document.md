@@ -1,5 +1,7 @@
 # Exercise 3.5 — Model an Order Document
 
+**Answer key:** [solution](solution/exercise-3.5-model-an-order-document.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint E**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 46  
 **Time:** 20 min · **Type:** design (pairs) · **MongoDB needed:** no

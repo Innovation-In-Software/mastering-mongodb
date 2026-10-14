@@ -1,5 +1,7 @@
 # Exercise 5.4 — Correct a Broken Pipeline
 
+**Answer key:** [solution](solution/exercise-5.4-correct-a-broken-pipeline.md)
+
 **Module 5** (The Aggregation Framework) · Day 2 · **Checkpoint D**  
 **Time:** 15 min · **Type:** debugging, then hands-on in `mongosh`  
 **Deck:** `decks/pptx_new/MongoDB_Module05_The_Aggregation_Framework.pptx`, slide 50

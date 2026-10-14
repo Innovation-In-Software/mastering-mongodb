@@ -1,5 +1,7 @@
 # Exercise 5.1 — Arrange Pipeline Stages
 
+**Answer key:** [solution](solution/exercise-5.1-arrange-pipeline-stages.md)
+
 **Module 5** (The Aggregation Framework) · Day 2 · **Checkpoint A**  
 **Time:** 10 min · **Type:** design, in pairs, on paper  
 **Deck:** `decks/pptx_new/MongoDB_Module05_The_Aggregation_Framework.pptx`, slide 47

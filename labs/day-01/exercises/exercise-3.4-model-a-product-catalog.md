@@ -1,5 +1,7 @@
 # Exercise 3.4 — Model a Product Catalog
 
+**Answer key:** [solution](solution/exercise-3.4-model-a-product-catalog.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint D**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 45  
 **Time:** 20 min · **Type:** design (pairs) · **MongoDB needed:** optional — write documents in a scratch file

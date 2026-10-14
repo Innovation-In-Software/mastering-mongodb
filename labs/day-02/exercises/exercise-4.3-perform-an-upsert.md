@@ -1,5 +1,7 @@
 # Exercise 4.3 — Perform an Upsert
 
+**Answer key:** [solution](solution/exercise-4.3-perform-an-upsert.md)
+
 **Module 4** (The MongoDB Query Language) · Day 2 · **Checkpoint C**  
 **Time:** 10 min · **Type:** hands-on in `mongosh` · **Difficulty:** Intermediate
 

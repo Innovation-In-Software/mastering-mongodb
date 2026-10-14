@@ -1,5 +1,7 @@
 # Exercise 2.1 — Select a Deployment Option
 
+**Answer key:** [solution](solution/exercise-2.1-select-a-deployment-option.md)
+
 **Module 2** (Installation and Setup) · Day 1 · **Checkpoint A**  
 **Time:** 10 min (8 min pair work + 2 min debrief) · **Type:** design discussion · **Difficulty:** Beginner
 

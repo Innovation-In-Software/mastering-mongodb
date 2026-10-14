@@ -1,5 +1,7 @@
 # Exercise 1.3 — Explore a MongoDB Dataset
 
+**Answer key:** [solution](solution/exercise-1.3-explore-a-mongodb-dataset.md)
+
 **Module 1** (Introduction to NoSQL Databases) · Day 1 · **Checkpoint C**  
 **Time:** 25 min · **Type:** hands-on in `mongosh` (or follow on the instructor screen) · **Difficulty:** Beginner
 

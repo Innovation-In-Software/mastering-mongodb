@@ -1,5 +1,7 @@
 # Exercise 4.2 — Query Arrays of Documents
 
+**Answer key:** [solution](solution/exercise-4.2-query-arrays-of-documents.md)
+
 **Module 4** (The MongoDB Query Language) · Day 2 · **Checkpoint B**  
 **Time:** 15 min · **Type:** hands-on in `mongosh` · **Difficulty:** Intermediate
 

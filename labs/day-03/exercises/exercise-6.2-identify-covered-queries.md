@@ -1,5 +1,7 @@
 # Exercise 6.2 — Identify Covered Queries
 
+**Answer key:** [solution](solution/exercise-6.2-identify-covered-queries.md)
+
 **Module 6** (Indexing and Query Performance) · Day 3 · **Checkpoint B**  
 **Time:** 15 min · **Type:** design discussion · **Difficulty:** Intermediate
 

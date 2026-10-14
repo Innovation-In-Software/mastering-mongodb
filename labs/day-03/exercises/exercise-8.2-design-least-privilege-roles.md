@@ -1,5 +1,7 @@
 # Exercise 8.2 — Design Least-Privilege Roles
 
+**Answer key:** [solution](solution/exercise-8.2-design-least-privilege-roles.md)
+
 **Module 8** (MongoDB Best Practices, Security, and Troubleshooting) · Day 3 · **Checkpoint B**  
 **Time:** 20 min · **Type:** design (no commands run) · **Difficulty:** Beginner
 

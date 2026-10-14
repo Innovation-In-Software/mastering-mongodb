@@ -1,5 +1,7 @@
 # Exercise 4.4 — Correct Unsafe Operations
 
+**Answer key:** [solution](solution/exercise-4.4-correct-unsafe-operations.md)
+
 **Module 4** (The MongoDB Query Language) · Day 2 · **Checkpoint D**  
 **Time:** 10 min · **Type:** analysis and rewrite · **Difficulty:** Intermediate
 

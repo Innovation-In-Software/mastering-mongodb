@@ -1,5 +1,7 @@
 # Exercise 2.2 — Interpret a Connection String
 
+**Answer key:** [solution](solution/exercise-2.2-interpret-a-connection-string.md)
+
 **Module 2** (Installation and Setup) · Day 1 · **Checkpoint B**  
 **Time:** 10 min (8 min individual work + 2 min debrief) · **Type:** analysis · **Difficulty:** Beginner
 

@@ -1,5 +1,7 @@
 # Exercise 6.1 — Apply Equality–Sort–Range
 
+**Answer key:** [solution](solution/exercise-6.1-apply-equality-sort-range.md)
+
 **Module 6** (Indexing and Query Performance) · Day 3 · **Checkpoint A**  
 **Time:** 15 min · **Type:** design discussion · **Difficulty:** Intermediate
 

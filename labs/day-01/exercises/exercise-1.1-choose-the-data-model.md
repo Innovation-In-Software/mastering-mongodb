@@ -1,5 +1,7 @@
 # Exercise 1.1 — Choose the Appropriate Data Model
 
+**Answer key:** [solution](solution/exercise-1.1-choose-the-data-model.md)
+
 **Module 1** (Introduction to NoSQL Databases) · Day 1 · **Checkpoint A**  
 **Time:** 15 min (12 min pair work + 3 min debrief) · **Type:** design discussion · **Difficulty:** Beginner
 

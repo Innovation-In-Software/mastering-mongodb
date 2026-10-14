@@ -1,5 +1,7 @@
 # Exercise 7.4 — Targeted or Scatter-Gather?
 
+**Answer key:** [solution](solution/exercise-7.4-targeted-or-scatter-gather.md)
+
 **Module 7** (Introduction to Replication and Sharding) · Day 3 · **Checkpoint D**  
 **Time:** 15 min · **Type:** design discussion · **Difficulty:** Intermediate
 

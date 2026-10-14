@@ -1,5 +1,7 @@
 # Exercise 2.4 — Environment Readiness Checklist
 
+**Answer key:** [solution](solution/exercise-2.4-environment-readiness-checklist.md)
+
 **Module 2** (Installation and Setup) · Day 1 · **Checkpoint D**  
 **Time:** 10 min · **Type:** verification checklist · **Difficulty:** Beginner
 

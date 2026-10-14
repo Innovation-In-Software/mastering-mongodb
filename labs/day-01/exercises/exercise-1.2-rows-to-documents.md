@@ -1,5 +1,7 @@
 # Exercise 1.2 — Convert Relational Rows into a Document
 
+**Answer key:** [solution](solution/exercise-1.2-rows-to-documents.md)
+
 **Module 1** (Introduction to NoSQL Databases) · Day 1 · **Checkpoint B**  
 **Time:** 20 min · **Type:** modeling on paper (MongoDB optional) · **Difficulty:** Beginner
 

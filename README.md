@@ -50,7 +50,7 @@ One PDF per module, in teaching order.
 
 ## Labs
 
-Full sequence and worksheets: [labs/README.md](labs/README.md). Indexes: [exercises](labs/EXERCISES-INDEX.md) · [labs](labs/LABS-INDEX.md). Answer keys are not in this repository.
+Full sequence and worksheets: [labs/README.md](labs/README.md). Indexes: [exercises](labs/EXERCISES-INDEX.md) · [labs](labs/LABS-INDEX.md). Answer keys are linked from each worksheet and from the exercise index.
 
 | Day | Lab | Where it runs |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ mongosh "mongodb://localhost:27017" .\datasets\training_store\load.js
 
 A fresh load prints 6 customers, 13 products, 17 orders, 6 reviews, and 13 paid orders.
 
-Instructor answer keys are not published here. This copy has the lab guides and `datasets/training_store/load.js`.
+Answer keys for every official exercise are in `labs/day-0N/exercises/solution/`. In-slide practice answers are in `labs/practice-exercises/`. This copy also has the lab guides and `datasets/training_store/load.js`.
 
 ---
 

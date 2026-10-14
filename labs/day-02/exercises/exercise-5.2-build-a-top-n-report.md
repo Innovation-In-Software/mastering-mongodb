@@ -1,5 +1,7 @@
 # Exercise 5.2 — Build a Top-N Report
 
+**Answer key:** [solution](solution/exercise-5.2-build-a-top-n-report.md)
+
 **Module 5** (The Aggregation Framework) · Day 2 · **Checkpoint B**  
 **Time:** 15 min · **Type:** hands-on in `mongosh`  
 **Deck:** `decks/pptx_new/MongoDB_Module05_The_Aggregation_Framework.pptx`, slide 48

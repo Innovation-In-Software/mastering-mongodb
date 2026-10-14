@@ -1,5 +1,7 @@
 # Exercise 3.6 — Find and Correct Schema Anti-Patterns
 
+**Answer key:** [solution](solution/exercise-3.6-correct-schema-anti-patterns.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint F**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 47  
 **Time:** 15 min · **Type:** design (pairs) · **MongoDB needed:** no

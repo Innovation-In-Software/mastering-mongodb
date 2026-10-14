@@ -1,5 +1,7 @@
 # Exercise 3.3 — Embed or Reference?
 
+**Answer key:** [solution](solution/exercise-3.3-embed-or-reference.md)
+
 **Module 3** (Data Modeling with MongoDB) · Day 1 · **Checkpoint C**  
 **Deck:** `decks/pptx_new/MongoDB_Module03_Data_Modeling_with_MongoDB.pptx`, slide 44  
 **Time:** 15 min · **Type:** discussion (pairs) · **MongoDB needed:** no

@@ -1,5 +1,7 @@
 # Exercise 8.1 — Review a Query and Projection
 
+**Answer key:** [solution](solution/exercise-8.1-review-a-query-and-projection.md)
+
 **Module 8** (MongoDB Best Practices, Security, and Troubleshooting) · Day 3 · **Checkpoint A**  
 **Time:** 15 min · **Type:** query review (hands-on optional) · **Difficulty:** Beginner
 
