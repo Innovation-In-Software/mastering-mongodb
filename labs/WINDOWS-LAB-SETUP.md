@@ -24,7 +24,7 @@ Day 1 Lab 1 walks through the same install in class. Completing this page first 
 | Rights | A local account that can install software and start a Windows service (Administrator for `Start-Service`) |
 | Memory | 8 GB RAM |
 | Disk | 10 GB free (MongoDB plus the course folder) |
-| Network | Internet for the installers. After that, Days 1–2 labs work offline on the local server. Day 3 Lab 6 needs the instructor’s replica-set or Atlas address, which does need a network. |
+| Network | Internet for the installers. After that, Days 1–3 labs work offline on the local server. |
 
 You do **not** need prior MongoDB experience. You do need to be comfortable opening PowerShell and pasting a command.
 
@@ -327,7 +327,7 @@ Class then continues with [Lab 1 — Install, Connect and Verify](day-01/lab1/LA
 |---|---|
 | Day 1 Lab 1 | Server service, `mongosh`, Compass |
 | Day 1 Lab 2 through Day 3 Lab 5 | Same local server, plus the course folder so `load.js` reloads `training_store` |
-| Day 3 Lab 6 | The instructor’s replica-set or Atlas URI. A standalone `mongod` on `localhost` is not a replica set. |
+| Day 3 Lab 6 | This VM (`localhost:27017`) for Steps 1–4. Steps 5–7 use the sample replica-set status in the lab guide. Do not turn the local service into a replica set. |
 | Day 3 Lab 7 | `mongodump` and `mongorestore` on PATH, local server on `localhost:27017` |
 | Module 8 `sample-app` (optional) | Node.js 18+ **or** Python 3, and `$env:MONGODB_URI = "mongodb://localhost:27017"` |
 

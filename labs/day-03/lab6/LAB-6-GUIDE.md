@@ -6,9 +6,9 @@
 
 **Deck:** `decks/pptx_new/MongoDB_Module07_Introduction_to_Replication_and_Sharding.pptx` — slide 49, "Lab 6 — Replication and Sharding"
 
-**Objective:** Choose replication, sharding or a backup for stated requirements, reason about shard keys and query routing for `training_store.orders`, then inspect a real replica set and write a short health report.
+**Objective:** Choose replication, sharding or a backup for stated requirements, reason about shard keys and query routing for `training_store.orders`, confirm the class VM is a standalone server, then read a sample replica-set status and write a short health report.
 
-> **Safety.** Failover and sharding commands run only on instructor-controlled, disposable infrastructure. Never step down or shard a shared class cluster. Every command **you** run in this lab only reads status or data.
+> **Safety.** Run this lab on the class VM (`mongodb://localhost:27017`). Every command reads status or data. Do not add `--replSet` to the local MongoDB service, and do not run failover or sharding commands.
 
 ---
 
@@ -32,8 +32,8 @@ Keep the health report and your answers: Module 8's production-readiness review 
 | **Replication is not a backup** | Step 1: a delete is replicated to every member. |
 | **Cardinality, frequency, monotonic keys** | Step 2: why `fulfillmentStatus` and ranged `createdAt` are poor shard keys. |
 | **Targeted vs scatter-gather** | Step 3: only filters with the shard-key prefix can be targeted. |
-| **Primary, secondaries, votes, majority** | Steps 4–5: read them from `rs.status()`, `rs.conf()` and `db.hello()`. |
-| **Replication lag** | Step 6: measure it with `rs.printSecondaryReplicationInfo()`. |
+| **Primary, secondaries, votes, majority** | Step 4 shows the VM is standalone. Steps 5–6 read those fields from the sample status in this guide. |
+| **Replication lag** | Step 6: read each secondary's lag from the sample `rs.printSecondaryReplicationInfo()` output. |
 
 ### The `training_store.orders` facts you'll use
 
@@ -49,27 +49,27 @@ Loaded by `datasets/training_store/load.js`:
 
 ## Before you start
 
+The whole lab runs on the class Windows VM. Steps 5–7 use the sample status printed later in this guide. This VM is not a replica set, so those steps have no live screenshot.
+
 | Task | How |
 | --- | --- |
-| Steps 1–3 | Paper or a notes file. No database needed; the optional checks run on any `training_store`. |
-| Steps 4–7 | Step 4 also runs on the class laptop (`mongodb://localhost:27017`) and is expected to report a standalone server. Steps 5–7 need the **instructor's replica-set or Atlas URI** (`mongodb+srv://…`), or their screen. A local `mongod` is **not** a replica set. |
+| Steps 1–3 | Paper or a notes file. No database required. Optional read-only checks use the local `training_store` after `load.js`. |
+| Step 4 | The `mongosh` session on `mongodb://localhost:27017`. Record `db.hello()` and the `rs.status()` error. That error is the correct result. |
+| Steps 5–7 | Read the sample `rs0` status in this guide. Fill the member table and write the health report from those lines. Do **not** add `--replSet` to the local MongoDB service. Lab 7 uses that same standalone server. |
 | Terminal | PowerShell in VS Code or Cursor (``Ctrl+` ``). |
-| Credentials | The instructor gives you the URI and a lab user. Type the password only at the `mongosh` prompt; never put a real password in notes, slides or chat. |
-| Data | `training_store` loaded with `load.js` (the instructor has loaded it on the shared cluster). Do **not** update or delete shared data. |
+| Data | Local `training_store` only. Do not change another server's data. |
 
-Connect (placeholders only — use the values your instructor gives you):
+Connect:
 
 ```powershell
-mongosh "mongodb+srv://<cluster-host>/training_store" --username <lab-user>
+mongosh "mongodb://localhost:27017"
 ```
-
-`mongosh` prompts for the password. Then:
 
 ```javascript
 use training_store
 ```
 
-No replica-set URI available? Run Step 4 on `localhost` and record the standalone error below. Follow Steps 5–7 on the instructor's screen and write the report from their output. Continue to Lab 7 on `localhost` either way.
+Continue to Lab 7 on this same `localhost` server.
 
 ---
 
@@ -152,7 +152,7 @@ db.orders.find({ fulfillmentStatus: "PROCESSING" })
 db.orders.find({ _id: o._id })
 ```
 
-You may run them on the replica set to see the results. A replica set keeps all the data in one place, so it cannot show routing — that is a sharded-cluster behaviour.
+You may run them on the class VM to see the documents. This server is not sharded, so the shell cannot show targeted versus scatter-gather routing. Classify each query from the shard key, and use the fresh-load counts as the results.
 
 **Expected:**
 
@@ -164,9 +164,9 @@ You may run them on the replica set to see the results. A replica set keeps all 
 
 ---
 
-### Step 4 — Confirm you are on a replica set
+### Step 4 — Confirm the class VM is standalone
 
-**Do this:** Run these on the connection you have. On the class Windows VM that is the `mongosh` session already connected to `mongodb://localhost:27017`. If the instructor gave you a replica-set or Atlas URI, connect with that URI and run the same commands there.
+**Do this:** On the class Windows VM, run these in the `mongosh` session already connected to `mongodb://localhost:27017`.
 
 ```javascript
 db.hello()
@@ -176,36 +176,47 @@ db.hello()
 rs.status()
 ```
 
-**Expected on the class laptop:** this server is standalone. `db.hello()` returns `isWritablePrimary: true` and `ok: 1`, and it has no `setName`, no `hosts` list and no `primary`. `rs.status()` fails with:
+**Expected:** this server is standalone. `db.hello()` returns `isWritablePrimary: true` and `ok: 1`, and it has no `setName`, no `hosts` list and no `primary`. `rs.status()` fails with:
 
 ```text
 MongoServerError[NoReplicationEnabled]: not running with --replSet
 ```
 
-Record that pair of results. They are the correct reading for this install. Do not add `--replSet` to the local MongoDB service. Steps 5–7 cannot be measured on this laptop: copy them from the instructor's screen, or from their URI if one was handed out. Then continue with Lab 7 on `localhost`.
+Record that pair of results. They are the correct reading for this install. Do not add `--replSet` to the local MongoDB service. Steps 5–7 use the sample below. Lab 7 continues on this same server.
 
-**Expected on a replica-set URI:** `db.hello()` shows a `setName`, a `hosts` list, the `primary`, and `isWritablePrimary: true` (you are on the primary) or `secondary: true`. `rs.status()` shows the set name, exactly **one** `PRIMARY`, one or more `SECONDARY` members, and `health: 1` on each reachable member.
+---
+
+### Sample replica-set status
+
+Steps 5–7 read this fixed output from a three-member set named `rs0`. Do not run these commands on the class VM.
+
+```text
+db.hello()
+  setName: "rs0"
+  hosts: [ "rs0-a:27017", "rs0-b:27017", "rs0-c:27017" ]
+  primary: "rs0-a:27017"
+  isWritablePrimary: true
+
+rs.status().members
+  rs0-a:27017  PRIMARY    health 1
+  rs0-b:27017  SECONDARY  health 1
+  rs0-c:27017  SECONDARY  health 1
+
+rs.conf().members
+  rs0-a:27017  votes 1  priority 1  arbiterOnly false
+  rs0-b:27017  votes 1  priority 1  arbiterOnly false
+  rs0-c:27017  votes 1  priority 1  arbiterOnly false
+
+rs.printSecondaryReplicationInfo()
+  source: rs0-b:27017  0 secs (0 hrs) behind the primary
+  source: rs0-c:27017  1 secs (0 hrs) behind the primary
+```
 
 ---
 
 ### Step 5 — Record identity, votes and priority
 
-**Do this:** Run:
-
-```javascript
-rs.conf()
-```
-
-```javascript
-rs.status().members.map(m => ({ name: m.name, state: m.stateStr, health: m.health }))
-```
-
-```javascript
-rs.conf().members.map(m => ({ host: m.host, votes: m.votes, priority: m.priority,
-                              arbiterOnly: m.arbiterOnly }))
-```
-
-Fill in:
+**Do this:** From the sample, fill in:
 
 | Member host | State | health | votes | priority | Arbiter? |
 | --- | --- | --- | --- | --- | --- |
@@ -213,38 +224,28 @@ Fill in:
 | | | | | | |
 | | | | | | |
 
-**Expected:** Set name, one primary host, the secondary hosts. Atlas typically shows **three data-bearing members, each with 1 vote, and no arbiter**; the majority is 2 of 3.
+**Expected:** Set name `rs0`. One primary (`rs0-a:27017`) and two secondaries. Each member has health 1, 1 vote, priority 1, and is not an arbiter. The majority is 2 of 3.
 
 ---
 
 ### Step 6 — Record replication lag
 
-**Do this:** Run:
+**Do this:** From `rs.printSecondaryReplicationInfo()` in the sample, write how far each secondary is behind the primary.
 
-```javascript
-rs.printSecondaryReplicationInfo()
-```
-
-**Expected:** For each secondary, how far it is behind the primary — often **0–2 seconds** on a quiet training set. Record the values even when they are zero. A secondary a few seconds behind (like Secondary B, 5 s, on the "Checking Replica-Set Health" slide) is still healthy, but worth watching.
+**Expected:** `rs0-b` is 0 seconds behind. `rs0-c` is 1 second behind. Record both, including the zero. A secondary a few seconds behind (like Secondary B, 5 s, on the "Checking Replica-Set Health" slide) is still healthy, but worth watching. One second is not a concern.
 
 ---
 
 ### Step 7 — Write the health report
 
-**Do this:** Write one short paragraph that answers:
+**Do this:** Write one short paragraph about the `rs0` sample that answers:
 
 1. Is a primary present? Which host?
 2. Is a majority of voting members reachable?
 3. Is the lag a concern?
 4. Any configuration smell — for example an arbiter carrying durability, or `priority: 0` on the only nearby member?
 
-**Expected:** A report that would make sense to another operator, with the lag **measured, not guessed**, and concerns listed even if the set is healthy. No unexplained red states.
-
----
-
-## Instructor demonstration — watch only
-
-On an **instructor-controlled, disposable** replica set or sharded cluster, the instructor may show a failover (`rs.stepDown()`) and the result of sharding a scratch collection (`sh.status()`, `getShardDistribution()`, `explain()` on queries A and B). Participants do **not** run these commands, and nobody runs them on the shared class cluster. Atlas free-tier clusters are replica sets, not sharded clusters.
+**Expected:** A report another operator could act on. Name `rs0-a:27017` as the primary, state that 2 of 3 voters are a majority and all three are healthy, and quote the measured lag (0 s and 1 s). Note that the set has no arbiter and no `priority: 0` member.
 
 ---
 
@@ -253,9 +254,9 @@ On an **instructor-controlled, disposable** replica set or sharded cluster, the 
 - [ ] Backup — not replication — recovers last week's deleted order
 - [ ] `fulfillmentStatus` is rejected as a shard key; ranged `createdAt` is flagged as a write hotspot
 - [ ] The customer-history query is targeted for the compound key; the status-only and `_id`-only queries are scatter-gather
-- [ ] Class laptop: `not running with --replSet` is recorded. Replica-set URI: the primary is identified and the voting configuration is recorded
-- [ ] On a replica set, lag is measured, not guessed; on the class laptop, lag is taken from the instructor's screen
-- [ ] The health report lists concerns even if the set is healthy (from the replica set you can see, or from the instructor's output)
+- [ ] The class VM records `not running with --replSet`
+- [ ] The member table matches the `rs0` sample, including votes, priority and the measured lag
+- [ ] The health report names the primary, the majority and the measured lag
 
 ---
 
@@ -263,10 +264,7 @@ On an **instructor-controlled, disposable** replica set or sharded cluster, the 
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| `rs.status()`: *not running with --replSet* | Connected to the class laptop's standalone `mongod` | Expected on `localhost`. Record the error. Complete Steps 5–7 from the instructor's screen, then continue with Lab 7. |
-| `not authorized … replSetGetStatus` or `replSetGetConfig` | The lab user lacks monitoring privileges, or the tier restricts the command | Use `db.hello()` for Steps 4–5 and take `rs.status()` / `rs.conf()` output from the instructor's screen. |
-| `db.hello()` shows `secondary: true` | The shell reached a secondary (for example a `readPreference` in the URI) | Fine for reading status. Note it in the report; don't try to write. |
-| `Authentication failed` | Wrong user or password | Re-enter the password at the prompt. Never paste real credentials into notes or chat. |
-| Step 3 counts differ (not 5, 3, 1) | `training_store` was changed by an earlier lab | Ask the instructor; reload only your own local copy with `load.js`, never the shared cluster. |
+| `rs.status()`: *not running with --replSet* | Connected to the class VM's standalone `mongod` | Expected in Step 4. Record the error, then complete Steps 5–7 from the sample. |
+| Step 3 counts differ (not 5, 3, 1) | `training_store` was changed by an earlier lab | From the repository root, reload the local copy: `mongosh "mongodb://localhost:27017" .\datasets\training_store\load.js` |
 | `c` or `o` is `null` | Wrong database, or data not loaded | Run `use training_store`, then check `db.orders.countDocuments()` returns 17. |
-| Lag is large or growing | Busy or slow secondary, write burst | Record it; say what you'd check next (member optimes, then the secondary's CPU and disk). |
+| Steps 5–7 commands fail on the VM | This server has no replica set | Leave the service standalone. Read the sample status in this guide. |
