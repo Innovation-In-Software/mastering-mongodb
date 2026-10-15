@@ -70,7 +70,9 @@ db.orders.find(
   { total: { $gt: Decimal128("1000.00") } },
   { _id: 0, orderNumber: 1, total: 1 }
 )
+```
 
+```javascript
 db.reviews.find(
   { rating: { $gte: 4 } },
   { _id: 0, sku: 1, rating: 1 }

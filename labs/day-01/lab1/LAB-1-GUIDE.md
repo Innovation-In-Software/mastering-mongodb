@@ -185,8 +185,17 @@ In a new window, if `mongodump` is still not recognized, reload the saved Path. 
 
 ```powershell
 $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+```
+
+```powershell
 mongosh --version
+```
+
+```powershell
 mongodump --version
+```
+
+```powershell
 mongorestore --version
 ```
 
@@ -194,9 +203,21 @@ mongorestore --version
 
 ```powershell
 Get-Service MongoDB
+```
+
+```powershell
 mongosh --version
+```
+
+```powershell
 mongodump --version
+```
+
+```powershell
 mongorestore --version
+```
+
+```powershell
 mongosh "mongodb://localhost:27017" --eval "db.runCommand({ ping: 1 })"
 ```
 
@@ -208,8 +229,17 @@ Expected: service `Running`, `mongosh` **2.12.0**, Database Tools **100.19.0**, 
 
 ```bash
 brew tap mongodb/brew
+```
+
+```bash
 brew install mongodb-community
+```
+
+```bash
 brew services start mongodb-community
+```
+
+```bash
 mongosh --version
 ```
 
@@ -217,7 +247,13 @@ mongosh --version
 
 ```bash
 sudo systemctl start mongod
+```
+
+```bash
 sudo systemctl status mongod
+```
+
+```bash
 sudo systemctl enable mongod
 ```
 
@@ -264,6 +300,9 @@ $env:MONGODB_URI = "mongodb+srv://<cluster-host>/"
 
   ```powershell
   Get-Service MongoDB
+  ```
+
+  ```powershell
   Test-NetConnection localhost -Port 27017
   ```
 
@@ -394,7 +433,9 @@ db.environment_check.insertOne({
   status: "READY",
   checkedAt: new Date()
 })
+```
 
+```javascript
 db.environment_check.findOne({
   status: "READY"
 })
@@ -421,14 +462,20 @@ db.environment_check.insertMany([
   { component: "MongoDB Shell", available: true },
   { component: "MongoDB Compass", available: true }
 ])
+```
 
+```javascript
 db.environment_check.countDocuments({})
+```
 
+```javascript
 db.environment_check.updateOne(
   { participant: "Student" },
   { $set: { participant: "Participant Name" } }
 )
+```
 
+```javascript
 db.environment_check.findOne({ status: "READY" })
 ```
 
@@ -468,16 +515,24 @@ db.products.insertOne({
   category: "ACCESSORY",
   active: true
 })
+```
 
+```javascript
 db.products.find({ sku: "LAB1" })
+```
 
+```javascript
 db.products.updateOne(
   { sku: "LAB1" },
   { $set: { verified: true } }
 )
+```
 
+```javascript
 db.products.deleteOne({ sku: "LAB1" })
+```
 
+```javascript
 db.products.find({ sku: "LAB1" })
 ```
 
@@ -539,7 +594,9 @@ db.environment_check.insertOne({
   validation: "COMPLETE",
   validatedAt: new Date()
 })
+```
 
+```javascript
 db.environment_check.countDocuments({})
 ```
 
@@ -547,7 +604,13 @@ Then prove you can reconnect: type `exit`, run the Step 4 command again, and:
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.environment_check.findOne({ validation: "COMPLETE" })
+```
+
+```javascript
 show dbs
 ```
 

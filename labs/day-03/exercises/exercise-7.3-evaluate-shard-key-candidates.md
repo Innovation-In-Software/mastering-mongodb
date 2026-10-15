@@ -28,7 +28,13 @@ Optional evidence (read-only):
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.orders.distinct("paymentStatus")
+```
+
+```javascript
 db.orders.aggregate([{ $group: { _id: "$paymentStatus", n: { $sum: 1 } } }])
 ```
 

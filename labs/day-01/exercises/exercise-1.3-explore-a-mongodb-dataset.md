@@ -27,7 +27,13 @@ The instructor has loaded `training_store`: an online store with four collection
 
 ```javascript
 show dbs
+```
+
+```javascript
 use training_store
+```
+
+```javascript
 show collections
 ```
 
@@ -37,6 +43,9 @@ Write down the databases and the collections you see. Check that the prompt now 
 
 ```javascript
 db.products.findOne()
+```
+
+```javascript
 db.orders.findOne()
 ```
 

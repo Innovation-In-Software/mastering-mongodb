@@ -53,6 +53,9 @@ Run the command above. Copy the whole write result: `acknowledged`, `insertedId`
 
 ```javascript
 db.products.findOne({ sku: "A700" })
+```
+
+```javascript
 const firstCreatedAt = db.products.findOne({ sku: "A700" }).createdAt
 ```
 
@@ -64,7 +67,13 @@ Run the identical `updateOne` from the scenario again (use the up arrow in `mong
 
 ```javascript
 db.products.findOne({ sku: "A700" }, { _id: 0, sku: 1, createdAt: 1, updatedAt: 1, stockQuantity: 1 })
+```
+
+```javascript
 db.products.findOne({ sku: "A700" }).createdAt.getTime() === firstCreatedAt.getTime()
+```
+
+```javascript
 db.products.countDocuments({ sku: "A700" })
 ```
 

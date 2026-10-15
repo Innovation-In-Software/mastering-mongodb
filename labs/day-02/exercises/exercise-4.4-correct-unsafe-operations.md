@@ -24,10 +24,14 @@ A teammate wants to run these. Rewrite each one instead.
 // 1
 db.products.updateMany({},
   { $set: { active: false } })
+```
 
+```javascript
 // 2
 db.orders.deleteMany({})
+```
 
+```javascript
 // 3
 db.customers.updateOne(
   { customerNumber: "C101" },
@@ -45,7 +49,13 @@ For each command, write what it would change on a fresh load of `training_store`
 
 ```javascript
 db.products.countDocuments({})
+```
+
+```javascript
 db.orders.countDocuments({})
+```
+
+```javascript
 db.customers.findOne({ customerNumber: "C101" }, { _id: 0, contact: 1 })
 ```
 

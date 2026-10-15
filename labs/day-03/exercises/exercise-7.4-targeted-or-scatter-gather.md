@@ -23,7 +23,13 @@ Assume `training_store.orders` is sharded on the ranged key **`{ customerId: 1, 
 
 ```javascript
 use training_store
+```
+
+```javascript
 const c = db.customers.findOne({ customerNumber: "C101" })
+```
+
+```javascript
 const start = ISODate("2026-09-01T00:00:00Z")
 ```
 
@@ -32,10 +38,19 @@ const start = ISODate("2026-09-01T00:00:00Z")
 ```javascript
 // A
 db.orders.find({ customerId: c._id })
+```
+
+```javascript
 // B
 db.orders.find({ customerId: c._id, createdAt: { $gte: start } })
+```
+
+```javascript
 // C
 db.orders.find({ paymentStatus: "PAID" })
+```
+
+```javascript
 // D
 db.orders.find({ createdAt: { $gte: start } })
 // E — query D again, but the shard key is { customerId: "hashed" }

@@ -117,7 +117,9 @@ Follow these steps in order. Finish one step before starting the next.
 
 ```javascript
 db.orders.getIndexes().map(i => i.name)
+```
 
+```javascript
 db.orders.find({ customerId: cid })
   .sort({ createdAt: -1 })
   .explain("executionStats")
@@ -204,16 +206,22 @@ Warehouse staff list PROCESSING orders, oldest first. This query does **not** fi
 db.orders.find({ fulfillmentStatus: "PROCESSING" })
   .sort({ createdAt: 1 })
   .explain("executionStats")
+```
 
+```javascript
 db.orders.createIndex(
   { fulfillmentStatus: 1, createdAt: 1 },
   { name: "idx_orders_fulfillment_date" }
 )
+```
 
+```javascript
 db.orders.find({ fulfillmentStatus: "PROCESSING" })
   .sort({ createdAt: 1 })
   .explain("executionStats")
+```
 
+```javascript
 db.orders.find({ fulfillmentStatus: "PROCESSING" },
                { _id: 0, orderNumber: 1, createdAt: 1 })
   .sort({ createdAt: 1 })
@@ -240,10 +248,17 @@ db.products.createIndex(
   { tags: 1 },
   { name: "idx_products_tags" }
 )
+```
 
+```javascript
 db.products.find({ tags: "wireless" }).explain("executionStats")
-db.products.find({ tags: "wireless" }, { _id: 0, sku: 1, name: 1, tags: 1 })
+```
 
+```javascript
+db.products.find({ tags: "wireless" }, { _id: 0, sku: 1, name: 1, tags: 1 })
+```
+
+```javascript
 db.products.find({ tags: "technology" }, { _id: 0, sku: 1, name: 1 })
 ```
 
@@ -275,8 +290,17 @@ The screenshot reads `isMultiKey` with a small `ixscan()` helper. `summary()` do
 
 ```javascript
 db.products.getIndexes()
+```
+
+```javascript
 db.customers.getIndexes()
+```
+
+```javascript
 db.orders.getIndexes()
+```
+
+```javascript
 db.reviews.getIndexes()
 ```
 
@@ -312,22 +336,33 @@ These steps fold in the extra Module 6 practice. They build on each other and on
 db.products.find({ category: "ACCESSORY", active: true })
   .sort({ price: 1 })
   .explain("executionStats")
+```
 
+```javascript
 db.products.createIndex(
   { category: 1, active: 1, price: 1 },
   { name: "idx_products_category_active_price" }
 )
+```
 
+```javascript
 db.products.find({ category: "ACCESSORY", active: true })
   .sort({ price: 1 })
   .explain("executionStats")
+```
 
+```javascript
 db.products.find({ category: "ACCESSORY", active: true },
                  { _id: 0, sku: 1, name: 1, price: 1 })
   .sort({ price: 1 })
+```
 
+```javascript
 // Prefix tests
 db.products.find({ category: "LAPTOP" }).explain("executionStats")
+```
+
+```javascript
 db.products.find({ active: true }).explain("executionStats")
 ```
 
@@ -352,7 +387,9 @@ Write one query this index does **not** serve well, with a one-line reason.
 
 ```javascript
 db.customers.find({ "contact.email": "aisha@example.com" }).explain("executionStats")
+```
 
+```javascript
 db.orders.find({
   customerId: cid,
   createdAt: { $gte: ISODate("2026-08-01T00:00:00Z") }
@@ -366,13 +403,18 @@ db.orders.createIndex(
   { createdAt: -1, customerId: 1 },
   { name: "idx_orders_created_customer" }
 )
+```
+
+```javascript
 db.orders.find({
   customerId: cid,
   createdAt: { $gte: ISODate("2026-08-01T00:00:00Z") }
 }).sort({ createdAt: -1 }).limit(10)
   .hint("idx_orders_created_customer")
   .explain("executionStats")
+```
 
+```javascript
 db.orders.dropIndex("idx_orders_created_customer")
 ```
 
@@ -392,14 +434,24 @@ db.orders.dropIndex("idx_orders_created_customer")
 
 ```javascript
 db.customers.getIndexes().map(i => i.name)
-db.orders.getIndexes().map(i => i.name)
+```
 
+```javascript
+db.orders.getIndexes().map(i => i.name)
+```
+
+```javascript
 db.products.dropIndex("sku_unique")
+```
+
+```javascript
 db.products.createIndex(
   { sku: 1 },
   { unique: true, name: "uq_products_sku" }
 )
+```
 
+```javascript
 db.products.insertOne({
   sku: "L100",
   name: "Duplicate SKU test",
@@ -409,7 +461,9 @@ db.products.insertOne({
   tags: ["temp"],
   createdAt: new Date()
 })
+```
 
+```javascript
 db.products.countDocuments()
 ```
 
@@ -440,18 +494,28 @@ db.products.createIndex(
     partialFilterExpression: { active: true }
   }
 )
-db.products.validate().keysPerIndex
+```
 
+```javascript
+db.products.validate().keysPerIndex
+```
+
+```javascript
 // Compatible: the filter includes active: true
 db.products.find({ category: "LAPTOP", active: true,
                    price: { $lte: Decimal128("2000.00") } })
   .hint("idx_active_products_category_price")
   .explain("executionStats")
+```
 
+```javascript
 // Incompatible: no active: true, so L190 would be missing
 db.products.find({ category: "LAPTOP",
                    price: { $lte: Decimal128("2000.00") } })
   .explain("executionStats")
+```
+
+```javascript
 db.products.find({ category: "LAPTOP",
                    price: { $lte: Decimal128("2000.00") } })
   .hint("idx_active_products_category_price")
@@ -461,17 +525,29 @@ db.products.find({ category: "LAPTOP",
 
 ```javascript
 db.sessions.drop()
+```
+
+```javascript
 db.sessions.insertMany([
   { sessionId: "S1", user: "aisha",
     expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
   { sessionId: "S-EXPIRED", user: "temp",
     expiresAt: new Date(Date.now() - 60 * 1000) }
 ])
+```
+
+```javascript
 db.sessions.createIndex(
   { expiresAt: 1 },
   { expireAfterSeconds: 0, name: "ttl_sessions_expires_at" }
 )
+```
+
+```javascript
 db.sessions.getIndexes()
+```
+
+```javascript
 db.sessions.countDocuments()
 ```
 
@@ -509,16 +585,25 @@ db.products.createIndex(
   { category: 1, price: 1, name: 1 },
   { name: "idx_products_category_price_name" }
 )
+```
 
+```javascript
 // Covered
 db.products.find({ category: "BOOK" }, { _id: 0, name: 1, price: 1 })
   .explain("executionStats")
-db.products.find({ category: "BOOK" }, { _id: 0, name: 1, price: 1 })
+```
 
+```javascript
+db.products.find({ category: "BOOK" }, { _id: 0, name: 1, price: 1 })
+```
+
+```javascript
 // Not covered: _id comes back by default
 db.products.find({ category: "BOOK" }, { name: 1, price: 1 })
   .explain("executionStats")
+```
 
+```javascript
 // Not covered: tags isn't in the index
 db.products.find({ category: "BOOK" }, { _id: 0, name: 1, tags: 1 })
   .explain("executionStats")
@@ -551,15 +636,24 @@ var pipeline = [
       orderCount: { $sum: 1 }
   } }
 ]
+```
 
+```javascript
 db.orders.explain("executionStats").aggregate(pipeline)
+```
 
+```javascript
 db.orders.createIndex(
   { paymentStatus: 1, createdAt: -1 },
   { name: "idx_orders_payment_created" }
 )
+```
 
+```javascript
 db.orders.explain("executionStats").aggregate(pipeline)
+```
+
+```javascript
 db.orders.aggregate(pipeline)
 ```
 
@@ -591,12 +685,26 @@ Write which stage still can't be served by the index.
 
 ```javascript
 db.getCollectionNames()
+```
+
+```javascript
 db.products.getIndexes().map(i => i.name)
+```
+
+```javascript
 db.products.aggregate([{ $indexStats: {} }])
   .map(s => ({ name: s.name, ops: s.accesses.ops }))
+```
 
+```javascript
 db.products.hideIndex("idx_products_category_active_price")
+```
+
+```javascript
 db.products.find({ category: "ACCESSORY" }).explain("queryPlanner")
+```
+
+```javascript
 db.products.unhideIndex("idx_products_category_active_price")
 ```
 

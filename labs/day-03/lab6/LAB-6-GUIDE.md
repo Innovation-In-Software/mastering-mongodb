@@ -131,14 +131,23 @@ Assume the shard key is `{ customerId: 1, createdAt: 1 }`.
 
 ```javascript
 const c = db.customers.findOne({ customerNumber: "C101" })
-const o = db.orders.findOne({ orderNumber: "O6401" })
+```
 
+```javascript
+const o = db.orders.findOne({ orderNumber: "O6401" })
+```
+
+```javascript
 // A — customer history
 db.orders.find({ customerId: c._id }).sort({ createdAt: -1 })
+```
 
+```javascript
 // B — status only
 db.orders.find({ fulfillmentStatus: "PROCESSING" })
+```
 
+```javascript
 // C — _id only
 db.orders.find({ _id: o._id })
 ```
@@ -161,6 +170,9 @@ You may run them on the replica set to see the results. A replica set keeps all 
 
 ```javascript
 db.hello()
+```
+
+```javascript
 rs.status()
 ```
 
@@ -182,7 +194,13 @@ Record that pair of results. They are the correct reading for this install. Do n
 
 ```javascript
 rs.conf()
+```
+
+```javascript
 rs.status().members.map(m => ({ name: m.name, state: m.stateStr, health: m.health }))
+```
+
+```javascript
 rs.conf().members.map(m => ({ host: m.host, votes: m.votes, priority: m.priority,
                               arbiterOnly: m.arbiterOnly }))
 ```

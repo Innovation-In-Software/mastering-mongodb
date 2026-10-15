@@ -97,6 +97,9 @@ Counting products:
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.products.countDocuments()   // 13
 ```
 

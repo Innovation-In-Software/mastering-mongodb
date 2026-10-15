@@ -47,6 +47,9 @@ If a learner inserts it in `mongosh`, point out the course habit from the "Anato
 
 ```javascript
 use module1_scratch
+```
+
+```javascript
 db.orders.insertOne({
   _id: "O5001",
   customer: { customerId: "C101", name: "Aisha Khan", email: "aisha@example.com" },
@@ -57,6 +60,9 @@ db.orders.insertOne({
   status: "PLACED",
   total: Decimal128("110.00")
 })
+```
+
+```javascript
 db.orders.findOne({ _id: "O5001" })
 ```
 

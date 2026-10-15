@@ -94,10 +94,25 @@ use training_store
 
 ```javascript
 db.products.countDocuments()
+```
+
+```javascript
 db.customers.countDocuments()
+```
+
+```javascript
 db.orders.countDocuments()
+```
+
+```javascript
 db.reviews.countDocuments()
+```
+
+```javascript
 db.orders.countDocuments({ paymentStatus: "PAID" })
+```
+
+```javascript
 db.orders.findOne({ orderNumber: "O6301" })
 ```
 

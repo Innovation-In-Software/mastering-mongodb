@@ -26,16 +26,25 @@ Slide summary: App: readWrite, never userAdmin · Reporting: read only · Suppor
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.createUser({
   user: "trainingStoreApp",
   pwd: passwordPrompt(),
   roles: [{ role: "readWrite", db: "training_store" }]
 })
+```
+
+```javascript
 db.createUser({
   user: "reportUser",
   pwd: passwordPrompt(),
   roles: [{ role: "read", db: "training_store" }]
 })
+```
+
+```javascript
 db.createRole({
   role: "reviewReader",
   privileges: [{
@@ -44,7 +53,13 @@ db.createRole({
   }],
   roles: []
 })
+```
+
+```javascript
 db.createUser({ user: "supportAnalyst", pwd: passwordPrompt(), roles: [] })
+```
+
+```javascript
 db.grantRolesToUser("supportAnalyst", [{ role: "reviewReader", db: "training_store" }])
 ```
 

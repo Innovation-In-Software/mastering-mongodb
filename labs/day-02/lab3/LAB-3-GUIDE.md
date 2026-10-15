@@ -75,6 +75,9 @@ mongosh "mongodb://localhost:27017"
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.products.countDocuments({})   // 13
 ```
 
@@ -166,7 +169,9 @@ db.products.find(
   { category: { $nin: ["SHOE", "BOOK"] } },
   { _id: 0, sku: 1, category: 1 }
 )
+```
 
+```javascript
 db.products.countDocuments({ category: { $nin: ["SHOE", "BOOK"] } })
 ```
 
@@ -245,9 +250,13 @@ db.products.updateOne(
   { sku: "A410" },
   { $set: { stockQuantity: 18 } }
 )
+```
 
+```javascript
 db.products.findOne({ sku: "A410", stockQuantity: { $gte: 2 } }, { _id: 0, sku: 1, stockQuantity: 1 })
+```
 
+```javascript
 db.products.updateOne(
   { sku: "A410", stockQuantity: { $gte: 2 } },
   {
@@ -255,7 +264,9 @@ db.products.updateOne(
     $currentDate: { updatedAt: true }
   }
 )
+```
 
+```javascript
 db.products.findOne({ sku: "A410" }, { _id: 0, sku: 1, stockQuantity: 1, updatedAt: 1 })
 ```
 
@@ -284,7 +295,9 @@ db.products.updateOne(
     $currentDate: { updatedAt: true }
   }
 )
+```
 
+```javascript
 db.products.findOne({ sku: "A410" }, { _id: 0, sku: 1, tags: 1 })
 ```
 
@@ -299,8 +312,13 @@ db.products.updateMany(
   {},
   { $pull: { tags: { $in: ["discontinued", "temporary", "old-stock"] } } }
 )
+```
 
+```javascript
 db.products.find({ tags: "discontinued" }, { _id: 0, sku: 1, tags: 1 })
+```
+
+```javascript
 db.products.findOne({ sku: "L190" }, { _id: 0, sku: 1, tags: 1 })
 ```
 
@@ -325,7 +343,9 @@ db.orders.updateOne(
     $currentDate: { updatedAt: true }
   }
 )
+```
 
+```javascript
 db.orders.findOne(
   { orderNumber: "O6202" },
   { _id: 0, orderNumber: 1, fulfillmentStatus: 1, statusHistory: 1 }
@@ -346,8 +366,13 @@ Do **not** rewrite existing `body` fields. Insert a throwaway review, then renam
 
 ```javascript
 const p = db.products.findOne({ sku: "A400" })
-const c = db.customers.findOne({ customerNumber: "C101" })
+```
 
+```javascript
+const c = db.customers.findOne({ customerNumber: "C101" })
+```
+
+```javascript
 db.reviews.insertOne({
   productId: p._id,
   sku: "A400",
@@ -357,14 +382,20 @@ db.reviews.insertOne({
   reviewText: "Temporary field name for $rename practice.",
   createdAt: new Date()
 })
+```
 
+```javascript
 db.reviews.find({ reviewText: { $exists: true } }, { _id: 0, sku: 1, title: 1, reviewText: 1 })
+```
 
+```javascript
 db.reviews.updateMany(
   { reviewText: { $exists: true }, body: { $exists: false } },
   { $rename: { reviewText: "body" } }
 )
+```
 
+```javascript
 db.reviews.find({ sku: "A400", title: "Lab rename fixture" }, { _id: 0, sku: 1, title: 1, body: 1, reviewText: 1 })
 ```
 

@@ -100,11 +100,26 @@ A brand-new local server. Nothing has been created yet.
 
 ```javascript
 show dbs
+```
+
+```javascript
 use training_store
+```
+
+```javascript
 show dbs
+```
+
+```javascript
 db.environment_check.insertOne(
   { status: "READY" })
+```
+
+```javascript
 show dbs
+```
+
+```javascript
 show collections
 ```
 

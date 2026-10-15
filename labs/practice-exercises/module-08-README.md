@@ -18,12 +18,24 @@ Official numbered checkpoints for this module: [Exercise 8.1](../day-03/exercise
 
 ```javascript
 use training_store_ops
+```
+
+```javascript
 // A
 db.orders_validated.insertOne({ orderNumber: "OPS-2", total: Decimal128("24.99"), paymentStatus: "PENDING" })
+```
+
+```javascript
 // B
 db.orders_validated.insertOne({ orderNumber: "OPS-3", total: Decimal128("5.00"), paymentStatus: "PAID_NOW" })
+```
+
+```javascript
 // C
 db.orders_validated.insertOne({ total: Decimal128("5.00"), paymentStatus: "PAID" })
+```
+
+```javascript
 // D
 db.orders_validated.insertOne({ orderNumber: "OPS-4", total: 9.99, paymentStatus: "PAID" })
 ```

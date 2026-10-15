@@ -15,6 +15,9 @@ Fifteen minutes. Let learners write the query on paper or in a notes file first,
 
 ```javascript
 use training_store
+```
+
+```javascript
 const c101 = db.customers.findOne({ customerNumber: "C101" })._id
 ```
 

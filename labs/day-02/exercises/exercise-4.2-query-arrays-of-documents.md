@@ -51,7 +51,9 @@ db.orders.findOne(
 ```javascript
 // Step 1 — orders containing SKU L100
 db.orders.find({ "items.sku": "L100" }, { _id: 0, orderNumber: 1 })
+```
 
+```javascript
 // Step 2 — orders with any item of quantity 2 or more
 db.orders.find({ "items.quantity": { $gte: 2 } }, { _id: 0, orderNumber: 1 })
 ```
@@ -66,7 +68,9 @@ db.orders.find(
   { items: { $elemMatch: { sku: "L100", quantity: { $gte: 2 } } } },
   { _id: 0, orderNumber: 1 }
 )
+```
 
+```javascript
 // Step 4 — steps 1 and 2 combined with dot notation
 db.orders.find(
   { "items.sku": "L100", "items.quantity": { $gte: 2 } },

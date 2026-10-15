@@ -81,6 +81,9 @@ Run this in **PowerShell** at the repo root — **not** inside `mongosh`. If a `
 
 ```powershell
 cd "d:\Current_work\Innovation in Software\MasteringMongoDB"
+```
+
+```powershell
 mongosh "mongodb://localhost:27017" .\datasets\training_store\load.js
 ```
 
@@ -188,14 +191,41 @@ Follow the steps in order. Finish one step before starting the next.
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.products.drop()
+```
+
+```javascript
 db.customers.drop()
+```
+
+```javascript
 db.orders.drop()
+```
+
+```javascript
 db.reviews.drop()
+```
+
+```javascript
 db.createCollection("products")
+```
+
+```javascript
 db.createCollection("customers")
+```
+
+```javascript
 db.createCollection("orders")
+```
+
+```javascript
 db.createCollection("reviews")
+```
+
+```javascript
 show collections
 ```
 
@@ -255,6 +285,9 @@ db.products.insertMany([
     createdAt: new Date()
   }
 ])
+```
+
+```javascript
 db.products.find()
 ```
 
@@ -294,7 +327,9 @@ db.customers.insertOne({
   status: "ACTIVE",
   createdAt: new Date()
 })
+```
 
+```javascript
 db.customers.findOne({ customerNumber: "C101" })
 ```
 
@@ -308,8 +343,17 @@ db.customers.findOne({ customerNumber: "C101" })
 
 ```javascript
 const customer = db.customers.findOne({ customerNumber: "C101" })
+```
+
+```javascript
 const product = db.products.findOne({ sku: "L100" })
+```
+
+```javascript
 customer._id
+```
+
+```javascript
 product.price
 ```
 
@@ -342,8 +386,13 @@ db.orders.insertOne({
   total: Decimal128("1468.99"),
   createdAt: new Date()
 })
+```
 
+```javascript
 db.orders.findOne({ orderNumber: "O5001" })
+```
+
+```javascript
 db.orders.findOne({ orderNumber: "O5001" }).customerId.equals(customer._id)
 ```
 
@@ -441,6 +490,9 @@ db.orders.getIndexes()
 
 ```javascript
 db.validated_products.drop()
+```
+
+```javascript
 db.createCollection("validated_products", {
   validator: {
     $jsonSchema: {
@@ -457,7 +509,9 @@ db.createCollection("validated_products", {
     }
   }
 })
+```
 
+```javascript
 db.validated_products.insertOne({
   sku: "A100",
   name: "USB-C Adapter",

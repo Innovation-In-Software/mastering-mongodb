@@ -25,11 +25,15 @@ The index `{ category: 1, price: 1, name: 1 }` exists on `products`. Decide whic
 // Q1
 db.products.find({ category: "BOOK" },
                  { _id: 0, name: 1, price: 1 })
+```
 
+```javascript
 // Q2
 db.products.find({ category: "BOOK" },
                  { _id: 0, name: 1, price: 1, tags: 1 })
+```
 
+```javascript
 // Q3
 db.products.find({ category: "BOOK" },
                  { name: 1 })

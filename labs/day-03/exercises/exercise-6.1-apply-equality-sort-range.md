@@ -36,14 +36,18 @@ db.products.find({
   active: true,
   price: { $lte: Decimal128("100") }
 }).sort({ price: 1 })
+```
 
+```javascript
 // B — cid is C101's _id: db.customers.findOne({ customerNumber: "C101" })._id
 db.orders.find({
   customerId: cid,
   createdAt: { $gte: ISODate("2026-08-01T00:00:00Z"),
                $lt:  ISODate("2026-10-01T00:00:00Z") }
 }).sort({ createdAt: -1 })
+```
 
+```javascript
 // C
 db.orders.find({
   paymentStatus: "PAID",

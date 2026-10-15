@@ -89,10 +89,25 @@ Run these in a normal PowerShell window on each laptop. Every item must pass bef
 
 ```powershell
 Get-Service MongoDB
+```
+
+```powershell
 Test-NetConnection localhost -Port 27017
+```
+
+```powershell
 mongosh --version
+```
+
+```powershell
 mongodump --version
+```
+
+```powershell
 mongorestore --version
+```
+
+```powershell
 mongosh "mongodb://localhost:27017" --eval "db.runCommand({ ping: 1 })"
 ```
 
@@ -174,13 +189,37 @@ Then, in `mongosh`:
 
 ```javascript
 db.hello()
+```
+
+```javascript
 rs.status()
+```
+
+```javascript
 rs.conf()
+```
+
+```javascript
 rs.printSecondaryReplicationInfo()
+```
+
+```javascript
 db.customers.countDocuments()
+```
+
+```javascript
 db.products.countDocuments()
+```
+
+```javascript
 db.orders.countDocuments()
+```
+
+```javascript
 db.reviews.countDocuments()
+```
+
+```javascript
 db.orders.countDocuments({ paymentStatus: "PAID" })
 ```
 

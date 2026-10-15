@@ -91,6 +91,9 @@ Check the Database Tools (Terminal 1):
 
 ```powershell
 mongodump --version
+```
+
+```powershell
 mongorestore --version
 ```
 
@@ -104,7 +107,9 @@ A catalog page currently runs `db.products.find({})` and returns all 13 products
 
 ```javascript
 use training_store
+```
 
+```javascript
 db.products.find(
   { category: "LAPTOP", active: true },
   { _id: 0, sku: 1, name: 1, price: 1 }
@@ -166,6 +171,9 @@ Create `orders_validated` in **`training_store_ops`**. Required: `orderNumber` s
 
 ```javascript
 use training_store_ops
+```
+
+```javascript
 db.createCollection("orders_validated", {
   validator: { $jsonSchema: {
     bsonType: "object",
@@ -186,7 +194,9 @@ db.orders_validated.insertOne({
   orderNumber: "OPS-1",
   total: Decimal128("10.00"),
   paymentStatus: "PAID" })
+```
 
+```javascript
 db.orders_validated.insertOne({
   orderNumber: "OPS-BAD",
   total: "10.00",
@@ -199,6 +209,9 @@ Confirm the class data is untouched:
 
 ```javascript
 use training_store
+```
+
+```javascript
 db.orders.countDocuments({})
 ```
 
@@ -212,7 +225,13 @@ Dump `training_store` and restore it into **`training_store_restore` only** (Ter
 
 ```powershell
 mkdir "$env:TEMP\mongodb-lab7" -Force
+```
+
+```powershell
 mongodump --uri="mongodb://localhost:27017" --db=training_store --out="$env:TEMP\mongodb-lab7"
+```
+
+```powershell
 mongorestore --uri="mongodb://localhost:27017" --db=training_store_restore --drop "$env:TEMP\mongodb-lab7\training_store"
 ```
 
@@ -222,12 +241,29 @@ Compare both databases (Terminal 2):
 
 ```javascript
 use training_store_restore
-db.products.countDocuments({})
-db.orders.countDocuments({})
-db.orders.findOne({ orderNumber: "O5001" }, { _id: 0, orderNumber: 1, paymentStatus: 1, total: 1 })
-db.orders.getIndexes()
+```
 
+```javascript
+db.products.countDocuments({})
+```
+
+```javascript
+db.orders.countDocuments({})
+```
+
+```javascript
+db.orders.findOne({ orderNumber: "O5001" }, { _id: 0, orderNumber: 1, paymentStatus: 1, total: 1 })
+```
+
+```javascript
+db.orders.getIndexes()
+```
+
+```javascript
 use training_store
+```
+
+```javascript
 db.products.countDocuments({})
 ```
 
@@ -311,8 +347,17 @@ The scratch databases can be dropped when you are done — they are not the clas
 
 ```javascript
 use training_store_ops
+```
+
+```javascript
 db.dropDatabase()
+```
+
+```javascript
 use training_store_restore
+```
+
+```javascript
 db.dropDatabase()
 ```
 

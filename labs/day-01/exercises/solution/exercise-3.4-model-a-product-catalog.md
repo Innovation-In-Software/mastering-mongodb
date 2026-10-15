@@ -53,6 +53,9 @@ The worksheet also asks for `description`, a shoe's gender category and a book's
 
 ```javascript
 db.products.find({ category: "LAPTOP" })
+```
+
+```javascript
 db.products.find({ "attributes.isbn": "978-0000000000" })   // returns B300
 ```
 

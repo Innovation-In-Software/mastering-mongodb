@@ -17,8 +17,17 @@ Ten minutes, mostly discussion. **Nobody runs the unsafe commands.** Counts are 
 
 ```javascript
 const f = { tags: "discontinued" }
+```
+
+```javascript
 db.products.find(f, { _id: 0, sku: 1, active: 1 })   // { sku: 'L190', active: false }
+```
+
+```javascript
 db.products.countDocuments(f)                         // 1
+```
+
+```javascript
 db.products.updateMany(f, { $set: { active: false } })
 ```
 
@@ -32,8 +41,17 @@ The preview and count show **1** product, L190. The update returns `matchedCount
 
 ```javascript
 const testOrders = { orderNumber: { $in: ["TEST-001", "TEST-002"] } }
+```
+
+```javascript
 db.orders.find(testOrders, { _id: 0, orderNumber: 1 })
+```
+
+```javascript
 db.orders.countDocuments(testOrders)    // note the number
+```
+
+```javascript
 db.orders.deleteMany(testOrders)        // deletedCount must equal that number
 ```
 

@@ -36,6 +36,9 @@ That returns all 17 orders, with every field, in no guaranteed order.
 
 ```javascript
 use training_store
+```
+
+```javascript
 const c101 = db.customers.findOne({ customerNumber: "C101" })._id
 ```
 
@@ -67,7 +70,9 @@ db.orders.find(
   { /* filter */ },
   { /* projection */ }
 )./* sort */./* limit */
+```
 
+```javascript
 // Task 4: your index, each key labelled E or S
 db.orders.createIndex({ /* ... */ })
 ```

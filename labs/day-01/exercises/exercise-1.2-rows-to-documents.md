@@ -78,7 +78,13 @@ If you have `mongosh` connected, insert your document into a scratch database (n
 
 ```javascript
 use module1_scratch
+```
+
+```javascript
 db.orders.insertOne( /* paste your document here */ )
+```
+
+```javascript
 db.orders.findOne({ _id: "O5001" })
 ```
 

@@ -196,8 +196,17 @@ Close that window. In a new window, if `mongodump` is still not recognized, relo
 
 ```powershell
 $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+```
+
+```powershell
 mongosh --version
+```
+
+```powershell
 mongodump --version
+```
+
+```powershell
 mongorestore --version
 ```
 
@@ -217,6 +226,9 @@ With Git:
 
 ```powershell
 git clone <repository-url>
+```
+
+```powershell
 cd MasteringMongoDB
 ```
 
@@ -260,7 +272,13 @@ PowerShell may also print `WARNING: TCP connect to (::1 : 27017) failed`. That l
 
 ```powershell
 mongosh --version
+```
+
+```powershell
 mongodump --version
+```
+
+```powershell
 mongorestore --version
 ```
 
@@ -349,6 +367,9 @@ Use Atlas only when the instructor assigns it. Days 1–2 can run against Atlas.
 
 ```powershell
 $env:MONGODB_URI = "mongodb+srv://<cluster-host>/"
+```
+
+```powershell
 mongosh $env:MONGODB_URI --username <username>
 ```
 

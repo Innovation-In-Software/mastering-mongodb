@@ -62,10 +62,19 @@ Use the dataset facts: shoe sizes, accessory connections, customer countries and
 ```javascript
 db.products.find(
   { "attributes.sizes": 11 })
+```
+
+```javascript
 db.products.find(
   { "attributes.connection": "USB-C" })
+```
+
+```javascript
 db.customers.find(
   { "addresses.country": "USA" })
+```
+
+```javascript
 db.orders.countDocuments(
   { "items.sku": "A410" })
 ```

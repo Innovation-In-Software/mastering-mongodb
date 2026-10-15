@@ -36,12 +36,24 @@ Restore into an isolated database, never over `training_store`, then:
 
 ```javascript
 use training_store_restore
+```
+
+```javascript
 db.orders.countDocuments({})                           // compare with the pre-restore note: 17 on a fresh load
+```
+
+```javascript
 db.orders.findOne({ orderNumber: "O5001" },
   { _id: 0, orderNumber: 1, paymentStatus: 1, total: 1 })
 // { orderNumber: 'O5001', paymentStatus: 'PENDING', total: Decimal128('1514.17') }
+```
+
+```javascript
 db.orders.findOne({ orderNumber: "O6101" }, { _id: 0, paymentStatus: 1, total: 1 })
 // a paid total: { paymentStatus: 'PAID', total: Decimal128('1483.99') }
+```
+
+```javascript
 db.orders.getIndexes()                                 // _id_ and orderNumber_unique (plus any lab indexes you had)
 ```
 
